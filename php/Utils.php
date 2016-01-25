@@ -7,3 +7,9 @@
 			$randomString .= $characters[rand(0, $charactersLength - 1)];
 		return $randomString;
 	}
+
+	function pre_r($array){
+		echo "<pre>";
+		print_r($array);
+		echo "</pre>";
+	}
