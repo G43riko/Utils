@@ -1,6 +1,7 @@
 function changeIfEqual(variable, value, newValue){
     return variable == value ? newValue : variable;
 }
+
 function negate(func) {
 	return function(x) {
 		return !func(x);
@@ -32,6 +33,18 @@ Array.prototype.max = function(numbers) {
 		max = equal(j++, 0) ? number : (greaterThen(max, number) ? max : number);
 	});
 	return max;
+}
+
+Array.prototype.range = function(min, max, result = []){
+	this.forEach(function (number) {
+		if(greaterThen(number, min - 1) && lessThen(number, max + 1))
+			result.push(number);
+	});
+	return result;
+}
+
+Array.prototype.avg = function(result = 0){
+	return this.sum() / this.length;
 }
 
 Array.prototype.min = function(numbers) {
