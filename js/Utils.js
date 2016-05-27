@@ -2,6 +2,14 @@ function changeIfEqual(variable, value, newValue){
     return variable == value ? newValue : variable;
 }
 
+function isInt(n){
+	return Number(n) === n && n % 1 === 0;
+}
+
+function isFloat(n){
+	return Number(n) === n && n % 1 !== 0;
+}
+
 function negate(func) {
 	return function(x) {
 		return !func(x);
