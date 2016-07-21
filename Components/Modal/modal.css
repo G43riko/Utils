@@ -1,0 +1,80 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+body{
+	overflow: hidden;
+}
+
+#modalBackground{
+	position:fixed;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	opacity: 1;   
+	transition: opacity .15s linear;
+}
+#modal{
+	color: #333;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	font-size: 21px;
+	font-family: "Segoe UI",Arial,sans-serif;
+	transform: translate(-50%, -50%);
+	width: 80%;
+	font-weight: 300;
+	/*height: 80%;*/
+	background-color: white;
+	border-radius: 10px;
+	/*border:1px solid rgba(0, 0, 0, 0.7);*/
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+#modal #modalHeader{
+	padding: 20px;
+	border-radius: 10px 10px 0 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+#modal #modalFooter{
+	position: relative;
+	bottom: 0;
+	width:100%;
+	box-sizing: border-box;
+	padding: 20px;
+	text-align: right;
+	border-radius: 0 0 10px 10px;
+	border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+#modal input{
+	background-color: #fff;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 6px 12px;
+	cursor: pointer;
+	border-radius: 4px;
+	font: inherit;
+}
+
+#modal input:hover {
+	background-color: #e6e6e6;
+	border-color: #adadad;
+}
+
+#modal #modalHeader h4{
+	display: inline;	
+}
+
+#modal #modalHeader span{
+	float: right;
+	box-sizing: border-box;
+	color: #000;
+	cursor: pointer;
+	text-shadow: 0 1px 0 #fff;
+}
+
+#modal #modalBody{
+	padding: 20px;
+	font-family: Verdana,sans-serif;
+	font-size: 15px;
+	line-height: 1.5;
+}
