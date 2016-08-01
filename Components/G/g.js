@@ -4,11 +4,17 @@
  * G(nazov, {attr:{}, element, style:{}}) - vytvorý nový G object
  */
 G = function(... args){//TODO otestovať
-	if(args.length === 1){
+	if(args.length === 0)
+		this.elements = [];
+	else if(args.length === 1){
 		if(G.isString(args[0]))
 			this.elements = G.find(args[0]);
-		else if(G.isObject(args[0]))
+		else if(G.isArray(args[0]))
+			this.elements = args[0];
+		else if(G.isElement(args[0]))
 			this.elements = [args[0]];
+		else if(G.isObject(args[0]) && G.isArray(args[0].elements))
+			this.elements = args[0].elements;
 	}
 	else if(args.length === 2 && G.isString(args[0]) && G.isObject(args[1])){
 		this.elements = [G.createElement(args[0], args[1].attr, args[1].cont, args[1].style)]
@@ -114,14 +120,21 @@ G.each = function(obj, func, thisArg){
 	}
 }
 
+
 /**
  * Funkcia najde v rodičovnskom objekde objekty ktoré najde CSS selector
  */
 G.find = function(args, parent = document){//TODO otestovať
-	if(G.isString(args))
-		return parent.querySelectorAll(args);
+	var result = [];
+	if(G.isString(args)){
+		var datas = parent.querySelectorAll(args);
+		for(var i in datas)
+			if(datas.hasOwnProperty(i))
+				result.push(datas[i]);
+	}
 	else if(G.isElement(args))
-		return [args];
+		result.push(args);
+	return result;
 }
 
 /**
@@ -129,6 +142,17 @@ G.find = function(args, parent = document){//TODO otestovať
  */
 G.parent = function(element){
 	return G.isElement(element) ? element.parentElement : null;
+}
+
+G.children = function(element){//TODO prerobiť
+	var result = [];
+	if(G.isElement(element)){
+		var datas = element.children;
+		for(var i in datas)
+			if(datas.hasOwnProperty(i))
+				result.push(datas[i]);
+	}
+	return result;
 }
 
 /**
@@ -140,8 +164,77 @@ G.delete = function(element){
 }
 
 /*************************************************************************************
-                      PROTOTYPOVE FUNKCIE
+                      PROTOTYPOVO-UTILITOVE FUNKCIE
 *************************************************************************************/
+
+G.prototype.add = function(...args){
+	for(var i in args)
+		if(args.hasOwnProperty(i)){
+			if(G.isElement(args[i]))
+				this.element.push(args[i]);
+			else if(G.isString(args[i]))
+				this.elements.push.apply(this, G.find(args[i]));
+		}
+}
+
+G.prototype.empty = function(){
+	return this.html("");;
+}
+
+G.prototype.hasClass = function(className){
+	return this.class(className);
+}
+
+G.prototype.val = function(){
+	return this.attr("value", arguments[0]);
+}
+
+G.prototype.addClass = function(className){
+	return this.class("+" + className);
+}
+
+G.prototype.removeClass = function(className){
+	return this.class("-" + className);
+}
+
+G.prototype.toggleClass = function(className){
+	return this.class("/" + className);
+}
+
+/*************************************************************************************
+                      TRAVERSINGOVE FUNKCIE
+*************************************************************************************/
+
+
+/**
+ * Funkcia vráti G objekt obsahujuci rodiča daného elementu
+ */
+G.prototype.parent = function(){
+	return new G(G.parent(this.first()));
+}
+
+G.prototype.children = function(){//TODO otestovať - pridať možnosť filtrovať deti
+	return new G(G.children(this.first()));
+}
+
+//TODO childrens
+//TODO next
+//TODO prev
+
+G.prototype.each = function(func, ... args){//TODO otestovať
+	for(var i in this.elements)
+		func.apply(this.elements[i], args);
+
+	return this;
+}
+
+/*************************************************************************************
+                      NEZARADENE FUNKCIE
+*************************************************************************************/
+
+G.prototype.first = function(){
+	return this.elements[0];
+}
 
 G.prototype.length = function(){//TODO prerobiť na size
 	return this.elements.length;
@@ -151,61 +244,133 @@ G.prototype.isEmpty = function(){
 	return this.length() === 0;
 }
 
-G.prototype.each = function(func, ... args){//TODO otestovať
-	for(var i in this.elements)
-		func.apply(this.elements[i], args);
+/*************************************************************************************
+                      HTML/CSS FUNKCIE
+*************************************************************************************/
+
+
+G.prototype.prependTo = function(data){//TODO otestovať
+	if(this.isEmpty())
+		return this;
+
+	if(G.isElement(data))
+		data.parentElement.insertBefore(this.first(), data.parentElement.firstElementChild);
+	return this;
+}
+
+G.prototype.appendTo = function(data){//TODO otestovať
+	if(this.isEmpty())
+		return this;
+
+	if(G.isElement(data))
+		data.appendChild(this.first());
 
 	return this;
 }
 
+G.prototype.prepend = function(data){//TODO otestovať
+	if(this.isEmpty())
+		return this;
+
+	if(G.isElement(data))
+		this.first().insertBefore(data, this.first().firstElementChild);
+	else if(typeof data === "string")
+		this.html(data + this.html());
+	return this;
+}
+
+G.prototype.append = function(data){//TODO otestovať
+	if(this.isEmpty())
+		return this;
+
+	if(G.isElement(data))
+		this.first().appendChild(data);
+	else if(typeof data === "string")
+		this.first().innerHTML += data;
+
+	return this;
+}
+
+/**
+ * text() - vráti obsah ako text
+ * text("juhuuu") - text elementu bude "juchuuu"
+ * text("<b>bold</>") - text elementu bude "bold"
+ */
+G.prototype.text = function(){//TODO otestovať
+			if(this.isEmpty())
+				return this;
+
+			if(arguments.length == 0)
+				return this.textContent;
+
+			this.html(arguments[0].replace(/<[^>]*>/g, ""));
+			return this;
+		}
+
+/*
+ * html() - vráti HTML obsah elementu
+ * html("<b>bold</b>") - nastavý HTML obsah elementu
+ * html("Element") - nastavý ako jedine dieťa nový element
+ */
+G.prototype.html = function(){
+	if(this.isEmpty())
+		return this;
+
+	if(arguments.length == 0)
+		return this.first().innerHTML;
+	if(G.isString(arguments[0])){
+		if(arguments[0][0] === "+")
+			this.append(arguments[0].substring(1));
+		else
+			this.first().innerHTML = arguments[0];
+	}
+	else if(G.isElement(arguments[0])){//TODO otestovať
+		this.first().innerHTML = "";
+		this.append(arguments[0]);
+	}
+	//TODO ak je G tak pridá všetky elementy čo obsahuje argument G
+	return this;
+}
 
 /**
  * Funkcia vymaže prvý element v zozname a vráti G object
  */
-G.prototype.delete = function(){
+G.prototype.delete = function(){//TODO otestovať - pridať možnosť filtrovať vymazane
 	if(this.isEmpty())
 		return this;
 
-	console.log(this.elements, this.elements.length);
-	G.delete(this.elements[0]);
+	G.delete(this.first());
 	if(G.isArray(this.elements))
 		this.elements.splice(0, 1);
 	else if(G.isObject(this.elements))
-		delete this.elements[0];
+		delete this.first();
 
 	return this;
-}
-
-/**
- * Funkcia vráti G objekt obsahujuci rodiča daného elementu
- */
-G.prototype.parent = function(){
-	return new G(G.parent(this.elements[0]));
 }
 
 /**
  * class("nazov") - vrati true ak ma objekt danú triedu ináč vrát false
  * class("+nazov") - pridá objektu danú triedu
  * class("-nazov") - odstráni objektu danú triedu
- * class("/nazov") - pridá objektu danú triedu
+ * class("/nazov") - pridá objektu danú triedu ak neexistuje ináč ju odstráni
  */
-G.prototype.class = function(name){
+G.prototype.class = function(name){//TODO prerobiť - nemôže vracať this ak ma vratit T/F
 	if(this.isEmpty())
 		return this;
-
+	var clases = this.first().classList;
 	if(G.isArray(name))
 		G.each(name, (e) => this.class(e));
 	else if(G.isString(name)){
 		switch(name[0]){
 			case "+":
-				this.elements[0].classList.add(name.substring(1));
+				clases.add(name.substring(1));
 				break;
 			case "-":
-				this.elements[0].classList.remove(name.substring(1));
+				clases.remove(name.substring(1));
 				break;
 			case "/":
 				name = name.substring(1)
-				this.attr("class").indexOf(name) > -1 ? this.elements[0].classList.remove(name) : this.elements[0].classList.add(name);
+				this.attr("class").indexOf(name) > -1 ? clases.remove(name) : clases.add(name);
 				break;
 			default:
 				return this.attr("class").indexOf(name) > -1;
@@ -227,7 +392,7 @@ G.prototype.css = function(...args){
 	//ak je 0 argumentov vráti objekt z CSS štýlmi
 	if(args.length == 0){
 		var result = {};
-		var css = window.getComputedStyle(this.elements[0]);
+		var css = window.getComputedStyle(this.first());
 		for(var i in css)
 			if(css.getPropertyValue(css[i]) !== "")
 				result[css[i]] = css.getPropertyValue(css[i]);
@@ -238,22 +403,22 @@ G.prototype.css = function(...args){
 	if(G.isString(args[0])){
 		//a druhý argument je zadaný a dá sa prepísať na string nastav štýl
 		if(args.length == 2 && G.isToStringable(args[1])){
-			this.elements[0].style[args[0]] = args[1];
+			this.first().style[args[0]] = args[1];
 		}
 		//ak prvý argument neobsahuje symbol pre vymazanie tak vráť hodnotu štýlu
 		else if(args[0][0] !== "-"){
-			return this.elements[0].style[args[0]];
+			return this.first().style[args[0]];
 		}
 		//ináč štýl odstráň
 		else{
-			this.elements[0].style[args[0].substring(1)] = "";
+			this.first().style[args[0].substring(1)] = "";
 		}
 	}
 	//ak je prvý argument objekt nastav všetky štýli podla objektu
 	else if(G.isObject(args[0]))
 		for(var i in args[0])
 			if(args[0].hasOwnProperty(i) && G.isString(i) && G.isToStringable(args[0][i]))
-				this.elements[0].style[i] = args[0][i];
+				this.first().style[i] = args[0][i];
 	return this;
 }
 
@@ -270,8 +435,8 @@ G.prototype.attr = function(...args){
 	//ak je 0 argumentov vráti objekt z atribútmi
 	if(args.length == 0){
 		var result = {};
-		for(var i=0, tmp=[] ; i<this.elements[0].attributes.length ; i++)
-				result[this.elements[0].attributes[i].nodeName] = this.elements[0].attributes[i].nodeValue;
+		for(var i=0, tmp=[] ; i<this.first().attributes.length ; i++)
+				result[this.first().attributes[i].nodeName] = this.first().attributes[i].nodeValue;
 		return result;
 	}
 	
@@ -279,21 +444,21 @@ G.prototype.attr = function(...args){
 	if(G.isString(args[0])){
 		//a druhý argument je zadaný a dá sa prepísať na string nastav štýl
 		if(args.length == 2 && G.isToStringable(args[1])){
-			this.elements[0].setAttribute(args[0], args[1]);
+			this.first().setAttribute(args[0], args[1]);
 		}
 		//ak prvý argument neobsahuje symbol pre vymazanie tak vráť hodnotu štýlu
 		else if(args[0][0] !== "-"){
-			return this.elements[0].getAttribute(args[0]);
+			return this.first().getAttribute(args[0]);
 		}
 		//ináč štýl odstráň
 		else{
-			this.elements[0].removeAttribute(args[0].substring(1));
+			this.first().removeAttribute(args[0].substring(1));
 		}
 	}
 	//ak je prvý argument objekt nastav všetky štýli podla objektu
 	else if(G.isObject(args[0]))
 		for(var i in args[0])
 			if(args[0].hasOwnProperty(i) && G.isString(i) && G.isToStringable(args[0][i]))
-				this.elements[0].setAttribute(i, args[0][i]);
+				this.first().setAttribute(i, args[0][i]);
 	return this;
 }
