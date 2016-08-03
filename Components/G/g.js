@@ -34,24 +34,73 @@ G = function(... args){//TODO otestovať
 };
 
 function tests(){
-	var body = new G(document.body);
+	body = new G(document.body);
+	/*
+	 * empty();
+	 * append();
+	 * length();
+	 * createElement();
+	 */
 	body.empty();
 	if(body.children().length() !== 0)
-		console.error("dlžka prazdneho objektu je: " + body.length());
+		G.error("dlžka prazdneho objektu je: " + body.length());
 
 	body.append("<div id='idecko'>jupilajda</div>");
-
 	body.append(new G("div", {
 		attr : {
 			class: "clasa"},
 		cont: "toto je classsa"
 	}));
+	var elementP = document.createElement("p");
+	elementP.appendChild(document.createTextNode("juhuuu toto je paragraf"));
+	body.append(elementP);
+	if(body.children().length() !== 3)
+		G.error("dlžka objektu s 2 detmi je: " + body.children().length());
 
-	if(body.children().length() !== 20)
-		console.error("dlžka objektu s 2 detmi je: " + body.length());
-
-	//css
 	var idecko = new G("#idecko");
+	var clasa = new G(".clasa");
+	var par = new G("p");
+
+	/* 
+	 * constructor()
+	 * find()
+	 * first();
+	 */
+
+	if(G.isDefined(new G().first()))
+		G.error("pri prazdnom G to nevratilo ako prvý element null")
+
+	if(idecko.first() !== document.getElementById("idecko"))
+		G.error("nenašlo to spravny element podla id");
+
+	if(clasa.first() !== document.getElementsByClassName("clasa")[0])
+		G.error("nenašlo to spravny element podla class");
+
+	if(par.first() !== document.getElementsByTagName("p")[0])
+		G.error("nenašlo to spravny element podla tagu");
+	
+	/*
+	 * css
+	 */
+
+	if(!G.isObject(idecko.css()))
+		G.error("css() nevratilo objekt");
+
+	idecko.css("color", "");
+	if(idecko.css("color") !== "")
+		G.error("nenastavený css nieje prazdny");
+
+	idecko.css("color", "red");
+	if(idecko.css("color") !== "red")
+		G.error("nesprávne to nastavilo css štýl");
+
+	idecko.css({color: "blue", width: "200px"});
+
+	if(idecko.css("color") !== "blue" || idecko.css("width") !== "200px")
+		G.error("nesprávne to nastavilo css štýl s objektu");
+
+	if(idecko.parent().first() !== body.first())
+		G.error("parent nefunguje správne");
 
 }
 
@@ -121,6 +170,7 @@ G.isObject = val => typeof val === "object";
 G.isNumber = val => typeof val === "number";
 G.isBool = val => typeof val === "boolean";
 G.isUndefined = val => !G.isDefined(val);
+G.isG = val => val.__proto__ === G.prototype;
 G.isArray = val => Array.isArray(val);
 G.isToStringable = val => G.isNumber(val) || G.isString(val) || G.isBool(val);
 G.isGElement = val => val["isGElement"] === true;
@@ -245,7 +295,7 @@ G.children = function(element){//TODO prerobiť
 	if(G.isElement(element)){
 		var data = element.children;
 		for(var i in data)
-			if(data.hasOwnProperty(i))
+			if(data.hasOwnProperty(i) && result.indexOf(data[i]) < 0)
 				result.push(data[i]);
 	}
 	else
@@ -287,6 +337,30 @@ G.prototype.add = function(... args){
 		}
 	return this;
 };
+
+//equalAll
+
+G.prototype.equal = function(element){
+	if(G.isG(element))
+		return this.first() === element.first();
+	else if(G.isElement(element))
+		return this.first() === element;
+	else
+		G.error("argument funkcie môže byť iba element alebo G objekt");
+	return false;
+}
+
+G.prototype.contains = function(element){//TODO otestovať
+	if(G.isElement){
+		for(var i=0 ; i<this.element.length ; i++)
+			if(this.element[i] === element)
+				return true;
+	}
+	else
+		G.error("argument funkcie musí byť element a teraz je: ", element);
+
+	return false;
+}
 
 /**
  * Funkcia vyprázdni element a vráti hod
@@ -417,11 +491,13 @@ G.prototype.prepend = function(data){//TODO otestovať
 G.prototype.append = function(data){//TODO otestovať
 	if(this.isEmpty())
 		return this;
-
 	if(G.isElement(data))
 		this.first().appendChild(data);
-	else if(typeof data === "string")
+	else if(typeof data === "string"){
 		this.first().innerHTML += data;
+	}
+	else if(G.isG(data) && !data.isEmpty())
+		this.first().appendChild(data.first());
 	else
 		G.error("argument funkcie musí byť element alebo string a teraz je: ", data);
 
@@ -517,6 +593,7 @@ G.prototype.class = function(name){//TODO prerobiť - nemôže vracať this ak m
 	return this;
 };
 
+
 /**
  * css() - vráti všetky nastavené CSS štýly;
  * css("nazov") - vráti hodnotu CSS štýlu;
@@ -560,6 +637,7 @@ G.prototype.css = function(...args){
 				this.first().style[i] = args[0][i];
 	return this;
 };
+
 
 /**
  * attr() - vráti všetky atribúty;
