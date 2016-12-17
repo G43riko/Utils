@@ -40,7 +40,7 @@ var Modal = {
 			document.body.appendChild(Modal._createElement("div", {id: "modalBackground"}));
 		else
 			bg.style.opacity = 1;
-		var modal = Modal._createElement("div", {id: "modal"}, [
+		var modalWrapper = Modal._createElement("div", {id: "modalWrapper"}, [
 			Modal._createElement("div", {id: "modalHeader"}, 
 				[
 					Modal._createElement("h4", {}, title), 
@@ -49,7 +49,7 @@ var Modal = {
 					}, "×")
 				]
 			), 
-			Modal._createElement("div", {id: "modalBody"}, data), 
+			Modal._createElement("div", {id: "modalBody"}, Modal._createElement("div", {id: "modalContainer"}, data)), 
 			Modal._createElement("div", {id: "modalFooter"}, 
 				[
 					Modal._createElement("input", {
@@ -59,7 +59,7 @@ var Modal = {
 				]
 			)
 		]);
-		document.body.appendChild(modal);
+		document.body.appendChild(Modal._createElement("div", {id: "modal"}, modalWrapper));
 	},
 	hideModal: function(el){
 		var elem = el.parentElement.parentElement;
