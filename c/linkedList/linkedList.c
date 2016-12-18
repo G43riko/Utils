@@ -16,13 +16,15 @@ typedef struct list{
 void * getLast(List * list){return list -> last -> data;}
 void * getFirst(List * list){return list -> first -> data;}
 void * get(List * list, int id){
-	if(id >= list -> size)
+	if(id >= list -> size){
 		return NULL;
+	}
 	int counter = 0;
 	struct node * it = list -> first;
 	while(it != NULL){
-		if(id == counter)
+		if(id == counter){
 			return it -> data;
+		}
 		counter++;
 		it = it -> p_next;
 	}
@@ -37,7 +39,7 @@ struct node * createEmptyNode(void * data){
 	return newElement;
 }
 
-struct node * deleteFirst(List * list){
+void * deleteFirst(List * list){
 	if(list -> size == 0){
 		return NULL;
 	}
@@ -53,10 +55,11 @@ struct node * deleteFirst(List * list){
 	list -> size--;
 	void * result = first -> data;
 	free(first);
+
 	return result;
 }
 
-struct node * deleteLast(List * list){
+void * deleteLast(List * list){
 	if(list -> size == 0){
 		return NULL;
 	}
@@ -75,13 +78,16 @@ struct node * deleteLast(List * list){
 	return result;
 }
 
-struct node * delete(List * list, int index){
-	if(index == 0)
+void * delete(List * list, int index){
+	if(index == 0){
 		return deleteFirst(list);
-	if(index == list -> size)
+	}
+	if(index == list -> size){
 		return deleteLast(list);
-	if(index > list -> size)
+	}
+	if(index > list -> size){
 		return NULL;
+	}
 
 	int id = 0;
 	struct node * it = list -> first;
@@ -89,7 +95,10 @@ struct node * delete(List * list, int index){
 		if(id++ == index){
 			it -> p_prev -> p_next = it -> p_next;
 			it -> p_next -> p_prev = it -> p_prev;
-			return it;
+
+			void * result = it -> data;
+			free(it);
+			return result;
 		}
 		it = it -> p_next;
 	}
@@ -153,8 +162,9 @@ int indexOf(List * list, void * element){
 	int id = 0;
 	struct node * it = list -> first;
 	while(it != NULL){
-		if(it -> data == element)
+		if(it -> data == element){
 			return id;
+		}
 		id++;
 		it = it -> p_next;
 	}
