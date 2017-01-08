@@ -6,38 +6,51 @@
  * @param args - argumenty funkcie
  * @constructor
  */
-G = function(... args){
-	if(args.length === 0){
+var G = function(){
+	if(!(this instanceof G)){//ak sa nevolá ako konštruktor
+		var inst = Object.create(G.prototype);
+		G.apply(inst, arguments);
+		return inst;
+	}
+	if(arguments.length === 0){
 		this.elements = [];
 	}
-	else if(args.length === 1){
-		if(G.isString(args[0])){
-			this.elements = G.find(args[0]);
+	else if(arguments.length === 1){
+		if(G.isString(arguments[0])){ //query selector
+			this.elements = G.find(arguments[0]);
 		}
-		else if(G.isArray(args[0])){
-			this.elements = args[0];
+		else if(G.isArray(arguments[0])){ //pole elementov
+			this.elements = [];
+			G.each(arguments[0], e => {
+				if(G.isElement(e)){
+					this.elements.push(e);
+				}
+			});
 		}
-		else if(G.isElement(args[0])){
-			this.elements = [args[0]];
+		else if(G.isElement(arguments[0])){ //HTML Element
+			this.elements = [arguments[0]];
 		}
-		else if(G.isObject(args[0]) && G.isArray(args[0].elements)){
-			this.elements = args[0].elements;
+		else if(G.isG(arguments[0])){ //G Object
+			this.elements = arguments[0].elements;
 		}
 	}
-	else if(args.length === 2 && G.isString(args[0]) && G.isObject(args[1])){
-		this.elements = [G.createElement(args[0], args[1].attr, args[1]["cont"], args[1]["style"])]
+	else if(arguments.length === 2 && G.isString(arguments[0]) && G.isObject(arguments[1])){
+		this.elements = [G.createElement(arguments[0], arguments[1].attr, arguments[1].cont, arguments[1].style)];
 	}
 
 	if(G.isUndefined(this.elements)){
-		G.error("nepodarilo sa rozpoznať argumenty: ", args);
+		G.warn("nepodarilo sa rozpoznať argumenty: ", arguments);
 		this.elements = [];
 	}
-
-	this.size = this.elements.length;
+	if(!G.isArray(this.elements)){
+		G.error("elementy niesu pole ale " + G.typeOf(this.elements), arguments);
+		this.elements = [];
+	}
+	this.size = this.length();
 };
 
-function tests(){
-	var body = new G(document["body"]);
+var tests = function(){
+	var body = new G(document.body);
 	/*
 	 * empty();
 	 * append();
@@ -52,7 +65,8 @@ function tests(){
 	body.append("<div id='idecko'>jupilajda</div>");
 	body.append(new G("div", {
 		attr : {
-			class: "clasa"},
+			class: "clasa"
+		},
 		cont: "toto je classsa"
 	}));
 	var elementP = document.createElement("p");
@@ -129,9 +143,7 @@ function tests(){
 	if(res.a !== "aaa" || res.b !== "bb" || res.c !== "cccc"){
 		G.error("nefunguje extendse pretože po zlučenie", a, b, c, " vzniklo: ", res, "a malo vzniknut: ", {a: "aaa", b: "bb", c: "cccc"});
 	}
-
-
-}
+};
 
 
 /**
@@ -144,12 +156,18 @@ function tests(){
  */
 G.ajax = function(url, options, dataType){
 	var start = 0;
-	var http = window.XMLHttpRequest ?  new XMLHttpRequest() :  new ActiveXObject("Microsoft.XMLHTTP");
+	if(!window.XMLHttpRequest){
+		G.error("Lutujeme ale váš prehliadaš nepodporuje AJAX");
+		return false;
+	}
+	//var http = window.XMLHttpRequest ?  new XMLHttpRequest() :  new ActiveXObject("Microsoft.XMLHTTP");
+	var http = new XMLHttpRequest();
 
 	if(G.isFunction(options)){
 		options = {success: options};
-		if(G.isString(dataType))
-			options["dataType"] = dataType;
+		if(G.isString(dataType)){
+			options.dataType = dataType;
+		}
 	}
 	else if(!G.isObject(options)){
 		options = {};
@@ -160,54 +178,54 @@ G.ajax = function(url, options, dataType){
 		return false;
 	}
 
-	options["method"] = options["method"] || "GET";
-	options["async"] = options["async"] || true;
+	options.method = options.method || "GET";
+	options.async = options.async || true;
 
-	if(G.isFunction(options["abort"])){
-		http.onabort = options["abort"];
+	if(G.isFunction(options.abort)){
+		http.onabort = options.abort;
 	}
-	if(G.isFunction(options["error"])){
-		http.onerror = options["error"];
+	if(G.isFunction(options.error)){
+		http.onerror = options.error;
 	}
-	if(G.isFunction(options["progress"])){
-		http.onprogress = options["progress"];
+	if(G.isFunction(options.progress)){
+		http.onprogress = options.progress;
 	}
-	if(G.isFunction(options["timeout"])){
-		http.ontimeout = options["timeout"];
+	if(G.isFunction(options.timeout)){
+		http.ontimeout = options.timeout;
 	}
-	if(G.isFunction(options["loadEnd"])){
-		http.onloadend = () => options["loadEnd"]((window["performance"].now() - start));
+	if(G.isFunction(options.loadEnd)){
+		http.onloadend = () => options.loadEnd((window.performance.now() - start));
 	}
-	if(G.isFunction(options["loadStart"])){
+	if(G.isFunction(options.loadStart)){
 		http.onloadstart = () => {
-			options["loadStart"]();
-			start = window["performance"].now();
+			options.loadStart();
+			start = window.performance.now();
 		};
 	}
 
-	if(G.isFunction(options["success"])){
+	if(G.isFunction(options.success)){
 		http.onreadystatechange = () => {
 			if (http.readyState == 4 && http.status == 200){
-				switch(options["dataType"]){
+				switch(options.dataType){
 					case "json" :
-						options["success"](JSON.parse(http.responseText));
+						options.success(JSON.parse(http.responseText));
 						break;
 					case "html" :
-						options["success"](new DOMParser().parseFromString(http.responseText, "text/xml"));
+						options.success(new DOMParser().parseFromString(http.responseText, "text/xml"));
 						break;
 					case "xml" :
-						options["success"](new DOMParser().parseFromString(http.responseText, "text/xml"));
+						options.success(new DOMParser().parseFromString(http.responseText, "text/xml"));
 						break;
 					default :
-						options["success"](http.responseText)
+						options.success(http.responseText);
 				}
 			}
 		};
 	}
 	else{
-		G.error("nieje zadaná succes funkcia");
+		G.error("nieje zadaná Succes funkcia");
 	}
-	http.open(options["method"], url, options["async"]);
+	http.open(options.method, url, options.async);
 	http.send();
 	return http;
 };
@@ -219,13 +237,21 @@ G.ajax = function(url, options, dataType){
  * Funkcie spracuje chybové hlášky
  * @param msg
  */
-G.error = function(... msg){
-	console.error.apply(console, msg);
+G.error = function(){
+	console.error.apply(console, arguments);
 };
 
-G._error = function(key, ...arguments){
+G.warn = function(){
+	console.warn.apply(console, arguments);
+};
+
+G.log = function(){
+	console.log.apply(console, arguments);
+};
+
+G._error = function(key, ...args){
 	//TODO všetky výpisi budú du zoradené podla IDčka chyby
-}
+};
 
 
 /**
@@ -238,78 +264,93 @@ G._error = function(key, ...arguments){
  * G.createElement("div", {}, "text", {color: "blue"}) => <div style="color: blue;">text</div>
  *
  * @param name - názov elementu
- * @param attr
- * @param cont - objekt kde kluče su nazvy atribútov a hodnoty su hodnoty atribútov
+ * @param attr - objekt kde kluče su nazvy atribútov a hodnoty su hodnoty atribútov
+ * @param cont - string s textom alebo element alebo pole elementov
  * @param style - objekt kde kluče su nazvy štýlov a hodnoty su hodnoty štýlov
  * @returns {Element} - novo vytvorený element
  */
 G.createElement = function(name, attr, cont, style){
-	var i;
+	var el;
+	//NAME
 	if(G.isObject(name)){
-		if(G.isDefined(name.name)&& G.isDefined(name.attr) && G.isDefined(name["cont"]) && G.isDefined(name["style"])){
-			return G.createElement(name.name, name.attr, name["cont"], name["style"]);
+		if(G.isString(name.name)){
+			G.createElement(name.name, name.attr || {}, name.cont || "", name.style || {});
 		}
 		else{
-			return G.error("parametre funkcie(String, Object, String/Element, Object) a su zadane: ", name, attr, cont, style);
+			return G.error("prví parameter funkcie[Object] musí obsahovať name[String] ale ten je: ", name.name);
 		}
 	}
 	if(G.isString(name)){
-		var el = document.createElement(name);
+		el = document.createElement(name);
 	}
 	else{
 		return G.error("prvý parameter(nazov elementu) musí byť string a je: ", name);
 	}
-
+	//ATTRIBUTES
 	if(G.isObject(attr)){
-		for(i in attr){
-			if(attr.hasOwnProperty(i)){
-				el.setAttribute(i, attr[i]);
-			}
-		}
+		G.each(attr, (e, i) => el.setAttribute(i, e));
 	}
-
+	//STYLES
 	if(G.isObject(style)){
-		for(i in style){
-			if(style.hasOwnProperty(i)){
-				el.style[i] = style[i];
-			}
-		}
+		G.each(style, (e, i) => el.style[i] = e);
 	}
-
-	if(G.isString(cont)){
+	//CONTENT
+	if(G.isToStringable(cont)){
 		G.html(el, cont);
 	}
 	else if(G.isArray(cont)){
-		for(i in cont){
-			if(cont.hasOwnProperty(i) && G.isObject(cont[i])){
-				el.appendChild(cont[i]);
+		G.each(cont, e => {
+			if(G.isObject(e)){
+				el.appendChild(e);
 			}
-		}
+		});
 	}
-	else if(G.isObject(cont)){
+	else if(G.isElement(cont)){
 		el.appendChild(cont);
 	}
 
 	return el;
 };
-
-G.isFunction = val => typeof val === "function";
-G.isDefined = val => typeof val !== "undefined";
-G.isString = val => typeof val === "string";
-G.isObject = val => typeof val === "object";
-G.isNumber = val => typeof val === "number";
-G.isNum = obj => !G.isArray(obj) && (obj - parseFloat(obj) + 1) >= 0;
-G.isBool = val => typeof val === "boolean";
-G.isG = val => val.__proto__ === G.prototype;
+G.typeOf = val => typeof val;
+G.isFunction = val => G.typeOf(val) === "function";
+G.isDefined = val => G.typeOf(val) !== "undefined";
+G.isString = val => G.typeOf(val) === "string";
+G.isObject = val => G.typeOf(val) === "object";
+G.isNumber = val => G.typeOf(val) === "number";
+//G.isNum = obj => !G.isArray(obj) && (obj - parseFloat(obj) + 1) >= 0;
+G.isInt = val => G.isNumber(val) && val % 1 === 0;
+G.isFloat = val => G.isNumber(val) && val % 1 !== 0;
+G.isBool = val => G.typeOf(val) === "boolean";
+//G.isG = val => G.isObject(val) && val.__proto__ === G.prototype;
+G.isG = val => G.isObject(val) && Object.getPrototypeOf(val) === G.prototype;
 G.isUndefined = val => !G.isDefined(val);
 G.isArray = val => Array.isArray(val);
 G.isToStringable = val => G.isNumber(val) || G.isString(val) || G.isBool(val);
-G.isGElement = val => val["isGElement"] === true;
+//G.isGElement = val => val["isGElement"] === true;
 G.isElement = obj => {
-	try {return obj instanceof HTMLElement;}
-	catch(e){return G.isObject(obj) && obj.nodeType === 1 && G.isObject(obj.style) && G.isObject(obj.ownerDocument);}
+	try {
+		return obj instanceof HTMLElement;
+	}
+	catch(e){
+		return G.isObject(obj) && obj.nodeType === 1 && G.isObject(obj.style) && G.isObject(obj.ownerDocument);
+	}
 };
 
+G.isIn = function(obj, data){//testovane 8.1.2017
+	if(G.isArray(data)){
+		if(data.indexOf(obj) >= 0){
+			return true;
+		}
+	}
+	else{
+		for(var i=1 ; i<arguments.length ; i++){
+			if(arguments[i] === obj){
+				return true;
+			}
+		}
+	}
+	return false;
+}
 
 /**
  * Funkcia zlúči objekty na vstupe do jedného (prvého) objektu
@@ -318,42 +359,47 @@ G.isElement = obj => {
  */
 G.extend = function(target, ... args){
 	if(G.isObject(target)){
-		for(var i=0; i<args.length; i++){
-			if(G.isObject(args[i])){
-				for(var key in args[i])
-					if(args[i].hasOwnProperty(key))
-						target[key] = args[i][key];
+		G.each(args, (e, i) => {
+			if(G.isObject(e)){
+				G.each(e, (ee, key) => target[key] = ee);
 			}
 			else{
-				G.error("args[" + i + "] ma byť object a je : " + args[i]);
+				G.error("args[" + i + "] ma byť object a je : ", e);
 			}
-		}
+		});
 	}
-	else
-		G.error("prvý argument musí byť objekt. teraz je: " + target);
+	else{
+		G.error("prvý argument musí byť objekt. teraz je: ", target);
+	}
 	return target;
 };
 
 
 /**
- * Funkcia preloopuje pole alebo objekt daný ako argument a zavolá funkciu a umožnuje nastaviť lubovolný this objekt
+ * Funkcia preloopuje pole alebo objekt daný ako argument a zavolá funkciu a 
+ * umožnuje nastaviť lubovolný this objekt.
+ * V prípade že funckia daná ako argument vráti false tak sa loop ukončí
  *
  * @param obj - objekt ktorý sa má preloopovať
  * @param func - funkcia ktorá sa má zavoláť pre každý objekt a jej parametre su: (element, index, pole)
  * @param thisArg - objekt ktorý má byť dosadený sa this premennú
  */
 G.each = function(obj, func, thisArg){
-	var i;
+	var i, result;
 	if(G.isObject(obj) && G.isFunction(func)){
 		if(G.isArray(obj)){
 			if(G.isObject(thisArg)){
-				for(i = 0; i<obj.length ; i++){
-					func.call(thisArg, obj[i], i, obj);
+				for(i = 0 ; i<obj.length ; i++){
+					if(func.call(thisArg, obj[i], i, obj) === false){
+						break;
+					}
 				}
 			}
 			else{
-				for(i = 0; i<obj.length ; i++){
-					func(obj[i], i, obj);
+				for(i = 0 ; i<obj.length ; i++){
+					if(func(obj[i], i, obj) === false){
+						break;
+					}
 				}
 			}
 		}
@@ -361,14 +407,18 @@ G.each = function(obj, func, thisArg){
 			if(G.isObject(thisArg)){
 				for(i in obj){
 					if(obj.hasOwnProperty(i)){
-						func.call(thisArg, obj[i], i, obj);
+						if(func.call(thisArg, obj[i], i, obj) === false){
+							break;
+						}
 					}
 				}
 			}
 			else{
 				for(i in obj){
 					if(obj.hasOwnProperty(i)){
-						func(obj[i], i, obj);
+						if(func(obj[i], i, obj) === false){
+							break;
+						}
 					}
 				}
 			}
@@ -387,23 +437,19 @@ G.each = function(obj, func, thisArg){
  * @param parent - element v ktorom sa má hladadť. Defaultne je do document
  * @returns {Array} - pole nájdených výsledkov
  */
-G.find = function(key, parent){
+G.find = function(query, parent){
 	var result = [];
 
 	if(!G.isElement(parent)){
 		parent = document;
 	}
 
-	if(G.isString(key)){
-		var data = parent.querySelectorAll(key);
-		for(var i in data){
-			if(data.hasOwnProperty(i)){
-				result.push(data[i]);
-			}
-		}
+	if(G.isString(query)){
+		var data = parent.querySelectorAll(query);
+		G.each(data, e => result.push(e));
 	}
 	else{
-		G.error("argument funkcie musí byť string a je ", key);
+		G.error("argument funkcie musí byť string a je ", query);
 	}
 
 	return result;
@@ -425,9 +471,41 @@ G.parent = function(element){
 	return null;
 };
 
-
 /**
  * Funkcia nastavý alebo pridá obsah elementu
+ *
+ * @param element
+ * @param text
+ * @param append
+ * @returns {*}
+ */
+
+G.text = function(element, text, append){
+	if(G.isElement(element)){
+		if(G.isUndefined(text)){
+			return element.textContent;
+		}
+
+		if(G.isToStringable(text)){
+			if(append){
+				element.textContent += text;
+			}
+			else{
+				element.textContent = text;
+			}
+		}
+		else{
+			G.error("druhý argument musí byť string a je: ", html);
+		}
+	}
+	else{
+		G.error("prvý argument musí byť objekt a je: ", element);
+	}
+	return element;
+}
+
+/**
+ * Funkcia nastavý alebo pridá html obsah elementu
  *
  * @param element
  * @param html
@@ -440,7 +518,7 @@ G.html = function(element, html, append = false){
 			return element.innerHTML();
 		}
 
-		if(G.isString(html)){
+		if(G.isToStringable(html)){
 			if(append){
 				element.innerHTML += html;
 			}
@@ -468,10 +546,7 @@ G.next = function (element){
 	if(G.isElement(element)){
 		return element.nextSibling;
 	}
-	else{
-		G.error("prvý argument musí byť element a je: ", element);
-	}
-
+	G.error("prvý argument musí byť element a je: ", element);
 	return null;
 };
 
@@ -485,10 +560,7 @@ G.prev = function (element){
 	if(G.isElement(element)){
 		return element.previousSibling;
 	}
-	else{
-		G.error("prvý argument musí byť element a je: ", element);
-	}
-
+	G.error("prvý argument musí byť element a je: ", element);
 	return null;
 };
 
@@ -502,11 +574,11 @@ G.children = function(element){
 	var result = [];
 	if(G.isElement(element)){
 		var data = element.children;
-		for(var i in data){
-			if(data.hasOwnProperty(i) && result.indexOf(data[i]) < 0){
-				result.push(data[i]);
+		G.each(data, e => {
+			if(result.indexOf(e) < 0){
+				result.push(e);
 			}
-		}
+		});
 	}
 	else{
 		G.error("argument funcie musí byť element a teraz je: ", element);
@@ -540,20 +612,18 @@ G.delete = function(element){
  * @param args - objekty ktoré sa majú pridať
  * @returns {G} - G objekt
  */
-G.prototype.add = function(... args){
-	for(var i in args){
-		if(args.hasOwnProperty(i)){
-			if(G.isElement(args[i])){
-				this.element.push(args[i]);
-			}
-			else if(G.isString(args[i])){
-				this.elements.push.apply(this, G.find(args[i]));
-			}
-			else{
-				G.error("argumenty funkcie: (... string), " + i +" -ty argument: ", args[i]);
-			}
+G.prototype.add = function(){
+	G.each(arguments, (e, i) => {
+		if(G.isElement(e)){
+			this.element.push(e);
 		}
-	}
+		else if(G.isString(e)){
+			this.elements.push.apply(this, G.find(e));
+		}
+		else{
+			G.error("argumenty funkcie: (...string), " + i +" -ty argument: ", e);
+		}
+	});
 	return this;
 };
 
@@ -564,15 +634,16 @@ G.prototype.add = function(... args){
  * @param args
  * @returns {G}
  */
-G.prototype.remove = function(... args){//TODO otestovať
-	for(var i in args){
-		if(args.hasOwnProperty(i) && G.isElement(args[i])){
-			var index = this.elements.indexOf(args[i]);
+G.prototype.remove = function(){//TODO otestovať
+	var index;
+	G.each(arguments, e => {
+		if(G.isElement(e)){
+			index = this.elements.indexOf(e);
 			if(index >= 0){
 				this.elements.splice(index, 1);
 			}
 		}
-	}
+	});
 	return this;
 };
 
@@ -717,14 +788,11 @@ G.prototype.isEmpty = function(){
 
 G.prototype.each = function(func, ... args){//TODO otestovať asi prerobiť lebo neviem či bude takto použitelne (args)
 	if(G.isFunction(func)){
-		for(var i in this.elements){
-			if(this.elements.hasOwnProperty(i)){
-				func.apply(this.elements[i], args);
-			}
-		}
+		G.each(this.elements, e => func.appy(e, args));
 	}
-	else
+	else{
 		G.error("prvý parameter musí byť funkcia a je: ", func);
+	}
 
 	return this;
 };
@@ -734,7 +802,9 @@ G.prototype.each = function(func, ... args){//TODO otestovať asi prerobiť lebo
  *************************************************************************************/
 
 
-
+/**
+ * Funkcia zmaže všetky objekty uložené v G objekte
+ */
 
 G.prototype.deleteAll = function(){
 	G.each(this.elements, e => G.delete(e));
@@ -788,6 +858,12 @@ G.prototype.prepend = function(data){//TODO otestovať
 	return this;
 };
 
+/**
+ * funkcia pridá text, objekt alebo G element na začiatok prvého elementu
+ *
+ * @param data - objekt ktorý sa má pridať
+ * @return {*}
+ */
 G.prototype.append = function(data){//TODO otestovať
 	if(this.isEmpty()){
 		return this;
@@ -818,19 +894,16 @@ G.prototype.append = function(data){//TODO otestovať
  * @param text
  * @returns {*}
  */
-G.prototype.text = function(text){//TODO otestovať
+G.prototype.text = function(text, append = false){//TODO otestovať
 	if(this.isEmpty()){
 		return this;
 	}
-
-	if(G.isString(text)){
-		return this.html(text.replace(/<[^>]*>/g, ""));
-	}
-	else if(G.isDefined(text)){
-		G.error("argument funkcie musí byť text a teraz je: ", text);
+	if(G.isUndefined(text)){
+		return G.text(this.first());
 	}
 
-	return this.first().textContent;
+	text[0] === "+" ? G.text(this.first(), text.substring(1), true) : G.text(this.first(), text);
+	return this;
 };
 
 /**
@@ -873,9 +946,6 @@ G.prototype.delete = function(){//TODO otestovať - pridať možnosť filtrovať
 	G.delete(this.first());
 	if(G.isArray(this.elements)){
 		this.elements.splice(0, 1);
-	}
-	else if(G.isObject(this.elements)){
-		delete this.first();
 	}
 
 	return this;
@@ -929,43 +999,44 @@ G.prototype.class = function(name){//TODO prerobiť - nemôže vracať this ak m
  * @param args
  * @returns {*}
  */
-G.prototype.css = function(...args){
+G.prototype.css = function(){
 	if(this.isEmpty()){
 		return this;
 	}
-	var i;
 	//ak je 0 argumentov vráti objekt z CSS štýlmi
-	if(args.length == 0){
+	if(arguments.length === 0){
 		var result = {};
 		var css = window.getComputedStyle(this.first());
-		for(i in css)
-			if(css.hasOwnProperty(i) && css.getPropertyValue(css[i]) !== "")
-				result[css[i]] = css.getPropertyValue(css[i]);
+		G.each(css, e => {
+			if(css.getPropertyValue(e) !== ""){
+				result[e] = css.getPropertyValue(e);
+			}
+		});
 		return result;
 	}
 
 	//ak je prvý argument string
-	if(G.isString(args[0])){
+	if(G.isString(arguments[0])){
 		//a druhý argument je zadaný a dá sa prepísať na string nastav štýl
-		if(args.length == 2 && G.isToStringable(args[1])){
-			this.first().style[args[0]] = args[1];
+		if(arguments.length == 2 && G.isToStringable(arguments[1])){
+			this.first().style[arguments[0]] = arguments[1];
 		}
 		//ak prvý argument neobsahuje symbol pre vymazanie tak vráť hodnotu štýlu
-		else if(args[0][0] !== "-"){
-			return this.first().style[args[0]];
+		else if(arguments[0][0] !== "-"){
+			return this.first().style[arguments[0]];
 		}
 		//ináč štýl odstráň
 		else{
-			this.first().style[args[0].substring(1)] = "";
+			this.first().style[arguments[0].substring(1)] = "";
 		}
 	}
 	//ak je prvý argument objekt nastav všetky štýli podla objektu
-	else if(G.isObject(args[0])){
-		for(i in args[0]){
-			if(args[0].hasOwnProperty(i) && G.isString(i) && G.isToStringable(args[0][i])){
-				this.first().style[i] = args[0][i];
+	else if(G.isObject(arguments[0])){
+		G.each(arguments[0], (e, i) => {
+			if(G.isString(i) && G.isToStringable(e)){
+				this.first().style[i] = e;
 			}
-		}
+		});
 	}
 	return this;
 };
@@ -980,46 +1051,94 @@ G.prototype.css = function(...args){
  * @param args
  * @returns {*}
  */
-G.prototype.attr = function(...args){
+G.prototype.attr = function(){
 	if(this.isEmpty()){
 		return this;
 	}
-	var i;
 
 	//ak je 0 argumentov vráti objekt z atribútmi
-	if(args.length == 0){
+	if(arguments.length === 0){
 		var result = {};
-		for(i=0 ; i<this.first().attributes.length ; i++){
-			result[this.first().attributes[i].nodeName] = this.first().attributes[i].nodeValue;
-		}
+		G.each(this.first().attributes, e => {
+			result[e.nodeName] = e.nodeValue;
+		});
 		return result;
 	}
 
 	//ak je prvý argument string
-	if(G.isString(args[0])){
+	if(G.isString(arguments[0])){
 		//a druhý argument je zadaný a dá sa prepísať na string nastav štýl
-		if(args.length == 2 && G.isToStringable(args[1])){
-			this.first().setAttribute(args[0], args[1]);
+		if(arguments.length == 2 && G.isToStringable(arguments[1])){
+			this.first().setAttribute(arguments[0], arguments[1]);
 		}
 		//ak prvý argument neobsahuje symbol pre vymazanie tak vráť hodnotu štýlu
-		else if(args[0][0] !== "-"){
-			return this.first().getAttribute(args[0]);
+		else if(arguments[0][0] !== "-"){
+			return this.first().getAttribute(arguments[0]);
 		}
 		//ináč štýl odstráň
 		else{
-			this.first().removeAttribute(args[0].substring(1));
+			this.first().removeAttribute(arguments[0].substring(1));
 		}
 	}
 	//ak je prvý argument objekt nastav všetky štýli podla objektu
-	else if(G.isObject(args[0])){
-		for(i in args[0]){
-			if(args[0].hasOwnProperty(i) && G.isString(i) && G.isToStringable(args[0][i])){
-				this.first().setAttribute(i, args[0][i]);
+	else if(G.isObject(arguments[0])){
+		G.each(arguments[0], (e, i) => {
+			if(G.isString(i) && G.isToStringable(e)){
+				this.first().setAttribute(i, e);
 			}
-		}
+		});
 	}
 	return this;
 };
+
+/**
+ * LISTENERS
+ */
+
+G._setListener = function(element, listener, func){
+	var allowedListeners = ["click", "blur", "submit", "focus", "scroll", "keydown", "keyup", "dblclick"];
+	if(G.isElement(element)){
+		if(G.isIn(listener, allowedListeners)){
+			if(G.isFunction(func)){
+				element.addEventListener(listener, displayDate);
+			}
+			else{
+				Logger.error("tretí parameter musí byť funkcia ale je", G.typeOf(func));
+			}
+		}
+		else{
+			Logger.error("druhý parameter nieje platný listenre");
+		}
+	}
+	else{
+		Logger.error("prví parameter musí byť element ale je", G.typeOf(element));
+	}
+	return eleelement;
+}
+
+G.prototype.bind = function(listener, func, all = false){//todo otestovať
+	if(this.isEmpty()){
+		return this;
+	};
+	if(all){
+		this.each(function(){
+			G._setListener(this, listener, func);
+		});
+	}
+	else{
+		G._setListener(this.first(), listener, func);
+	}
+	return this;
+}
+
+G.prototype.blur = func => this.bind("blur", func);
+G.prototype.keyup = func => this.bind("keyup", func);
+G.prototype.click = func => this.bind("click", func);
+G.prototype.focus = func => this.bind("focus", func);
+G.prototype.submit = func => this.bind("submit", func);
+G.prototype.scroll = func => this.bind("scroll", func);
+G.prototype.keydown = func => this.bind("keydown", func);
+G.prototype.dblclick = func => this.bind("dblclick", func);
 
 /*
  G.ajax();

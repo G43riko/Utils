@@ -27,7 +27,7 @@ void add(Buffer * buffer, void * item){
 }
 
 void * delete(Buffer * buffer){
-	if(buffer -> p_last == NULL)
+	if(!buffer -> size)
 		return NULL;
 	struct node * last = buffer -> p_last;
 	buffer -> p_last = last -> p_prev;
@@ -43,7 +43,7 @@ int size(Buffer * buffer){
 }
 
 void * get(Buffer * buffer){
-	if(buffer -> p_last == NULL)
+	if(!buffer -> size)
 		return NULL;
 
 	return buffer -> p_last -> data;

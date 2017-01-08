@@ -28,7 +28,7 @@ void add(Front * front, void * item){
 }
 
 void * delete(Front * front){
-	if(front -> p_first == NULL)
+	if(!front -> size)
 		return NULL;
 	struct node * first = front -> p_first;
 	front -> p_first = first -> p_prev;
@@ -44,7 +44,7 @@ int size(Front * front){
 }
 
 void * get(Front * front){
-	if(front -> p_first == NULL)
+	if(!front -> size)
 		return NULL;
 
 	return front -> p_first -> data;
