@@ -1,0 +1,20 @@
+{
+  "name": "g",
+  "version": "1.0.0",
+  "description": "javascript DOM library",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "g",
+    "javascript",
+    "DOM"
+  ],
+  "author": "Gabriel Csollei",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  }
+}
