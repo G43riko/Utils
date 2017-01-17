@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang='sk'>
+ 	<head>
+		<meta charset="UTF-8">
+		<base href="href"/>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="robots" content="all"/>
+		<meta name="keywords" content="keyword"/>
+		<meta name="author" content="Gabriel Csöllei" />
+		<meta name="description" content="description"/>
+		<title>LayersViewer</title>
+		<link rel="stylesheet" type="text/css" href="LayersViewer.css">
+		<script src="LayersViewer.js"></script>
+		<script src="../G/g.js"></script>
+ 	</head>
+ 	<body>
+ 		<div id="layerViewerPlaceholder">
+ 			<!--
+ 			<div id="layersViewer">
+ 				<div id="layersHeader">
+ 					<div class="layersHeaderButton" id="addLayerButton"></div>
+ 					<div class="layersHeaderButton" id="removeLayerButton"></div>
+ 					<div class="layersHeaderButton" id="toggleLayerButton"></div>
+ 				</div>
+ 				<div id="layersBody">
+ 					<div class="layer" id="default">
+ 						<div class="visible"></div>
+ 						<div class="title">Default</div>
+ 						<div class="options"></div>
+ 					</div>
+ 					<div class="layer" id="gui">
+ 						<div class="visible"></div>
+ 						<div class="title">Gui</div>
+ 						<div class="options"></div>
+ 					</div>
+ 				</div>
+ 			</div>
+ 			-->
+ 		</div>
+
+ 		<script type="text/javascript">
+			var layersVewer = new LayersViewer(G.byId("layerViewerPlaceholder"));
+ 		</script>
+	</body>
+</html>

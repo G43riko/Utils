@@ -30,13 +30,13 @@ var Test = function(){
 			case "eq":
 				return targetRes === result;
 			case "gt":
-				return targetRes > result;
-			case "ge":
-				return targetRes >= result;
-			case "lt":
 				return targetRes < result;
-			case "le":
+			case "ge":
 				return targetRes <= result;
+			case "lt":
+				return targetRes > result;
+			case "le":
+				return targetRes >= result;
 			case "ok":
 				return result ? true : false;
 			case "true":
@@ -52,15 +52,20 @@ var Test = function(){
 			case "empty"://{}, [], ""
 				return targetRes === result;
 			case "between":
-				return target > targetRes[0] && target < targetRes[1];
+				return result > targetRes[0] && result < targetRes[1];
 			case "property":
-				return target[targetRes[0]] === targetRes[1];
+				return result[targetRes[0]] === targetRes[1];
 			case "length":
-				return target.length === targetRes;
-			//case "instanceof":
-			//	return target.length === targetRes;
-			//case "members":
-			//	return target.length === targetRes;
+				return result.length === targetRes;
+			case "instanceof":
+				return result instanceof targetRes;
+			case "members":
+				for(var i in result){
+					if(result.hasOwnProperty(i) && typeof targetRes[i] === "undefined"){
+						return false;
+					}
+				}
+				return true;
 			default:
 				return targetRes === result;
 		};
@@ -155,9 +160,9 @@ function testTest(){
 	tester.addArgs("sucet", [4, 4], 8);
 
 	tester.addTest("sucin", sucin, window);
-	tester.addArg("sucin", [1, 2]).eq(3);
-	tester.addArg("sucin", [2, 2]).eq(4);
-	tester.addArg("sucin", [3, 2]).eq(6);
+	tester.addArg("sucin", [1, 2]).le(2);
+	tester.addArg("sucin", [2, 2]).ge(4);
+	tester.addArg("sucin", [3, 2]).lt(7);
 	tester.runTests();
 }
 
@@ -388,6 +393,18 @@ G.ajax = function(url, options, dataType){
 /*************************************************************************************
  UTILITOVE FUNKCIE
  *************************************************************************************/
+ 
+G.byId = function(title){
+	return document.getElementById(title);
+};
+
+G.byClass = function(title){
+	return document.getElementsByClassName(title);
+};
+
+G.byTag = function(title){
+	return document.getElementsByTagName(title);
+};
 /**
  * Funkcie spracuje chybové hlášky
  * @param msg
@@ -462,6 +479,9 @@ G.createElement = function(name, attr, cont, style){
 	}
 	else if(G.isElement(cont)){
 		el.appendChild(cont);
+	}
+	else if(G.isG(cont)){
+		el.appendChild(cont.first());
 	}
 
 	return el;
@@ -943,7 +963,7 @@ G.prototype.isEmpty = function(){
 
 G.prototype.each = function(func, ... args){//TODO otestovať asi prerobiť lebo neviem či bude takto použitelne (args)
 	if(G.isFunction(func)){
-		G.each(this.elements, e => func.appy(e, args));
+		G.each(this.elements, e => func.apply(e, args));
 	}
 	else{
 		G.error("prvý parameter musí byť funkcia a je: ", func);
@@ -1134,7 +1154,8 @@ G.prototype.class = function(name){//TODO prerobiť - nemôže vracať this ak m
 				break;
 			case "/":
 				name = name.substring(1);
-				this.attr("class").indexOf(name) > -1 ? classes.remove(name) : classes.add(name);
+				//this.attr("class").indexOf(name) > -1 ? classes.remove(name) : classes.add(name);
+				classes.toggle(name);
 				break;
 			default:
 				return this.attr("class").indexOf(name) > -1;

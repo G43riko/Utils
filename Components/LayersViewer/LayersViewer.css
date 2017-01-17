@@ -1,0 +1,107 @@
+*{
+	padding: 0;
+	margin: 0;
+}
+
+
+#layersViewer{
+	position: fixed;
+	top:20px;
+	right: 20px;
+	width: 210px;
+	height: calc(100% - 40px);
+	background-color: #1abc9c;
+	border: 2px solid black;
+    overflow: hidden;
+	border-radius: 15px;
+	transition: all 1s;
+}
+#layersHeader{
+	position: relative;
+	width: 100%;
+	height: 60px;
+	background-color: #1abc9c;
+	z-index: 20;
+	box-sizing: border-box;
+}
+
+.layersHeaderButton{
+	position: relative;
+	display: inline-block;
+	width: 50px;
+	height: 30px;
+	margin-top: 10px;
+	margin-left: 10px;
+	cursor: pointer;
+	border-radius: 10px;
+	font-size:50px;
+	font-weight: bold;	
+	text-align: center;
+	line-height: 30px;
+	border: 2px solid black;
+}
+
+#layersViewer .tmpLayerInput{
+	position: relative;
+	width: 100px;
+	height: 20px;
+	font-size: 20px;
+}
+
+#layersViewer .layer{
+	position: relative;
+	width: 210px;
+	box-sizing: border-box;
+	border-top: 2px solid black;
+}
+#layersViewer .layer:last-child{
+	border-bottom: 2px solid black;
+}
+	
+
+#layersViewer .layer.selected{
+	background-color: blue;
+}
+
+#layersViewer .visible{
+	position: relative;
+	display: inline-block;
+	width: 26px;
+	height: 26px;
+	background-color: green;
+	border-radius: 8px;
+	cursor: pointer;
+	border: 2px solid black;
+	top:5px;
+	left:5px;
+}
+
+#layersViewer .visible.false{
+	background-color: red;
+}
+
+#layersViewer .title{
+	position: relative;
+	display: inline-block;
+	margin-left: 10px;
+	line-height: 40px;
+	font-size: 25px;
+}
+#layersViewer .options{
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	top:5px;
+	right: 5px;
+	border-radius: 8px;
+	border: 2px solid black;
+	width: 26px;
+	height: 26px;
+	float:right;
+}
+
+/********************MINIMALIZED*******************/
+#layersViewer.minimalized{
+	height: 60px;
+
+}
