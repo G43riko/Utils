@@ -1,3 +1,4 @@
+"use strict"
 var Modal = {
 	_isDefined: function(){
 		for(var i in arguments)

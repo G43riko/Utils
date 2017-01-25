@@ -1,3 +1,6 @@
+
+"use strict"
+
 var Alert = {
 	_closeParent: function(el){
 		el.parentElement.style.opacity = 0;
@@ -13,9 +16,11 @@ var Alert = {
 	_showAlert: function(text, type = "success", time){
 		var createElement = function(name, params, text){
 			var el = document.createElement(name);
-			if(typeof params === "object")
-				for(var i in params)
+			if(typeof params === "object"){
+				for(var i in params){
 					el.setAttribute(i, params[i]);
+				}
+			}
 			typeof text === "string" && el.appendChild(document.createTextNode(text));
 			return el;
 		}

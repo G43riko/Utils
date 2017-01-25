@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang='sk'>
+ 	<head>
+		<meta charset="UTF-8">
+		<base href="href"/>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="robots" content="all"/>
+		<meta name="keywords" content="keyword"/>
+		<meta name="author" content="Gabriel Csöllei" />
+		<meta name="description" content="description"/>
+		<title>ContextMenu</title>
+		<link rel="stylesheet" type="text/css" href="contextMenu.css">
+		<script src="contextMenu.js"></script>
+		<script src="../G/g.js"></script>
+ 	</head>
+ 	<body>
+ 		<div id="contextMenuHolder"></div>
+		<nav class="context-menu" id="context-menu">
+			<ul class="items">
+				<li class="item">
+					<a href="#" class="link">View Task</a>
+					<ul class="item">
+						<li class="item">
+							<a href="#" class="link">a</a>
+						</li>
+						<li class="item">
+							<a href="#" class="link">b</a>
+						</li>
+						<li class="item">
+							<a href="#" class="link">c</a>
+						</li>
+						<li class="item">
+							<a href="#" class="link">c</a>
+						</li>
+					</ul>
+				</li>
+				<li class="item">
+					<a href="#" class="link">Edit Task</a>
+				</li>
+				<li class="item">
+					<a href="#" class="link">Delete Task</a>
+					<ul class="item">
+						<li class="item">
+							<a href="#" class="link">a</a>
+						</li>
+						<li class="item">
+							<a href="#" class="link">b</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</nav>
+		<script type="text/javascript">
+			(function(){
+				initContextMenu("#contextMenuHolder");
+			})();
+		</script>
+	</body>
+</html>
