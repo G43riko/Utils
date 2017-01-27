@@ -14,32 +14,38 @@
 		<script src="../G/g.js"></script>
  	</head>
  	<body>
- 		<div id="layerViewerPlaceholder">
- 			<!--
- 			<div id="layersViewer">
- 				<div id="layersHeader">
- 					<div class="layersHeaderButton" id="addLayerButton"></div>
- 					<div class="layersHeaderButton" id="removeLayerButton"></div>
- 					<div class="layersHeaderButton" id="toggleLayerButton"></div>
- 				</div>
- 				<div id="layersBody">
- 					<div class="layer" id="default">
- 						<div class="visible"></div>
- 						<div class="title">Default</div>
- 						<div class="options"></div>
- 					</div>
- 					<div class="layer" id="gui">
- 						<div class="visible"></div>
- 						<div class="title">Gui</div>
- 						<div class="options"></div>
- 					</div>
- 				</div>
- 			</div>
- 			-->
- 		</div>
-
+ 		<div id="layerViewerPlaceholder"></div>
  		<script type="text/javascript">
-			var layersVewer = new LayersViewer(G.byId("layerViewerPlaceholder"));
+			var layersViewer = new LayersViewer(G.byId("layerViewerPlaceholder"));
+
+			layersViewer.createLayer("desti");
+			layersViewer.createLayer("destiA");
+			layersViewer.createLayer("destiB");
+			layersViewer.deleteLayer("desti");
+			/*
+			var panel = G("#layersViewer");
+			var header = G.byId("layersHeader");
+			var offset = {}
+			header.onmousedown = function(e){
+				if(e.target != header){
+					return false;
+				}
+				panel.css("left", (e.clientX - e.offsetX) + "px");
+				panel.css("top", (e.clientY - e.offsetY) + "px");
+				offset.x = e.offsetX;
+				offset.y = e.offsetY;
+				window.onmousemove = function(ee){
+					var oldX = panel.css("left");
+					panel.css("left", (ee.clientX - e.offsetX) + "px");
+					panel.css("top", (ee.clientY - e.offsetY) + "px");
+					
+				}
+				window.onmouseup = function(){
+					window.onmousemove = null;
+					window.onmouseup = null;
+				};
+			}
+			*/
  		</script>
 	</body>
 </html>

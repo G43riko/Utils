@@ -1,0 +1,19 @@
+{
+  "name": "gquery",
+  "version": "1.0.0",
+  "description": "html manipulation tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "g",
+    "dom",
+    "html",
+    "javascript",
+    "manipulation",
+    "javascript"
+  ],
+  "author": "Gabriel Csollei <gcsolle@hotmail.com>",
+  "license": "MIT"
+}

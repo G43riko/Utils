@@ -4,7 +4,7 @@
   "description": "javascript DOM library",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "mocha"
   },
   "keywords": [
     "g",

@@ -1,0 +1,20 @@
+{
+  "name": "gtester",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "testing",
+    "engine"
+  ],
+  "author": "gabriel csollei",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^3.5.0",
+    "colors": "^1.1.2",
+    "mocha": "^3.2.0"
+  }
+}

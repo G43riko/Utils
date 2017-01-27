@@ -6,7 +6,9 @@
  * @param args - argumenty funkcie
  * @constructor
  */
+var G;
 exports.G = function(){
+	G = exports.G;
 	if(!(this instanceof G)){//ak sa nevolá ako konštruktor
 		var inst = Object.create(G.prototype);
 		G.apply(inst, arguments);

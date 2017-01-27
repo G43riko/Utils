@@ -52,16 +52,17 @@ class LayersViewer extends LayersViewerAbstract{
 		});
 		textBox.text("").append(input);
 		input.focus();
+		input.select();
 
 	}
 	static changeVisibility(layerName){
 		G("#id_" + layerName).toggleClass("true").toggleClass("false")
 	}
 	static removeActiveLayer(){
-		console.log("maže sa aktualna vrstva");
+		LayersViewer.instance.deleteLayer();
 	}
 	static createAnonymLayer(){
-		console.log("vytvara sa nova vrstva");
+		LayersViewer.instance.createLayer();
 	}
 	static makeSelected(element){
 		var layer = new G(element);
@@ -73,54 +74,64 @@ class LayersViewer extends LayersViewerAbstract{
 		});
 		layer.addClass("selected");
 	}
-	constructor(element){
+	constructor(element, defaultName = "Layer_"){
 		super();
+		if(typeof LayersViewer.instance !== "undefined"){
+			alert("Nieje možné vytvoriť viac ako jednu inštanciu LayersViewera!!!!");
+			return;
+		}
+		LayersViewer.instance = this;
+		this._defaultName = defaultName;
+		this._counter = 0;
+		this._layers = {};
+		this._activeLayer = "";
+		this._existingLayers = 0;
 		this._layersViewer = this._createDiv();
 		element.appendChild(this._layersViewer.first());
-		var element = this._layersViewer.first();
-
-		/*
-		this._layersViewer.first().onmousedown = function(e){
-			
-			element.onmousemove = function(ee){
-				element.style.top = ee.y + "px";
-				element.style.left = ee.x + "px";
-				console.log(element.style.top, element.style.left, ee);
-			};
-			element.onmouseup = function(ee){
-				element.onmousemove = null;
-				element.onmouseup = null;
-			};
-		};
-		*/
-
-		this.createLayer("desti");
-		this.createLayer("destiA");
-		this.createLayer("destiB");
-		this.deleteLayer("desti");
 	};
 	_createLayerDiv(title){
-		var layer = G("div", {
-			attr: {class: "layer", id: title, onclick: "LayersViewer.makeSelected(this)"},
+		return G("div", {
+			attr: {
+				class: "layer" + (this._existingLayers == 1 ? " selected" : ""),
+				id: title,
+				onclick: "LayersViewer.makeSelected(this)"},
 			cont: [
 				G.createElement("div", {class: "visible true", onclick: "LayersViewer.changeVisibility('" + title + "')", id: "id_" + title}),
 				G.createElement("div", {class: "title", ondblclick: "LayersViewer.changeName(this)"}, title),
 				G.createElement("div", {class: "options"})
 			]
-		})
-
-
-		this._layers[title] = layer;
-		return layer;
-	}
+		});
+	};
 	createLayer(title){
-		this._layersBody.append(this._createLayerDiv(title));
+		if(typeof title !== "string" || title.length === 0){
+			title = this._defaultName + this._counter;
+		}
+		this._counter++;
+		this._existingLayers++;
+		this._layers[title] = this._createLayerDiv(title);
+		this._layersBody.append(this._layers[title]);
 	};
 	onScreenResize(){
 	};
 
 	deleteLayer(title){
-		this._layers[title].delete();
-		this._layers[title] = null;
+		if(typeof title != "string" || title.length === 0){
+			title = G(".layer.selected").text()
+		}
+
+		var layer = this._layers[title];
+
+		//ak sa maže označená vrstva tak sa označí dalšia;
+		if(layer.hasClass("selected") && this._existingLayers > 1){
+			for(var i in this._layers){
+				if(i !== title && this._layers.hasOwnProperty(i)){
+					this._layers[i].addClass("selected");
+					break;
+				}
+			}
+		}
+		layer.delete();
+		delete this._layers[title];
+		this._existingLayers--;
 	};
 };
