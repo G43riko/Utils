@@ -6,8 +6,6 @@
  * @param args - argumenty funkcie
  * @constructor
  */
-"use strict";
-
 var G = function(){
 	if(!(this instanceof G)){//ak sa nevolá ako konštruktor
 		var inst = Object.create(G.prototype);
@@ -25,7 +23,7 @@ var G = function(){
 			this.elements = [];
 			G.each(arguments[0], e => {
 				if(G.isElement(e)){
-					this.elements.push(e);
+					this.elements[this.elements.length] = e;
 				}
 			});
 		}
@@ -50,6 +48,7 @@ var G = function(){
 	}
 	this.size = this.length();
 };
+
 
 var tests = function(G){
 	var body = new G(document.body);
@@ -205,7 +204,7 @@ var tests = function(G){
 	if(G(".thirdLink").parents("#wrapper").is(".wrappedDiv") !== true){
 		console.log("zlihalo 2");
 	}
-	if(G("#rightMenu").find("ul").children(":not(.disabled)").is(".firstLi") == false){
+	if(G("#rightMenu").find("ul").children(":not(.disabled)").is(".firstLi") === false){
 		console.log("zlihalo 3");
 	}
 	if(G(".middleLi").prev().is(".firstLi") !== true){
@@ -231,7 +230,6 @@ var tests = function(G){
 
 
 	var clickFunction = function(){
-		console.log("vola sa to");
 		G("#resultSpan").text("kuriatko");
 	};
 
@@ -259,7 +257,7 @@ var tests = function(G){
 	parent.append(new G("li", {cont: "b"}));
 	parent.append(G.createElement("li", {}, "c"));
 	if(parent.text() !== "abc"){
-		console.log("append nefunguje")
+		console.log("append nefunguje");
 	}
 
 	/*
@@ -290,6 +288,22 @@ var tests = function(G){
 		console.log("html nefunguje 6");
 	}
 	
+
+	//ADD
+
+	var data = new G();
+	data.add(G.createElement("span", {class: "pes macka"}, "volačo"));
+	data.add(G.createElement("div", {class: "pes kura"}, "niečo iné"));
+	data.add(G.createElement("p", {class: "macka kura"}, "niečo zasa iné"));
+	if(data.has(".pes").length() !== 2){
+		console.log("add nefunguje 1");
+	}
+	if(data.has(".pterodaktil").length() !== 0){
+		console.log("add nefunguje 2");
+	}
+	if(data.not(".kura").length() !== 1){
+		console.log("not nefunguje 2");
+	}
 };
 
 
@@ -389,11 +403,15 @@ G.byClass = function(title){
 	return document.getElementsByClassName(title);
 };
 
+G.byName = function(title){
+	return document.getElementsByName(title);
+};
+
 G.hasClass = function(element, className){
 	if(G.isElement(element) && G.isString(className)){
 		return element.classList.contains(className);
 	}
-	G.error("argumenty musia byť (element, string) a sú ", G.typeOf(element), G.typeOf(className));
+	G.warn("argumenty musia byť (element, string) a sú ", G.typeOf(element), G.typeOf(className));
 	return false;
 };
 
@@ -468,7 +486,7 @@ G.createElement = function(name, attr, cont, style){
 	}
 	else if(G.isArray(cont)){
 		G.each(cont, e => {
-			if(G.isObject(e)){
+			if(G.isElement(e)){
 				el.appendChild(e);
 			}
 		});
@@ -536,27 +554,6 @@ G.isIn = function(obj, data){//testovane 8.1.2017
  *
  * G.extend({a: "aa", b: "bb"}, {c: "cc", a: "aaa"}, {c: "ccc"}) => Object {a: "aaa", b: "bb", c: "ccc"}
  */
-/*
-G.extend = function(){
-	var target = arguments[0];
-	var args = Array.from(arguments);
-	args.splice(0, 1);
-	if(G.isObject(target)){
-		G.each(args, (e, i) => {
-			if(G.isObject(e)){
-				G.each(e, (ee, key) => target[key] = ee);
-			}
-			else{
-				G.error("args[" + i + "] ma byť object a je : ", e);
-			}
-		});
-	}
-	else{
-		G.error("prvý argument musí byť objekt. teraz je: ", target);
-	}
-	return target;
-};
-*/
 
  G.extend = function(target, ... args){
 	 if(G.isObject(target)){
@@ -575,6 +572,17 @@ G.extend = function(){
 	 return target;
  };
  
+ G.matches = function(element, queryString){
+ 	if(G.isElement(element) && G.isString(queryString)){
+ 		try{
+ 			return element.matches(queryString);
+ 		}
+ 		catch(err){
+ 			G.error(err);
+ 		}
+ 	}
+ 	return false;
+ };
 
 /**
  * Funkcia preloopuje pole alebo objekt daný ako argument a zavolá funkciu a
@@ -647,7 +655,7 @@ G.find = function(queryString, parent){//testovane 28.1.2017
 
 	if(G.isString(queryString)){
 		var data = parent.querySelectorAll(queryString);
-		G.each(data, e => result.push(e));
+		G.each(data, e => result[result.length] = e);
 	}
 	else{
 		G.error("argument funkcie musí byť string a je ", queryString);
@@ -655,7 +663,6 @@ G.find = function(queryString, parent){//testovane 28.1.2017
 
 	return result;
 };
-
 
 /**
  * Funkcia vráti rodičovský element elementu na vstupe alebo null
@@ -668,31 +675,48 @@ G.parent = function(element){//testovane 28.1.2017
 		return element.parentElement;
 	}
 
-	G.error("argument funcie musí byť element a teraz je: ", element);
+	G.warn("argument funcie musí byť element a teraz je: ", element);
 	return null;
 };
 
 /**
- * Funkcia vráti rodičovský element elementu na vstupe alebo null
+ * Funkcia vráti rodičovské elementy elementu na vstupe alebo []
  *
  * @param element - element ktorému sa hladájú rodičovské elementy
  * @param condition = "" - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
+ * @param finish = "" - podmienka rodičovký element po ktorý sa má hladať
+ * @param limit = 0 - maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
  * @returns {Element[]} - rodičovské elementy alebo [] ak sa nenašiel žiadny rodič
  */
-G.parents = function(element, condition = "*"){//testovane 28.1.2017
-	var result = [];
-	if(!G.isString(condition) || G.isEmpty(condition)){
-		condition = "*";
-	}
-	if(G.isElement(element)){
-		while(element = element.parentElement){
-			if(element.matches(condition)){
-				result.push(element);
-			}
-		}
+G.parents = function(params){//testovane 28.1.2017
+	return G._iterate({
+		condition: G.isString(params.condition) ? params.condition : "",
+		finish: G.isString(params.finish) ? params.finish : "",
+		limit: G.isNumber(params.limit) ? params.limit : 0,
+		operation: e => e.parentElement,
+		element: params.element
+	});
+};
+
+G._iterate = function(params){
+	var result 	= [];
+
+	if(!G.isElement(params.element) || !G.isFunction(params.operation)){
 		return result;
 	}
-	return [];
+
+	while(params.element = params.operation(params.element)){
+		if(G.isEmpty(params.condition) || G.matches(params.element, params.condition)){
+			result[result.length] = params.element;
+			if(params.limit && result.length === params.limit){
+				break;
+			}
+			if(params.finish && G.matches(params.element, params.finish)){
+				break;
+			}
+		}
+	}
+	return result;
 };
 
 /**
@@ -728,6 +752,9 @@ G.text = function(element, text, append = false){
 	}
 	return element;
 };
+
+
+
 
 /**
  * Funkcia nastavý alebo pridá html obsah elementu
@@ -767,12 +794,17 @@ G.html = function(element, html, append = false){//testovane 29.1.2017
  * @param element
  * @returns {*}
  */
-G.next = function (element){//testovane 28.1.2017
-	if(G.isElement(element)){
-		return element.nextSibling;
+G.next = function (params){//testovane 28.1.2017
+	if(G.isElement(params)){
+		return params.nextElementSibling;
 	}
-	G.error("prvý argument musí byť element a je: ", element);
-	return null;
+	return G._iterate({
+		condition: G.isString(params.condition) ? params.condition : "",
+		finish: G.isString(params.finish) ? params.finish : "",
+		limit: G.isNumber(params.limit) ? params.limit : 0,
+		operation: e => e.nextElementSibling,
+		element: params.element
+	});
 };
 
 
@@ -781,12 +813,17 @@ G.next = function (element){//testovane 28.1.2017
  * @param element
  * @returns {*}
  */
-G.prev = function (element){//testovane 28.1.2017
-	if(G.isElement(element)){
-		return element.previousSibling;
+G.prev = function (params){//testovane 28.1.2017
+	if(G.isElement(params)){
+		return params.previousElementSibling;
 	}
-	G.error("prvý argument musí byť element a je: ", element);
-	return null;
+	return G._iterate({
+		condition: G.isString(params.condition) ? params.condition : "",
+		finish: G.isString(params.finish) ? params.finish : "",
+		limit: G.isNumber(params.limit) ? params.limit : 0,
+		operation: e => e.previousElementSibling,
+		element: params.element
+	});
 };
 
 
@@ -799,10 +836,6 @@ G.prev = function (element){//testovane 28.1.2017
  */
 
 G.childrens = function(element, condition = "*"){
-	return G.children(element, condition);
-}
-
-G.children = function(element, condition = "*"){//testovane 28.1.2017 //deprecated since 29.1.2017, poižiť G.childrens
 	if(!G.isString(condition) || G.isEmpty(condition)){
 		condition = "*";
 	}
@@ -811,8 +844,8 @@ G.children = function(element, condition = "*"){//testovane 28.1.2017 //deprecat
 		var data = element.children;
 		G.each(data, element => {
 			if(result.indexOf(element) < 0){//ak sa nenachádze medzi výsledkami
-				if(element.matches(condition)){
-					result.push(element);
+				if(G.matches(element, condition)){
+					result[result.length] = element;
 				}
 
 			}
@@ -822,6 +855,10 @@ G.children = function(element, condition = "*"){//testovane 28.1.2017 //deprecat
 		G.error("argument funcie musí byť element a teraz je: ", element);
 	}
 	return result;
+};
+
+G.children = function(element, condition = "*"){//testovane 28.1.2017 //deprecated since 29.1.2017, poižiť G.childrens
+	return G.childrens(element, condition);
 };
 
 
@@ -852,14 +889,26 @@ G.delete = function(element){
 
 G.prototype.is = function(selectorString){//testovane 28.1.2017
 	if(this.isEmpty()){
-		return null;
+		return false;
 	}
-	try {
-		return this.first().matches(selectorString);
-	}
-	catch(err) {
-		return null;
-	}
+
+	return G.matches(this.first(), selectorString);
+};
+
+G.prototype.not = function(selectorString){
+	return this.has(":not(" + selectorString + ")");
+}
+
+G.prototype.has = function(selectorString){
+	var result = new G();
+
+	this.each(function(){
+		if(G.matches(this, selectorString)){
+			result.add(this);
+		}
+	});
+
+	return result;
 };
 
 /**
@@ -871,7 +920,7 @@ G.prototype.is = function(selectorString){//testovane 28.1.2017
 G.prototype.add = function(){
 	G.each(arguments, (e, i) => {
 		if(G.isElement(e)){
-			this.element.push(e);
+			this.elements[this.elements.length] = e;
 		}
 		else if(G.isString(e)){
 			this.elements.push.apply(this, G.find(e));
@@ -1020,8 +1069,18 @@ G.prototype.toggleClass = function(className){
 /**
  *
  */
-G.prototype.parents = function(selectorString = "*"){//testovane 28.1.2017
-	return new G(G.parents(this.first(), selectorString));
+G.prototype.parents = function(selectorString = ""){//testovane 28.1.2017
+	return new G(G.parents({
+		element: this.first(), 
+		condition: selectorString
+	}));
+};
+
+G.prototype.parentsUntil = function(selectorString = ""){//testovane 28.1.2017
+	return new G(G.parents({
+		element: this.first(), 
+		finish: selectorString
+	}));
 };
 
 /**
@@ -1046,14 +1105,44 @@ G.prototype.next = function(){//testovane 29.1.2017
 	return new G(G.next(this.first()));
 };
 
+G.prototype.nextAll = function(selectorString = ""){//TODO otestovať
+	return new G(G.next({
+		element: this.first(),
+		condition: selectorString
+	}));
+};
+
+G.prototype.nextUntil = function(selectorString = ""){//TODO otestovať
+	return new G(G.next({
+		element: this.first(),
+		finish: selectorString
+	}));
+};
+
 G.prototype.prev = function(){//testovane 29.1.2017
 	return new G(G.prev(this.first()));
 };
 
-G.prototype.children = function(condition = "*"){//TODO otestovať - pridať možnosť filtrovať deti
-	return new G(G.children(this.first(), condition));
+G.prototype.prevAll = function(selectorString = ""){//TODO otestovať
+	return new G(G.prev({
+		element: this.first(),
+		condition: selectorString
+	}));
 };
 
+G.prototype.prevUntil = function(selectorString = ""){//TODO otestovať
+	return new G(G.prev({
+		element: this.first(),
+		finish: selectorString
+	}));
+};
+
+G.prototype.children = function(selectorString = ""){//deprecated 11.2.2017
+	return this.childrens(selectorString);
+};
+G.prototype.childrens = function(selectorString = ""){//TODO otestovať - pridať možnosť filtrovať deti
+	return new G(G.childrens(this.first(), selectorString));
+};
 /*************************************************************************************
  NEZARADENE FUNKCIE
  *************************************************************************************/
@@ -1070,7 +1159,7 @@ G.prototype.isEmpty = function(){//testovane 29.1.2017
 	return this.length() === 0;
 };
 
- G.prototype.each = function(func, ...args){//testovane 29.1.2017
+G.prototype.each = function(func, ...args){//testovane 29.1.2017
 	if(G.isFunction(func)){
 		G.each(this.elements, e => func.apply(e, args));
 	}
@@ -1215,7 +1304,7 @@ G.prototype.html = function(html){//testovane 26.1.2017 //testovane 29.1.2017
 	}
 
 	if(G.isUndefined(html)){
-		return  G.html(this.first());
+		return G.html(this.first());
 	}
 	if(G.isString(html)){
 		html[0] === "+" ? G.html(this.first(), html.substring(1), true) : G.html(this.first(), html);
@@ -1278,7 +1367,7 @@ G.prototype.class = function(name, force){//testovane 28.1.2017
 				return classes.contains(name);
 		}
 	}
-	return null;
+	return this;
 };
 
 
@@ -1392,14 +1481,14 @@ G.prototype.attr = function(){//testovane 29.1.2017
  */
 
 G._modifyListener = function(element, listener, func, type){//testovane 29.1.2017
-	var allowedListeners = ["click", "blur", "submit", "focus", "scroll", "keydown", "keyup", "dblclick"]
+	var allowedListeners = ["click", "blur", "submit", "focus", "scroll", "keydown", "keyup", "dblclick"];
 	if(G.isElement(element)){
 		if(G.isIn(listener, allowedListeners)){
 			if(G.isFunction(func)){
-				if(type === "unset"){
+				if(type === "unbind"){
 					element.removeEventListener(listener, func);
 				}
-				else if(type === "set"){
+				else if(type === "bind"){
 					element.addEventListener(listener, func);
 				}
 			}
@@ -1416,11 +1505,31 @@ G._modifyListener = function(element, listener, func, type){//testovane 29.1.201
 	}
 	return element;
 };
+
+G.prototype.undelegate = function(listener, func){//TODO otestovať
+	this.unbind(listener, func);
+};
+
+G.prototype.delegate = function(condition, listener, func){//TODO otestovať
+	if(G.isString(condition)){
+		this.bind(listener, (e) => {
+			if(G.matches(e.target, condition)){
+				func(e);
+			}
+		});
+	}
+	else{
+		G.warn("prví parameter musí byť string a teraz je ", G.typeof(condition));
+	}
+	return this;
+	
+};
+
 G.prototype.unbind = function(listener, func){//testovane 29.1.2017
 	if(this.isEmpty()){
 		return this;
 	}
-	G._modifyListener(this.first(), listener, func, "unset");
+	G._modifyListener(this.first(), listener, func, "unbind");
 	return this;
 };
 
@@ -1428,7 +1537,7 @@ G.prototype.bind = function(listener, func){//testovane 29.1.2017
 	if(this.isEmpty()){
 		return this;
 	}
-	G._modifyListener(this.first(), listener, func, "set");
+	G._modifyListener(this.first(), listener, func, "bind");
 	return this;
 };
 
@@ -1467,7 +1576,7 @@ G.left = function(element){//testovane 29.1.2017
 		left += element.offsetLeft || 0;
 		element = element.offsetParent;
 	} while(element);
-	return left
+	return left;
 };
 G.top = function(element){//testovane 29.1.2017
 	if(!G.isElement(element)){
@@ -1479,7 +1588,7 @@ G.top = function(element){//testovane 29.1.2017
 		top += element.offsetTop  || 0;
 		element = element.offsetParent;
 	} while(element);
-	return top
+	return top;
 };
 
 G.size = function(element, width = true, height = true){//testovane 29.1.2017
@@ -1490,8 +1599,8 @@ G.size = function(element, width = true, height = true){//testovane 29.1.2017
 	return {
 		width : element.offsetWidth,
 		height : element.offsetHeight
-	}
-}
+	};
+};
 
 G.width = function(element){//testovane 26.1.2017
 	if(!G.isElement(element)){
