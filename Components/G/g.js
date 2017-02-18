@@ -1313,7 +1313,7 @@ G.prototype.append = function(data){//testovane 28.1.2017 //testovane 29.1.2017
 	return this;
 };
 
-G.prototype.delay(func, delay = 0){
+G.prototype.delay = function(func, delay = 0){
 	setTimeout(func, delay);
 };
 
