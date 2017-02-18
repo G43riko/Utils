@@ -7,7 +7,8 @@
  * @constructor
  */
 var G = function(){
-	if(!(this instanceof G)){//ak sa nevolá ako konštruktor
+	//ak sa nevolá ako konštruktor
+	if(!(this instanceof G)){
 		var inst = Object.create(G.prototype);
 		G.apply(inst, arguments);
 		return inst;
@@ -38,10 +39,12 @@ var G = function(){
 		this.elements = [G.createElement(arguments[0], arguments[1].attr, arguments[1].cont, arguments[1].style)];
 	}
 
+	//ak nieje definované pole elementov upozorníme používatela a vytvoríme ho
 	if(G.isUndefined(this.elements)){
 		G.warn("nepodarilo sa rozpoznať argumenty: ", arguments);
 		this.elements = [];
 	}
+	//ak zoznam elementov nieje pole tak vytvoríme pole a upozorníme používatela
 	if(!G.isArray(this.elements)){
 		G.warn("elementy niesu pole ale " + G.typeOf(this.elements), arguments);
 		this.elements = [];
@@ -395,17 +398,10 @@ G.ajax = function(url, options, dataType){
  UTILITOVE FUNKCIE
  *************************************************************************************/
 
-G.byId = function(title){
-	return document.getElementById(title);
-};
-
-G.byClass = function(title){
-	return document.getElementsByClassName(title);
-};
-
-G.byName = function(title){
-	return document.getElementsByName(title);
-};
+G.byClass 	= title => document.getElementsByClassName(title);
+G.byName 	= title => document.getElementsByName(title);
+G.byTag 	= title => document.getElementsByTagName(title);
+G.byId 		= title => document.getElementById(title);
 
 G.hasClass = function(element, className){
 	if(G.isElement(element) && G.isString(className)){
@@ -415,9 +411,6 @@ G.hasClass = function(element, className){
 	return false;
 };
 
-G.byTag = function(title){
-	return document.getElementsByTagName(title);
-};
 /**
  * Funkcie spracuje chybové hlášky
  * @param arguments
@@ -457,7 +450,8 @@ G.log = function(){
  */
 G.createElement = function(name, attr, cont, style){
 	var el;
-	//NAME
+
+	//ak je prvý parameter objekt tak zavoláme rekurzívne túto funkciu s hodnotami objektu
 	if(G.isObject(name)){
 		if(G.isString(name.name)){
 			G.createElement(name.name, name.attr || {}, name.cont || "", name.style || {});
@@ -466,21 +460,24 @@ G.createElement = function(name, attr, cont, style){
 			return G.error("prví parameter funkcie[Object] musí obsahovať name[String] ale ten je: ", name.name);
 		}
 	}
+
+	//Vytvoríme element podla názvu
 	if(G.isString(name)){
 		el = document.createElement(name);
 	}
 	else{
 		return G.error("prvý parameter(nazov elementu) musí byť string a je: ", name);
 	}
-	//ATTRIBUTES
+	//Ak sú atributy objekt tak priradíme elementu všetky atribúty
 	if(G.isObject(attr)){
 		G.each(attr, (e, i) => el.setAttribute(i, e));
 	}
-	//STYLES
+	//Ak sú štýly objekt tak priradíme elementu všetky štýly
 	if(G.isObject(style)){
 		G.each(style, (e, i) => el.style[i] = e);
 	}
-	//CONTENT
+
+	//Priradíme elementu obsah
 	if(G.isString(cont)){
 		G.html(el, cont);
 	}
@@ -522,7 +519,10 @@ G.isElement = obj => {
 		return obj instanceof HTMLElement;
 	}
 	catch(e){
-		return G.isObject(obj) && obj.nodeType === 1 && G.isObject(obj.style) && G.isObject(obj.ownerDocument);
+		return G.isObject(obj) && 
+			   obj.nodeType === 1 && 
+			   G.isObject(obj.style) && 
+			   G.isObject(obj.ownerDocument);
 	}
 };
 
@@ -573,14 +573,23 @@ G.isIn = function(obj, data){//testovane 8.1.2017
  };
  
  G.matches = function(element, queryString){
- 	if(G.isElement(element) && G.isString(queryString)){
- 		try{
- 			return element.matches(queryString);
- 		}
- 		catch(err){
- 			G.error(err);
- 		}
+ 	/*
+ 	//ak prvý parameter nieje element vráti false
+ 	if(!G.isElement(element)){
+ 		return false;
  	}
+ 	//ak druhý parameter nieje string vráti false
+ 	if(!G.isString(queryString)){
+ 		return false;
+ 	}
+	*/
+ 	//porovnám či element vyhovuje selectoru
+	try{
+		return element.matches(queryString);
+	}
+	catch(err){
+		G.error(err);
+	}
  	return false;
  };
 
@@ -690,11 +699,11 @@ G.parent = function(element){//testovane 28.1.2017
  */
 G.parents = function(params){//testovane 28.1.2017
 	return G._iterate({
-		condition: G.isString(params.condition) ? params.condition : "",
-		finish: G.isString(params.finish) ? params.finish : "",
-		limit: G.isNumber(params.limit) ? params.limit : 0,
-		operation: e => e.parentElement,
-		element: params.element
+		condition: 	G.isString(params.condition) ? params.condition : "",
+		finish: 	G.isString(params.finish) ? params.finish : "",
+		limit: 		G.isNumber(params.limit) ? params.limit : 0,
+		operation: 	e => e.parentElement,
+		element: 	params.element
 	});
 };
 
@@ -799,11 +808,11 @@ G.next = function (params){//testovane 28.1.2017
 		return params.nextElementSibling;
 	}
 	return G._iterate({
-		condition: G.isString(params.condition) ? params.condition : "",
-		finish: G.isString(params.finish) ? params.finish : "",
-		limit: G.isNumber(params.limit) ? params.limit : 0,
-		operation: e => e.nextElementSibling,
-		element: params.element
+		condition: 	G.isString(params.condition) ? params.condition : "",
+		finish: 	G.isString(params.finish) ? params.finish : "",
+		limit: 		G.isNumber(params.limit) ? params.limit : 0,
+		operation: 	e => e.nextElementSibling,
+		element: 	params.element
 	});
 };
 
@@ -818,11 +827,11 @@ G.prev = function (params){//testovane 28.1.2017
 		return params.previousElementSibling;
 	}
 	return G._iterate({
-		condition: G.isString(params.condition) ? params.condition : "",
-		finish: G.isString(params.finish) ? params.finish : "",
-		limit: G.isNumber(params.limit) ? params.limit : 0,
-		operation: e => e.previousElementSibling,
-		element: params.element
+		condition: 	G.isString(params.condition) ? params.condition : "",
+		finish: 	G.isString(params.finish) ? params.finish : "",
+		limit: 		G.isNumber(params.limit) ? params.limit : 0,
+		operation: 	e => e.previousElementSibling,
+		element: 	params.element
 	});
 };
 
@@ -868,12 +877,20 @@ G.children = function(element, condition = "*"){//testovane 28.1.2017 //deprecat
  * @param element - element ktorý sa má vymazať
  */
 G.delete = function(element){
+	try{
+		element.parentElement.removeChild(element);
+	}
+	catch(err){
+		G.error("pri mazaní nastala chyba: ", err);
+	}
+	/*
 	if(G.isElement(element)){
 		element.parentElement.removeChild(element);
 	}
 	else{
 		G.error("argument funcie musí byť element a teraz je: ", element);
 	}
+	*/
 };
 
 /*************************************************************************************
@@ -954,7 +971,7 @@ G.prototype.remove = function(){//TODO otestovať
 
 
 /**
- * Funckia vyprázdni obsah G elementy
+ * Funckia vyprázdni obsah G elementu
  * @returns {G}
  */
 G.prototype.clear = function(){
@@ -962,7 +979,38 @@ G.prototype.clear = function(){
 	return this;
 };
 
-//equalAll
+/**
+ * Funckia porovná 2 G elementy či majú všetky prvky rovnaké
+ *
+ * @param obj - G element s ktorým sa má porovnať
+ * @returns {boolean}
+ */
+G.prototype.equalAll = function(obj){
+	//ak parameter nieje G element tak vráti false
+	if(!G.isG(obj)){
+		return false;
+	}
+
+	//ak nesedia dĺžky tak vráti false
+	if(obj.length() !== this.length()){
+		return false;
+	}
+
+	//ak sa nejaký element nenachádza v druhom elemente tak vráti false
+	each(this.elements, e => {
+		if(obj.elements.indexOf(e) < 0){
+			return false;
+		}
+	});
+	//ak sa nejaký element nenachádza v tomto element tak vráti false
+	each(obj.elements, e => {
+		if(this.elements.indexOf(e) < 0){
+			return false;
+		}
+	});
+	//ak všetko úspešne skontrolovalo tak vráti true
+	return true;
+}
 
 /**
  *
@@ -1265,6 +1313,10 @@ G.prototype.append = function(data){//testovane 28.1.2017 //testovane 29.1.2017
 	return this;
 };
 
+G.prototype.delay(func, delay = 0){
+	setTimeout(func, delay);
+};
+
 //TODO after
 //TODO before
 
@@ -1299,14 +1351,16 @@ G.prototype.text = function(text, append = false){//testovane 29.1.2017
  * @returns {*}
  */
 G.prototype.html = function(html){//testovane 26.1.2017 //testovane 29.1.2017
+	//ak je G element prázdny tak vráti G objekt
 	if(this.isEmpty()){
 		return this;
 	}
 
+	//ak nieje zadaný parameter tak sa vráti HTML prvého elementu 
 	if(G.isUndefined(html)){
 		return G.html(this.first());
 	}
-	if(G.isString(html)){
+	else if(G.isString(html)){
 		html[0] === "+" ? G.html(this.first(), html.substring(1), true) : G.html(this.first(), html);
 	}
 	else if(G.isElement(html)){
