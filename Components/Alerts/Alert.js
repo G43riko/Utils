@@ -1,7 +1,7 @@
 
-"use strict"
+"use strict";
 
-var Alert = {
+let Alert = {
 	_closeParent: function(el){
 		el.parentElement.style.opacity = 0;
 		setTimeout(() => {
@@ -14,21 +14,23 @@ var Alert = {
 	danger: (text, time = 5000) => Alert._showAlert(text, "danger", time),
 	info: (text, time = 5000) => Alert._showAlert(text, "info", time),
 	_showAlert: function(text, type = "success", time){
-		var createElement = function(name, params, text){
-			var el = document.createElement(name);
+		let createElement = function(name, params, text){
+            let el = document.createElement(name);
 			if(typeof params === "object"){
-				for(var i in params){
-					el.setAttribute(i, params[i]);
+				for(let i in params){
+					if(params.hasOwnProperty(i)){
+						el.setAttribute(i, params[i]);
+                    }
 				}
 			}
 			typeof text === "string" && el.appendChild(document.createTextNode(text));
 			return el;
-		}
-		var div = createElement("div",{class: "alert alert-" + type});
-		var a = createElement("a", {
+		};
+		let div = createElement("div",{class: "alert alert-" + type});
+        let a = createElement("a", {
 			onclick: "Alert.removeEvent(event)",
 			class: "close"
-		}, "×")
+		}, "×");
 
 		switch(type){
 			case "success":
@@ -62,4 +64,4 @@ var Alert = {
 		Alert._showAlert("infoš", "info");
 		Alert._showAlert("dangeroš", "danger");
 	}
-}
+};

@@ -6,10 +6,17 @@
  * @param args - argumenty funkcie
  * @constructor
  */
-var G = function(){
+
+/**
+ * Konštruktor G objektu
+ *
+ * @returns {G}
+ * @constructor
+ */
+let G = function(){
 	//ak sa nevolá ako konštruktor
 	if(!(this instanceof G)){
-		var inst = Object.create(G.prototype);
+		let inst = Object.create(G.prototype);
 		G.apply(inst, arguments);
 		return inst;
 	}
@@ -53,8 +60,8 @@ var G = function(){
 };
 
 
-var tests = function(G){
-	var body = new G(document.body);
+let tests = function(G){
+    let body = new G(document.body);
 
 	body.append(G.createElement("div", {id: "idecko"}, "id"));
 	body.append(G.createElement("div", {class: "classa"}, "id"));
@@ -90,16 +97,16 @@ var tests = function(G){
 		},
 		cont: "toto je classsa"
 	}));
-	var elementP = document.createElement("p");
+    let elementP = document.createElement("p");
 	elementP.appendChild(document.createTextNode("juhuuu toto je paragraf"));
 	body.append(elementP);
 	if(body.children().length() !== 3){
 		G.warn("dlžka objektu s 2 detmi je: " + body.children().length());
 	}
 
-	var idecko = new G("#idecko");
-	var clasa = new G(".clasa");
-	var par = new G("p");
+    let idecko = new G("#idecko");
+    let clasa = new G(".clasa");
+    let par = new G("p");
 
 	/*
 	 * constructor()
@@ -155,11 +162,11 @@ var tests = function(G){
 	 * extends
 	 */
 
-	var a = {a: "aa"};
-	var b = {b: "bb", c: "cc"};
-	var c = {a: "aaa", c: "cccc"};
+    let a = {a: "aa"};
+    let b = {b: "bb", c: "cc"};
+    let c = {a: "aaa", c: "cccc"};
 
-	var res = G.extend({}, a, b, c);
+    let res = G.extend({}, a, b, c);
 
 	if(res.a !== "aaa" || res.b !== "bb" || res.c !== "cccc"){
 		G.error("nefunguje extendse pretože po zlučenie", a, b, c, " vzniklo: ", res, "a malo vzniknut: ", {a: "aaa", b: "bb", c: "cccc"});
@@ -232,7 +239,7 @@ var tests = function(G){
 	body.append(G.createElement("input", {type: "button", id: "resultButton", value: "klikni"}));
 
 
-	var clickFunction = function(){
+    let clickFunction = function(){
 		G("#resultSpan").text("kuriatko");
 	};
 
@@ -255,7 +262,7 @@ var tests = function(G){
 	/*
 	 * APPEND
 	 */
-	var parent = new G("div", {attr: {id :"parentElement"}});
+    let parent = new G("div", {attr: {id :"parentElement"}});
 	parent.append("<li>a</li>");
 	parent.append(new G("li", {cont: "b"}));
 	parent.append(G.createElement("li", {}, "c"));
@@ -294,7 +301,7 @@ var tests = function(G){
 
 	//ADD
 
-	var data = new G();
+    let data = new G();
 	data.add(G.createElement("span", {class: "pes macka"}, "volačo"));
 	data.add(G.createElement("div", {class: "pes kura"}, "niečo iné"));
 	data.add(G.createElement("p", {class: "macka kura"}, "niečo zasa iné"));
@@ -319,14 +326,14 @@ var tests = function(G){
  * @returns {*}
  */
 G.ajax = function(url, options, dataType){
-	var start = 0;
+    let start = 0;
 	/*
 	if(!window.XMLHttpRequest){
 		G.error("Lutujeme ale váš prehliadaš nepodporuje AJAX");
 		return false;
 	}
 	*/
-	var http = window.XMLHttpRequest ?  new XMLHttpRequest() :  new ActiveXObject("Microsoft.XMLHTTP");
+    let http = window.XMLHttpRequest ?  new XMLHttpRequest() :  new ActiveXObject("Microsoft.XMLHTTP");
 
 	if(G.isFunction(options)){
 		options = {success: options};
@@ -395,8 +402,15 @@ G.ajax = function(url, options, dataType){
 	return http;
 };
 
+/**
+ * Funkcia načíta a spustí externý Script
+ *
+ * @param src
+ * @param async
+ * @returns {Element|*}
+ */
 G.loadScript = function(src, async) {
-    var script, tag;
+    let script, tag;
 
 	if(!G.isBool(async)){
 		async = false;
@@ -421,6 +435,13 @@ G.byName 	= title => document.getElementsByName(title);
 G.byTag 	= title => document.getElementsByTagName(title);
 G.byId 		= title => document.getElementById(title);
 
+/**
+ * Funkcia zistí či element má danú triedu
+ *
+ * @param element
+ * @param className
+ * @returns {boolean}
+ */
 G.hasClass = function(element, className){
 	if(G.isElement(element) && G.isString(className)){
 		return element.classList.contains(className);
@@ -467,7 +488,7 @@ G.log = function(){
  * @returns {Element} - novo vytvorený element
  */
 G.createElement = function(name, attr, cont, style){
-	var el;
+    let el;
 
 	//ak je prvý parameter objekt tak zavoláme rekurzívne túto funkciu s hodnotami objektu
 	if(G.isObject(name)){
@@ -551,7 +572,7 @@ G.isElement = obj => {
  * Funkcia vráti posledný prvok pola ak existuje alebo undefined
  *
  * @param arr - pole ktorého posledný prvok potrebujeme
- * @returns object - posledný prvok alebo undefined
+ * @returns {*} - posledný prvok alebo undefined
  */
 G.last = function(arr){
 	if(!G.isArray(arr)){
@@ -579,7 +600,7 @@ G.isIn = function(obj, data){//testovane 8.1.2017
 		}
 	}
 	else{
-		for(var i=1 ; i<arguments.length ; i++){
+		for(let i=1 ; i<arguments.length ; i++){
 			if(arguments[i] === obj){
 				return true;
 			}
@@ -590,8 +611,11 @@ G.isIn = function(obj, data){//testovane 8.1.2017
 
 /**
  * Funkcia zlúči objekty na vstupe do jedného (prvého) objektu
- *
  * G.extend({a: "aa", b: "bb"}, {c: "cc", a: "aaa"}, {c: "ccc"}) => Object {a: "aaa", b: "bb", c: "ccc"}
+ *
+ * @param target
+ * @param args
+ * @returns {*}
  */
  G.extend = function(target, ... args){
 	 if(G.isObject(target)){
@@ -609,7 +633,14 @@ G.isIn = function(obj, data){//testovane 8.1.2017
 	 }
 	 return target;
  };
- 
+
+/**
+ * Funkcia zistí či element spĺňa daný selector
+ *
+ * @param element
+ * @param queryString
+ * @returns {*}
+ */
  G.matches = function(element, queryString){
  	/*
  	//ak prvý parameter nieje element vráti false
@@ -641,7 +672,7 @@ G.isIn = function(obj, data){//testovane 8.1.2017
  * @param thisArg - objekt ktorý má byť dosadený sa this premennú
  */
 G.each = function(obj, func, thisArg){
-	var i;
+    let i;
 	if(G.isObject(obj) && G.isFunction(func)){
 		if(G.isArray(obj)){
 			if(G.isObject(thisArg)){
@@ -694,14 +725,14 @@ G.each = function(obj, func, thisArg){
  * @returns {Array} - pole nájdených výsledkov
  */
 G.find = function(queryString, parent){//testovane 28.1.2017
-	var result = [];
+    let result = [];
 
 	if(!G.isElement(parent)){
 		parent = document;
 	}
 
 	if(G.isString(queryString)){
-		var data = parent.querySelectorAll(queryString);
+        let data = parent.querySelectorAll(queryString);
 		G.each(data, e => result[result.length] = e);
 	}
 	else{
@@ -729,10 +760,10 @@ G.parent = function(element){//testovane 28.1.2017
 /**
  * Funkcia vráti rodičovské elementy elementu na vstupe alebo []
  *
- * @param element - element ktorému sa hladájú rodičovské elementy
- * @param condition = "" - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
- * @param finish = "" - podmienka rodičovký element po ktorý sa má hladať
- * @param limit = 0 - maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
+ * @param params.element - element ktorému sa hladájú rodičovské elementy
+ * @param params.condition = "" - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
+ * @param params.finish = "" - podmienka rodičovký element po ktorý sa má hladať
+ * @param params.limit = 0 - maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
  * @returns {Element[]} - rodičovské elementy alebo [] ak sa nenašiel žiadny rodič
  */
 G.parents = function(params){//testovane 28.1.2017
@@ -745,8 +776,19 @@ G.parents = function(params){//testovane 28.1.2017
 	});
 };
 
+/**
+ * Funkcia preiteruje všetky elementy a vráti ich zoznam
+ *
+ * @param params.operation = operácia ktorou s získa další element
+ * @param params.element - element ktorému sa hladájú rodičovské elementy
+ * @param params.condition = "" - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
+ * @param params.finish = "" - podmienka rodičovký element po ktorý sa má hladať
+ * @param params.limit = 0 - maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
+ * @returns {Element[]} - rodičovské elementy alebo [] ak sa nenašiel žiadny rodič
+ * @private
+ */
 G._iterate = function(params){
-	var result 	= [];
+	let result 	= [];
 
 	if(!G.isElement(params.element) || !G.isFunction(params.operation)){
 		return result;
@@ -776,8 +818,6 @@ G._iterate = function(params){
  * @param append = false
  * @returns {*}
  */
-
-
 G.text = function(element, text, append = false){
 	if(G.isElement(element)){
 		if(G.isUndefined(text)){
@@ -837,7 +877,7 @@ G.html = function(element, html, append = false){//testovane 29.1.2017
 
 /**
  * Funkcia vráti dalšieho surodenca elementu
- * @param element
+ * @param params
  * @returns {*}
  */
 G.next = function (params){//testovane 28.1.2017
@@ -856,7 +896,8 @@ G.next = function (params){//testovane 28.1.2017
 
 /**
  * Funkcia vráti predchádzajúceho súrodenca elementu
- * @param element
+ *
+ * @param params
  * @returns {*}
  */
 G.prev = function (params){//testovane 28.1.2017
@@ -885,9 +926,9 @@ G.childrens = function(element, condition = "*"){
 	if(!G.isString(condition) || G.isEmpty(condition)){
 		condition = "*";
 	}
-	var result = [];
+	let result = [];
 	if(G.isElement(element)){
-		var data = element.children;
+        let data = element.children;
 		G.each(data, element => {
 			if(result.indexOf(element) < 0){//ak sa nenachádze medzi výsledkami
 				if(G.matches(element, condition)){
@@ -952,7 +993,7 @@ G.prototype.is = function(selectorString){//testovane 28.1.2017
  * Funckia zistí či sa selector zadaný ako parameter nezhoduje s elementom
  *
  * @param selectorString - paramter ktorý sa negovaný porovná s elementom
- * @returns boolean - či objekt spĺna podmienku
+ * @returns {G} - či objekt spĺna podmienku
  */
 G.prototype.not = function(selectorString){
 	return this.has(":not(" + selectorString + ")");
@@ -966,7 +1007,7 @@ G.prototype.not = function(selectorString){
  * @returns {G} - G objekt
  */
 G.prototype.has = function(selectorString){
-	var result = new G();
+    let result = new G();
 
 	this.each(function(){
 		if(G.matches(this, selectorString)){
@@ -1006,7 +1047,7 @@ G.prototype.add = function(){
  * @returns {G}
  */
 G.prototype.remove = function(){//TODO otestovať
-	var index;
+	let index;
 	G.each(arguments, e => {
 		if(G.isElement(e)){
 			index = this.elements.indexOf(e);
@@ -1070,7 +1111,7 @@ G.prototype.equalAll = function(obj){
  */
 G.prototype.contains = function(element){//TODO otestovať
 	if(G.isElement){
-		for(var i=0 ; i<this.element.length ; i++){
+		for(let i=0 ; i<this.element.length ; i++){
 			if(this.element[i] === element){
 				return true;
 			}
@@ -1167,7 +1208,10 @@ G.prototype.toggleClass = function(className){
  *************************************************************************************/
 
 /**
+ * Funkcia vráti všetkých rodičov elementu ktorý spĺňajú selector v argumente
  *
+ * @param selectorString = ""
+ * @returns {G}
  */
 G.prototype.parents = function(selectorString = ""){//testovane 28.1.2017
 	return new G(G.parents({
@@ -1176,6 +1220,11 @@ G.prototype.parents = function(selectorString = ""){//testovane 28.1.2017
 	}));
 };
 
+/**
+ * Funkcia vráti všetkych rodičov až kým neobjaví rodiča ktorý spĺňa selector v argumente
+ * @param selectorString
+ * @returns {G}
+ */
 G.prototype.parentsUntil = function(selectorString = ""){//testovane 28.1.2017
 	return new G(G.parents({
 		element: this.first(), 
@@ -1184,8 +1233,9 @@ G.prototype.parentsUntil = function(selectorString = ""){//testovane 28.1.2017
 };
 
 /**
- *
- *
+ * Funkcia vyhladá v element všetky elementy spĺnajúce selector a vráti ich v novom G objekte
+ * @param selectorString
+ * @returns {G}
  */
 G.prototype.find = function(selectorString){//testovane 28.1.2017
 	return new G(G.find(selectorString, this.first()));
@@ -1201,10 +1251,19 @@ G.prototype.parent = function(){//testovane 29.1.2017
 	return new G(G.parent(this.first()));
 };
 
+/**
+ *
+ * @returns {G}
+ */
 G.prototype.next = function(){//testovane 29.1.2017
 	return new G(G.next(this.first()));
 };
 
+/**
+ *
+ * @param selectorString
+ * @returns {G}
+ */
 G.prototype.nextAll = function(selectorString = ""){//TODO otestovať
 	return new G(G.next({
 		element: this.first(),
@@ -1212,6 +1271,11 @@ G.prototype.nextAll = function(selectorString = ""){//TODO otestovať
 	}));
 };
 
+/**
+ *
+ * @param selectorString
+ * @returns {G}
+ */
 G.prototype.nextUntil = function(selectorString = ""){//TODO otestovať
 	return new G(G.next({
 		element: this.first(),
@@ -1219,10 +1283,19 @@ G.prototype.nextUntil = function(selectorString = ""){//TODO otestovať
 	}));
 };
 
+/**
+ *
+ * @returns {G}
+ */
 G.prototype.prev = function(){//testovane 29.1.2017
 	return new G(G.prev(this.first()));
 };
 
+/**
+ *
+ * @param selectorString
+ * @returns {G}
+ */
 G.prototype.prevAll = function(selectorString = ""){//TODO otestovať
 	return new G(G.prev({
 		element: this.first(),
@@ -1230,6 +1303,11 @@ G.prototype.prevAll = function(selectorString = ""){//TODO otestovať
 	}));
 };
 
+/**
+ *
+ * @param selectorString
+ * @returns {G}
+ */
 G.prototype.prevUntil = function(selectorString = ""){//TODO otestovať
 	return new G(G.prev({
 		element: this.first(),
@@ -1237,9 +1315,19 @@ G.prototype.prevUntil = function(selectorString = ""){//TODO otestovať
 	}));
 };
 
+/**
+ *
+ * @param selectorString
+ */
 G.prototype.children = function(selectorString = ""){//deprecated 11.2.2017
 	return this.childrens(selectorString);
 };
+
+/**
+ *
+ * @param selectorString
+ * @returns {G}
+ */
 G.prototype.childrens = function(selectorString = ""){//TODO otestovať - pridať možnosť filtrovať deti
 	return new G(G.childrens(this.first(), selectorString));
 };
@@ -1274,18 +1362,22 @@ G.prototype.each = function(func, ...args){//testovane 29.1.2017
 /*************************************************************************************
  HTML/CSS FUNKCIE
  *************************************************************************************/
-
-
 /**
  * Funkcia zmaže všetky objekty uložené v G objekte
+ *
+ * @returns {G}
  */
-
 G.prototype.deleteAll = function(){
 	G.each(this.elements, e => G.delete(e));
 	this.elements = [];
 	return this;
 };
 
+/**
+ *
+ * @param data
+ * @returns {G}
+ */
 G.prototype.prependTo = function(data){//TODO otestovať
 	if(this.isEmpty()){
 		return this;
@@ -1303,6 +1395,11 @@ G.prototype.prependTo = function(data){//TODO otestovať
 	return this;
 };
 
+/**
+ *
+ * @param data
+ * @returns {G}
+ */
 G.prototype.appendTo = function(data){//testovane 28.1.2017
 	if(this.isEmpty()){
 		return this;
@@ -1321,6 +1418,11 @@ G.prototype.appendTo = function(data){//testovane 28.1.2017
 	return this;
 };
 
+/**
+ *
+ * @param data
+ * @returns {G}
+ */
 G.prototype.prepend = function(data){//testovane 29.1.2017
 	if(this.isEmpty()){
 		return this;
@@ -1365,6 +1467,12 @@ G.prototype.append = function(data){//testovane 28.1.2017 //testovane 29.1.2017
 	return this;
 };
 
+/**
+ *
+ * @param func
+ * @param delay
+ * @returns {G}
+ */
 G.prototype.delay = function(func, delay = 0){
 	setTimeout(func, delay);
 	return this;
@@ -1393,6 +1501,9 @@ G.prototype.text = function(text, append = false){//testovane 29.1.2017
 
 	if(text[0] === "+"){
 		G.text(this.first(), text.substring(1), true);
+	}
+	else if(append){
+        G.text(this.first(), text, true);
 	}
 	else{
 		G.text(this.first(), text);
@@ -1464,7 +1575,7 @@ G.prototype.class = function(name, force){//testovane 28.1.2017
 	if(this.isEmpty()){
 		return this;
 	}
-	var classes = this.first().classList;
+	let classes = this.first().classList;
 	if(G.isArray(name)){
 		G.each(name, (e) => this.class(e));
 	}
@@ -1509,8 +1620,8 @@ G.prototype.css = function(){//testovane 29.1.2017
 	}
 	//ak je 0 argumentov vráti objekt z CSS štýlmi
 	if(arguments.length === 0){
-		var result = {};
-		var css = window.getComputedStyle(this.first());
+        let result = {};
+        let css = window.getComputedStyle(this.first());
 		G.each(css, e => {
 			if(css.getPropertyValue(e) !== ""){
 				result[e] = css.getPropertyValue(e);
@@ -1562,7 +1673,7 @@ G.prototype.attr = function(){//testovane 29.1.2017
 
 	//ak je 0 argumentov vráti objekt z atribútmi
 	if(arguments.length === 0){
-		var result = {};
+        let result = {};
 		G.each(this.first().attributes, e => {
 			result[e.nodeName] = e.nodeValue;
 		});
@@ -1602,8 +1713,18 @@ G.prototype.attr = function(){//testovane 29.1.2017
  * LISTENERS
  */
 
+/**
+ * Funkcia upravý listener na elemente
+ *
+ * @param element
+ * @param listener
+ * @param func
+ * @param type
+ * @returns {*}
+ * @private
+ */
 G._modifyListener = function(element, listener, func, type){//testovane 29.1.2017
-	var allowedListeners = ["click", "blur", "submit", "focus", "scroll", "keydown", "keyup", "dblclick"];
+    let allowedListeners = ["click", "blur", "submit", "focus", "scroll", "keydown", "keyup", "dblclick"];
 	if(G.isElement(element)){
 		if(G.isIn(listener, allowedListeners)){
 			if(G.isFunction(func)){
@@ -1628,10 +1749,24 @@ G._modifyListener = function(element, listener, func, type){//testovane 29.1.201
 	return element;
 };
 
+/**
+ * Funkcia odbindne listener z elementu
+ *
+ * @param listener
+ * @param func
+ */
 G.prototype.undelegate = function(listener, func){//TODO otestovať
 	this.unbind(listener, func);
 };
 
+/**
+ * Funkcia bindne k elementu listener na počúvanie udalosti u všetkých deťoch
+ *
+ * @param condition - selector ktorým vyberie deti pri ktorých sa má zavolať funkcia
+ * @param listener - typ listeneru
+ * @param func - funlcia
+ * @returns {G}
+ */
 G.prototype.delegate = function(condition, listener, func){//TODO otestovať
 	if(G.isString(condition)){
 		this.bind(listener, (e) => {
@@ -1647,6 +1782,13 @@ G.prototype.delegate = function(condition, listener, func){//TODO otestovať
 	
 };
 
+/**
+ * Funkcia odbindne listener z elementu
+ *
+ * @param listener
+ * @param func
+ * @returns {G}
+ */
 G.prototype.unbind = function(listener, func){//testovane 29.1.2017
 	if(this.isEmpty()){
 		return this;
@@ -1655,6 +1797,13 @@ G.prototype.unbind = function(listener, func){//testovane 29.1.2017
 	return this;
 };
 
+/**
+ * Funkcia binde k elementu listener na zavolanie funkcie
+ *
+ * @param listener - typ listeneru o aký sa jedná
+ * @param func - funkcia ktorá sa má udiať pri udalosti
+ * @returns {G}
+ */
 G.prototype.bind = function(listener, func){//testovane 29.1.2017
 	if(this.isEmpty()){
 		return this;
@@ -1672,12 +1821,18 @@ G.prototype.scroll = function(func){return this.bind("scroll", func);};
 G.prototype.keydown = function(func){return this.bind("keydown", func);};
 G.prototype.dblclick = function(func){return this.bind("dblclick", func);};
 
+/**
+ * Funkcia vráti relatívnu pozícii elementu vzhladom k lavému hornému okraju stránky
+ *
+ * @param element
+ * @returns {*}
+ */
 G.position = function(element){//testovane 29.1.2017
 	if(!G.isElement(element)){
 		G.warn("argument musí byť element");
 		return null;
 	}
-	var top = 0, left = 0;
+    let top = 0, left = 0;
 	do {
 		top  += element.offsetTop  || 0;
 		left += element.offsetLeft || 0;
@@ -1689,12 +1844,17 @@ G.position = function(element){//testovane 29.1.2017
 	};
 };
 
+/**
+ * Funkcia vráti počet pixelov od lavého okraja stránky
+ * @param element
+ * @returns {number}
+ */
 G.left = function(element){//testovane 29.1.2017
 	if(!G.isElement(element)){
 		G.warn("argument musí byť element");
 		return 0;
 	}
-	var left = 0;
+    let left = 0;
 	do {
 		left += element.offsetLeft || 0;
 		element = element.offsetParent;
@@ -1702,12 +1862,18 @@ G.left = function(element){//testovane 29.1.2017
 	return left;
 };
 
+/**
+ * Funckia vráti počet pixelov od vrchu stránky
+ *
+ * @param element
+ * @returns {number}
+ */
 G.top = function(element){//testovane 29.1.2017
 	if(!G.isElement(element)){
 		G.warn("argument musí byť element");
 		return 0;
 	}
-	var top = 0;
+    let top = 0;
 	do {
 		top += element.offsetTop  || 0;
 		element = element.offsetParent;
@@ -1715,7 +1881,13 @@ G.top = function(element){//testovane 29.1.2017
 	return top;
 };
 
-G.size = function(element, width = true, height = true){//testovane 29.1.2017
+/**
+ * Funckia vráti velkosť elementu
+ *
+ * @param element
+ * @returns {*}
+ */
+G.size = function(element){//testovane 29.1.2017
 	if(!G.isElement(element)){
 		G.warn("argument musí byť element");
 		return null;
@@ -1726,6 +1898,12 @@ G.size = function(element, width = true, height = true){//testovane 29.1.2017
 	};
 };
 
+/**
+ * Funkcia vráti šírku elementu
+ *
+ * @param element
+ * @returns {number}
+ */
 G.width = function(element){//testovane 26.1.2017
 	if(!G.isElement(element)){
 		G.warn("argument musí byť element");
@@ -1734,6 +1912,12 @@ G.width = function(element){//testovane 26.1.2017
 	return element.offsetWidth;
 };
 
+/**
+ * Funkcia vráti výšku elementu
+ *
+ * @param element
+ * @returns {number}
+ */
 G.height = function(element){//testovane 26.1.2017
 	if(!G.isElement(element)){
 		G.warn("argument musí byť element");
