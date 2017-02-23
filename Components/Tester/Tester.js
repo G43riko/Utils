@@ -1,11 +1,11 @@
-var colors = require('colors');
+let colors = require('colors');
 
 exports.Tester = function(){
 	this._tests = {};
 	this._testCounter = 0;
 	this.getTestNumber = function(){
 		return this._testCounter;
-	},
+	};
 	/**
 	 * Pridá argumenty do už exisujúceho testu
 	 *
@@ -14,7 +14,7 @@ exports.Tester = function(){
 		if(!type){
 			type = "eq";
 		}
-		var test = this._tests[title];
+		let test = this._tests[title];
 		if(!test){
 			alert("test " + title + " ešte neexistuje");
 			return;
@@ -49,7 +49,7 @@ exports.Tester = function(){
 			case "le":
 				return targetRes >= result;
 			case "ok":
-				return result ? true : false;
+				return !!result;
 			case "true":
 				return targetRes === result;
 			case "false":
@@ -75,7 +75,7 @@ exports.Tester = function(){
 			case "finite":
 				return isFinite(result);
 			case "members":
-				for(var i in result){
+				for(let i in result){
 					if(result.hasOwnProperty(i) && typeof targetRes[i] === "undefined"){
 						return false;
 					}
@@ -83,7 +83,7 @@ exports.Tester = function(){
 				return true;
 			default:
 				return targetRes === result;
-		};
+		}
 	};
 
 	/**
@@ -108,8 +108,6 @@ exports.Tester = function(){
 			undefined: () => this._addArgs(title, args, undefined, "undefined"),
 			null: () => this._addArgs(title, args, null, "null"),
 			NaN: () => this._addArgs(title, args, NaN, "NaN"),
-			//??
-			exist: () => this._addArgs(title, args, "", "exist"),
 			//string, pole, objekt
 			empty: () => this._addArgs(title, args, "", "empty"),
 			//lubovolne argumenty
@@ -129,7 +127,7 @@ exports.Tester = function(){
 			//lubovolne argumenty
 			finite: () => this._addArgs(title, args, "", "finite")
 		}
-	}
+	};
 
 	/**
 	 * Pridá nový test
@@ -165,7 +163,7 @@ exports.Tester = function(){
 	 *
 	 */
 	this._reportFailedTest = function(title, targetRes, args, res, time, type){
-		var report = "test " + title + "(" + args + "): " + res + " => ";
+		let report = "test " + title + "(" + args + "): " + res + " => ";
 
 		report += targetRes + "[" + (typeof targetRes) + "] !== " + res + "[" + (typeof res) + "]";
 		console.log(report.red);
@@ -176,7 +174,7 @@ exports.Tester = function(){
 	 *
 	 */
 	this._finishOverview = function(time, testCounter, failedTestCounter){
-		console.log("testovalo sa " + time + "ms")
+		console.log("testovalo sa " + time + "ms");
 		console.log("neuspesnych bolo " + failedTestCounter + " z " + testCounter + " testov");
 	};
 
@@ -185,35 +183,35 @@ exports.Tester = function(){
 			return null;
 		}
 
-		var test = this._tests[testName];
-		var startTime = Date.now();
+        let test = this._tests[testName];
+        let startTime = Date.now();
 		return {
 			res: test.func.apply(test.thisArg, subtestArgs),
 			time: Date.now() - startTime
 		}
-	}
+	};
 
 	/**
 	 * Spustí všetky testy
 	 *
 	 */
 	this.runTests = function(){
-		var testCounter = 0;
-		var failedTestCounter = 0;
-		var startTotalTime = Date.now();
-		for(var i in this._tests){
+        let testCounter = 0;
+        let failedTestCounter = 0;
+        let startTotalTime = Date.now();
+		for(let i in this._tests){
 			if(this._tests.hasOwnProperty(i)){
-				var test = this._tests[i];
-				for(var j in test.subtests){
+                let test = this._tests[i];
+				for(let j in test.subtests){
 					if(test.subtests.hasOwnProperty(j)){
 						testCounter++;
-						var subtest = test.subtests[j];
-						var result = this.runSubtest(i, subtest.args);
+                        let subtest = test.subtests[j];
+                        let result = this.runSubtest(i, subtest.args);
 						subtest.results.push(result);
 						if(!this._compareResults(subtest.targetRes, result.res, subtest.type)){
 							failedTestCounter++;
 							this._reportFailedTest(i, subtest.targetRes, subtest.args, result.res, result.time, subtest.type);
-						};
+						}
 					}
 				}
 			}
@@ -223,8 +221,9 @@ exports.Tester = function(){
 };
 
 exports.Tests = function(tester){
-	var sucet = (a, b) => a + b;
-	var sucin = (a, b) => a * b;
+    let sucet = (a, b) => a + b;
+    let sucin = (a, b) => a * b;
+    let result = "";
 	/*
 	tester.addTestAndArgs("sucet", sucet, window, [1, 2], 3);
 	tester._addArgs("sucet", [3, 4], 7)
@@ -251,7 +250,6 @@ exports.Tests = function(tester){
 	tester.addArg("test compara", undefined).eq(undefined) || (result +="undefined == undefined\n");
 	tester.addArg("test compara", "macka").eq("macka") || (result +="\"macka\" == \"macka\"\n");
 	//false
-	var result = "";
 	tester.addArg("test compara", [2]).eq(2);//TODO je zle lebo by to malo byť false
 	tester.addArg("test compara", [2]).eq([2]);
 	tester.addArg("test compara", 2).eq("2") && (result +="2 == \"2\"\n");
@@ -294,4 +292,4 @@ exports.Tests = function(tester){
 	if(result){
 		console.log("__________________________\nerrors:\n ", result);
 	}
-}
+};

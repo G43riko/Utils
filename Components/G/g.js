@@ -450,6 +450,7 @@ G.ajax = function(url, options, dataType){
  * @param async
  * @returns {Element|*}
  */
+ /*
 G.loadScript = function(src, async) {
     let script, tag;
 
@@ -465,6 +466,30 @@ G.loadScript = function(src, async) {
     tag = G.byTag('script')[0];
     tag.parentNode.insertBefore(script, tag);
     return script;
+};
+*/
+
+G.loadScript = function(url, callback){
+    let script = document.createElement("script")
+    script.type = "text/javascript";
+
+    if(script.readyState){  //IE
+        script.onreadystatechange = function(){
+            if (script.readyState == "loaded" ||
+                    script.readyState == "complete"){
+                script.onreadystatechange = null;
+                callback();
+            }
+        };
+    }
+    else{  //Others
+        script.onload = function(){
+            callback();
+        };
+    }
+
+    script.src = url;
+    document.G.byTag('head')[0].appendChild(script);
 };
 
 /*************************************************************************************

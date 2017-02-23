@@ -2,12 +2,12 @@
 
 class TopMenu{
 	constructor(data){
-		var parent = new G("#topMenuHolder").html(this.createMainMenu(data["mainMenu"], data));
+		let parent = new G("#topMenuHolder").html(this.createMainMenu(data["mainMenu"], data));
 
-		var items = G.byClass("itemLink");
+        let items = G.byClass("itemLink");
 		document.onclick = e => {//TODO toto treba pridať ku akemukolvek kliku na canvas
-			var elements = G.byClass("selected");
-			for(var i=0 ; i<elements.length ; i++){
+            let elements = G.byClass("selected");
+			for(let i=0 ; i<elements.length ; i++){
 				if(G.isDefined(elements[i]) && e.target != elements[i].children[0]){
 					elements[i].classList.remove("selected");
 				}
@@ -16,7 +16,7 @@ class TopMenu{
 	}
 
 	disabled(value, menu, submenu = null){
-		var string = "#topMenuHolder .item_" + menu;
+        let string = "#topMenuHolder .item_" + menu;
 		if(G.isString(submenu)){
 			string += " .item_" + submenu
 		}
@@ -25,7 +25,7 @@ class TopMenu{
 	}
 
 	visible(value, menu, submenu = null){
-		var string = "#topMenuHolder .item_" + menu;
+        let string = "#topMenuHolder .item_" + menu;
 		if(G.isString(submenu)){
 			string += " .item_" + submenu
 		}
