@@ -1,17 +1,31 @@
 "use strict";
 
 let Alert = {
-	_closeParent: function(el){
-		el.parentElement.style.opacity = 0;
-		setTimeout(() => {
-			if(el.parentElement.parentElement !== null)
-				el.parentElement.parentElement.removeChild(el.parentElement)
-		}, 300);
-	},
 	success: (text, time = 5000) => Alert._showAlert(text, "success", time),
 	warning: (text, time = 5000) => Alert._showAlert(text, "warning", time),
 	danger: (text, time = 5000) => Alert._showAlert(text, "danger", time),
 	info: (text, time = 5000) => Alert._showAlert(text, "info", time),
+
+    /**
+     *
+     * @param el
+     * @private
+     */
+    _closeParent: function(el){
+        el.parentElement.style.opacity = 0;
+        setTimeout(() => {
+            if(el.parentElement.parentElement !== null)
+                el.parentElement.parentElement.removeChild(el.parentElement)
+        }, 300);
+    },
+
+    /**
+	 *
+     * @param text
+     * @param type
+     * @param time
+     * @private
+     */
 	_showAlert: function(text, type = "success", time){
 		let createElement = function(name, params, text){
             let el = document.createElement(name);
@@ -53,14 +67,13 @@ let Alert = {
 		setTimeout(() => Alert.removeEvent({target: a}), time);
 	},
 
+    /**
+	 *
+     * @param event
+     * @returns {boolean}
+     */
 	removeEvent: function(event){
 		Alert._closeParent(event.target);
 		return false;
-	},
-	show: function(){
-		Alert._showAlert("warningoš", "warning");
-		Alert._showAlert("successoš", "success");
-		Alert._showAlert("infoš", "info");
-		Alert._showAlert("dangeroš", "danger");
 	}
 };

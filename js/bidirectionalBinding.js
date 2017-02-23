@@ -1,8 +1,20 @@
+/**
+ * Created by gabriel on 23.2.2017.
+ *
+ * @author Gabriel Csollei[gcsollei@hotmail.com]
+ */
 let data = (function(){
     //zoznam uložených objektov
     let items = {};
 
-    //funkcia na bindnutie eventu k elementu
+    /**
+     * funkcia na bindnutie eventu k elementu
+     *
+     * @param name
+     * @param element
+     * @param func
+     * @returns {boolean}
+     */
     let bind = function(name, element, func){
         //ak chcem vložiť atribút ktorého názov je funkcia tak vypíšem error a vrátim false
         if(name === "bind" || name === "get" || name === "unbind"){
@@ -20,7 +32,12 @@ let data = (function(){
         element.addEventListener("input", func);
     };
 
-    //funkcia na unbindnutie eventu
+    /**
+     * Funkcia na unbindnutie eventu
+     *
+     * @param name
+     * @returns {boolean}
+     */
     let unbind = function(name){
         //pokúsim sa získať uložený objekt
         let data = items["_" + name];
@@ -37,41 +54,53 @@ let data = (function(){
         //vrátim true ak sa našiel uložený objekt ináč vrátim false
         return typeof data === "object";
     };
-
     return new Proxy({}, {
-            //funkcia na spracovanie getterov
-            get: function(target, name) {
-                if(name === "bind"){
-                    return bind;
-                }
-                if(name === "unbind"){
-                    return unbind;
-                }
-                //ináč sa pokúsim získať uložený objekt
-                let item = items["_" + name];
+        /**
+         * Funkcia na spracovanie getterov
+         *
+         * @param target
+         * @param name
+         * @returns {*}
+         */
+        get: function(target, name) {
+            if(name === "bind"){
+                return bind;
+            }
+            if(name === "unbind"){
+                return unbind;
+            }
+            //ináč sa pokúsim získať uložený objekt
+            let item = items["_" + name];
 
-                //ak sa ho podarilo získať tak vrátim jeho hodnotu ináč vrátim undefined
-                return item ? item.el.value : undefined;
-            },
-            //funkcia na spracovanie setterov
-            set: function(target, name, value) {
-                //umožnuje bindnutie dalším spôsobom
-                if(typeof value === "object"){
-                    if(typeof value.callback === "function" && typeof value.element === "object"){
-                        bind(name, value.element, value.callback);
-                        return "success";
-                    }
-                }
+            //ak sa ho podarilo získať tak vrátim jeho hodnotu ináč vrátim undefined
+            return item ? item.el.value : undefined;
+        },
 
-                //pokúsim sa získať uložený objekt
-                let item = items["_" + name];
-
-                //ak taký existuje
-                if(item){
-                    //nastavím mu hodnotu
-                    item.el.value = value;
+        /**
+         * Funkcia na spracovanie setterov
+         *
+         * @param target
+         * @param name
+         * @param value
+         * @returns {string}
+         */
+        set: function(target, name, value) {
+            //umožnuje bindnutie dalším spôsobom
+            if(typeof value === "object"){
+                if(typeof value.callback === "function" && typeof value.element === "object"){
+                    bind(name, value.element, value.callback);
+                    return "success";
                 }
             }
+
+            //pokúsim sa získať uložený objekt
+            let item = items["_" + name];
+
+            //ak taký existuje
+            if(item){
+                //nastavím mu hodnotu
+                item.el.value = value;
+            }
         }
-    );
+    });
 })();

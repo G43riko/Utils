@@ -1,14 +1,9 @@
-/*
+/**
+ * Konštruktor G objektu
+ *
  * G(selector) - vyhladá elementy podla selectora a vráti G object
  * G(nazov, {attr:{}, "obsah elementu", style:{}}) - vytvorý nový G object
  * G(nazov, {attr:{}, element, style:{}}) - vytvorý nový G object
- *
- * @param args - argumenty funkcie
- * @constructor
- */
-
-/**
- * Konštruktor G objektu
  *
  * @returns {G}
  * @constructor
@@ -708,16 +703,6 @@ G.isIn = function(obj, data){//testovane 8.1.2017
  * @returns {*}
  */
  G.matches = function(element, queryString){
- 	/*
- 	//ak prvý parameter nieje element vráti false
- 	if(!G.isElement(element)){
- 		return false;
- 	}
- 	//ak druhý parameter nieje string vráti false
- 	if(!G.isString(queryString)){
- 		return false;
- 	}
-	*/
  	//porovnám či element vyhovuje selectoru
 	try{
 		return element.matches(queryString);
@@ -1626,6 +1611,32 @@ G.prototype.delete = function(){//testovane 21.2.2017 //TODO pridať možnosť f
 	return this;
 };
 
+G.class = function(element, name, force){
+    if(G.isArray(name)){
+        G.each(name, (e) => this.class(e));
+    }
+    else if(G.isString(name)){
+        switch(name[0]){
+            case "+":
+                element.classList.add(name.substring(1));
+                break;
+            case "-":
+                element.classList.remove(name.substring(1));
+                break;
+            case "/":
+                name = name.substring(1);
+                if(G.isBool(force)){
+                    element.classList.toggle(name, force);
+                }
+                else{
+                    element.classList.toggle(name);
+                }
+                break;
+            default:
+                return element.classList.contains(name);
+        }
+    }
+};
 
 /**
  * class("nazov") - vrati true ak ma objekt danú triedu ináč vrát false
@@ -1638,37 +1649,52 @@ G.prototype.delete = function(){//testovane 21.2.2017 //TODO pridať možnosť f
  * @returns {*}
  */
 G.prototype.class = function(name, force){//testovane 28.1.2017
-	if(this.isEmpty()){
-		return this;
-	}
-	let classes = this.first().classList;
-	if(G.isArray(name)){
-		G.each(name, (e) => this.class(e));
-	}
-	else if(G.isString(name)){
-		switch(name[0]){
-			case "+":
-				classes.add(name.substring(1));
-				break;
-			case "-":
-				classes.remove(name.substring(1));
-				break;
-			case "/":
-				name = name.substring(1);
-				if(G.isBool(force)){
-					classes.toggle(name, force);
-				}
-				else{
-					classes.toggle(name);
-				}
-				break;
-			default:
-				return classes.contains(name);
-		}
-	}
-	return this;
+    let result = G.class(this.first(), arguments[0], arguments[1]);
+    return G.isUndefined(result) ? this : result;
 };
 
+G.css = function(element, ...args){
+    if(!G.isElement(element)){
+        G.warn("Prvý agument[element] musí byť element a teraz je:", element);
+        return;
+    }
+
+    //ak je 0 argumentov vráti objekt z CSS štýlmi
+    if(args.length === 0){
+        let result = {};
+        let css = window.getComputedStyle(element);
+        G.each(css, e => {
+            if(css.getPropertyValue(e) !== ""){
+                result[e] = css.getPropertyValue(e);
+            }
+        });
+        return result;
+    }
+
+    //ak je prvý argument string
+    if(G.isString(args[0])){
+        //a druhý argument je zadaný a dá sa prepísať na string nastav štýl
+        if(args.length === 2 && G.isString(args[1])){
+            element.style[args[0]] = args[1];
+        }
+        //ak prvý argument neobsahuje symbol pre vymazanie tak vráť hodnotu štýlu
+        else if(args[0][0] !== "-"){
+            return element.style[args[0]];
+        }
+        //ináč štýl odstráň
+        else{
+            element.style[args[0].substring(1)] = "";
+        }
+    }
+    //ak je prvý argument objekt nastav všetky štýli podla objektu
+    else if(G.isObject(args[0])){
+        G.each(args[0], (e, i) => {
+            if(G.isString(i) && G.isString(e)){
+                element.style[i] = e;
+            }
+        });
+    }
+};
 
 /**
  * css() - vráti všetky nastavené CSS štýly;
@@ -1681,45 +1707,51 @@ G.prototype.class = function(name, force){//testovane 28.1.2017
  * @returns {*}
  */
 G.prototype.css = function(){//testovane 29.1.2017
-	if(this.isEmpty()){
-		return this;
-	}
-	//ak je 0 argumentov vráti objekt z CSS štýlmi
-	if(arguments.length === 0){
-        let result = {};
-        let css = window.getComputedStyle(this.first());
-		G.each(css, e => {
-			if(css.getPropertyValue(e) !== ""){
-				result[e] = css.getPropertyValue(e);
-			}
-		});
-		return result;
+    let result = G.css(this.first(), arguments[0], arguments[1]);
+    return G.isUndefined(result) ? this : result;
+};
+
+G.attr = function(element, ...arg){
+	if(!G.isElement(element)){
+		G.warn("Prvý agument[element] musí byť element a teraz je:", element);
+		return;
 	}
 
-	//ak je prvý argument string
-	if(G.isString(arguments[0])){
-		//a druhý argument je zadaný a dá sa prepísať na string nastav štýl
-		if(arguments.length === 2 && G.isString(arguments[1])){
-			this.first().style[arguments[0]] = arguments[1];
-		}
-		//ak prvý argument neobsahuje symbol pre vymazanie tak vráť hodnotu štýlu
-		else if(arguments[0][0] !== "-"){
-			return this.first().style[arguments[0]];
-		}
-		//ináč štýl odstráň
-		else{
-			this.first().style[arguments[0].substring(1)] = "";
-		}
-	}
-	//ak je prvý argument objekt nastav všetky štýli podla objektu
-	else if(G.isObject(arguments[0])){
-		G.each(arguments[0], (e, i) => {
-			if(G.isString(i) && G.isString(e)){
-				this.first().style[i] = e;
-			}
-		});
-	}
-	return this;
+    //ak je 0 argumentov vráti objekt z atribútmi
+    if(arg.length === 0){
+        let result = {};
+        G.each(element.attributes, e => {
+            result[e.nodeName] = e.nodeValue;
+        });
+        return result;
+    }
+
+    //ak je prvý argument string
+    if(G.isString(arg[0])){
+        //a druhý argument je zadaný a dá sa prepísať na string nastav štýl
+        if(arg.length === 2 && G.isString(arg[1])){
+            element.setAttribute(arg[0], arg[1]);
+        }
+        //ak prvý argument obsahuje symbol pre vymazanie tak vymaž atribút
+        else if(arg[0][0] === "-"){
+            element.removeAttribute(arg[0].substring(1));
+        }
+        //ináč vrá atribút
+        else{
+            return element.getAttribute(arg[0]);
+        }
+    }
+    //ak je prvý argument objekt nastav všetky štýli podla objektu
+    else if(G.isObject(arg[0])){
+        G.each(arg[0], (e, i) => {
+            if(G.isString(i) && G.isString(e)){
+                element.setAttribute(i, e);
+            }
+        });
+    }
+    else{
+        G.warn("prvý parameter musí byť String alebo objekt a je: ", arguments[0]);
+    }
 };
 
 /**
@@ -1733,46 +1765,8 @@ G.prototype.css = function(){//testovane 29.1.2017
  * @returns {*}
  */
 G.prototype.attr = function(){//testovane 29.1.2017
-	if(this.isEmpty()){
-		return this;
-	}
-
-	//ak je 0 argumentov vráti objekt z atribútmi
-	if(arguments.length === 0){
-        let result = {};
-		G.each(this.first().attributes, e => {
-			result[e.nodeName] = e.nodeValue;
-		});
-		return result;
-	}
-
-	//ak je prvý argument string
-	if(G.isString(arguments[0])){
-		//a druhý argument je zadaný a dá sa prepísať na string nastav štýl
-		if(arguments.length === 2 && G.isString(arguments[1])){
-			this.first().setAttribute(arguments[0], arguments[1]);
-		}
-		//ak prvý argument obsahuje symbol pre vymazanie tak vymaž atribút
-		else if(arguments[0][0] === "-"){
-			this.first().removeAttribute(arguments[0].substring(1));
-		}
-		//ináč vrá atribút
-		else{
-			return this.first().getAttribute(arguments[0]);
-		}
-	}
-	//ak je prvý argument objekt nastav všetky štýli podla objektu
-	else if(G.isObject(arguments[0])){
-		G.each(arguments[0], (e, i) => {
-			if(G.isString(i) && G.isString(e)){
-				this.first().setAttribute(i, e);
-			}
-		});
-	}
-	else{
-		G.warn("prvý parameter musí byť String alebo objekt a je: ", arguments[0]);
-	}
-	return this;
+	let result = G.attr(this.first(), arguments[0], arguments[1]);
+    return G.isUndefined(result) ? this : result;
 };
 
 /**
@@ -1842,7 +1836,7 @@ G.prototype.delegate = function(condition, listener, func){//TODO otestovať
 		});
 	}
 	else{
-		G.warn("prví parameter musí byť string a teraz je ", G.typeof(condition));
+		G.warn("prví parameter musí byť string a teraz je ", G.typeOf(condition));
 	}
 	return this;
 	
@@ -1894,16 +1888,19 @@ G.prototype.dblclick = function(func){return this.bind("dblclick", func);};
  * @returns {*}
  */
 G.position = function(element){//testovane 29.1.2017
-	if(!G.isElement(element)){
-		G.warn("argument musí byť element");
-		return null;
+    let top  = 0,
+		left = 0;
+	if(G.isElement(element)){
+        do {
+            top  += element.offsetTop  || 0;
+            left += element.offsetLeft || 0;
+            element = element.offsetParent;
+        } while(element);
 	}
-    let top = 0, left = 0;
-	do {
-		top  += element.offsetTop  || 0;
-		left += element.offsetLeft || 0;
-		element = element.offsetParent;
-	} while(element);
+	else{
+        G.warn("argument musí byť element");
+	}
+
 	return {
 		y: top,
 		x: left
@@ -1917,16 +1914,7 @@ G.position = function(element){//testovane 29.1.2017
  * @returns {number}
  */
 G.left = function(element){//testovane 29.1.2017
-	if(!G.isElement(element)){
-		G.warn("argument musí byť element");
-		return 0;
-	}
-    let left = 0;
-	do {
-		left += element.offsetLeft || 0;
-		element = element.offsetParent;
-	} while(element);
-	return left;
+	return G.position(element).left;
 };
 
 /**
@@ -1936,16 +1924,7 @@ G.left = function(element){//testovane 29.1.2017
  * @returns {number}
  */
 G.top = function(element){//testovane 29.1.2017
-	if(!G.isElement(element)){
-		G.warn("argument musí byť element");
-		return 0;
-	}
-    let top = 0;
-	do {
-		top += element.offsetTop  || 0;
-		element = element.offsetParent;
-	} while(element);
-	return top;
+    return G.position(element).top;
 };
 
 /**
@@ -1957,7 +1936,7 @@ G.top = function(element){//testovane 29.1.2017
 G.size = function(element){//testovane 29.1.2017
 	if(!G.isElement(element)){
 		G.warn("argument musí byť element");
-		return null;
+		return {width: 0, height: 0};
 	}
 	return {
 		width  : element.offsetWidth,
@@ -1972,11 +1951,7 @@ G.size = function(element){//testovane 29.1.2017
  * @returns {number}
  */
 G.width = function(element){//testovane 26.1.2017
-	if(!G.isElement(element)){
-		G.warn("argument musí byť element");
-		return 0;
-	}
-	return element.offsetWidth;
+	return G.size(element).width;
 };
 
 /**
@@ -1986,14 +1961,151 @@ G.width = function(element){//testovane 26.1.2017
  * @returns {number}
  */
 G.height = function(element){//testovane 26.1.2017
-	if(!G.isElement(element)){
-		G.warn("argument musí byť element");
-		return 0;
-	}
-	return element.offsetHeight;
+    return G.size(element).height;
 };
 
 
+let GO = function(element){
+    "use strict";
+    let makeGO = function(target){
+    	if(!G.isElement(target) || target.setGO === true){
+    		return target;
+		}
+        target.setGO = true;
+        target.parent = () => makeGO(target.parentElement);
+        target.delete = () => target.parentElement.removeChild(target);
+        target.prev = () => makeGO(target.previousSibling);
+        target.next = () => makeGO(target.nextSibling);
+
+        target.text = () => {return {
+            get: () => target.textContent,
+            set: content => {
+                if(!G.isString(content)){
+                    G.warn("Argument[content] musí byť typu string a teraz je ", content);
+
+                }
+                target.textContent = content;
+                return target;
+            },
+            add: content => {
+                if(!G.isString(content)){
+                    G.warn("Argument[content] musí byť typu string a teraz je ", content);
+                    return
+                }
+                target.textContent += content;
+                return target;
+            },
+            clear: () => {
+                target.textContent = "";
+                return target;
+            }
+        }};
+        target.attr = name => {
+            if(!G.isString(name)){
+                G.warn("Argument[name] musí byť typu string a teraz je ", name);
+                return target;
+            }
+            return {
+                set: value => {
+                    target.setAttribute(name, value);
+                    return target;
+                },
+                get: () => target.getAttribute(name),
+                remove: () => {
+                    target.removeAttribute(name);
+                    return target;
+                }
+            }
+        };
+        target.css = function(name){
+            if(!G.isString(name)){
+                G.warn("Argument[name] musí byť typu string a teraz je ", name);
+                return target;
+            }
+            return {
+                set: value => {
+                    target.style[name] = value;
+                    return target;
+                },
+                get: () => target.style[name],
+                remove: () => {
+                    target.style[name] = null;
+                    return target;
+                }
+            }
+        };
+        target.class = function(name){
+            if(!G.isString(name)){
+                G.warn("Argument[name] musí byť typu string a teraz je ", name);
+                return;
+            }
+            return {
+                add: () => {
+                    target.classList.add(name);
+                    return target;
+                },
+                has: () => target.classList.has(name),
+                remove: () => {
+                    target.classList.remove(name);
+                    return target;
+                },
+                toggle: (force = undefined) => target.classList.toggle(name, force)
+            }
+        };
+        return target;
+    };
+
+    if(!G.isElement(element)) {
+        G.warn("Argument[element] musí byť element a teraz je:", element);
+    }
+    else{
+        makeGO(element);
+	}
+    return element;
+};
+
+G.object = function(element){
+	"use strict";
+    if(!G.isElement(element)){
+        G.warn("Argument[element] musí byť element a teraz je:", element);
+    }
+    return {
+        delete: () => element.parentElement.removeChild(element),
+    	parent: () => element.parentElement,
+        prev: () => element.previousSibling,
+        next: () => element.nextSibling,
+		text: () => {
+        	return {
+				get: () => element.textContent,
+				set: content => element.textContent = content,
+				add: content => element.textContent += content,
+				clear: () => element.textContent = ""
+			}
+        },
+    	attr: name => {
+            return {
+                set: value => element.setAttribute(name, value),
+                get: () => element.getAttribute(name),
+                remove: () => element.removeAttribute(name)
+			}
+		},
+		css: name => {
+            return {
+            	set: value => element.style[name] = value,
+				get: () => element.style[name],
+				remove: () => element.style[name] = null
+			}
+		},
+        class: name => {
+            return {
+                add: () => element.classList.add(name),
+                has: () => element.classList.has(name),
+                remove: () => element.classList.remove(name),
+                toggle: (force) => element.classList.toggle(name, force)
+            }
+        }
+	}
+};
 /*
  G.ajax();
  G.warn();

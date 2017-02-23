@@ -1,15 +1,18 @@
 /**
  * Created by gabriel on 23.2.2017.
+ *
+ * @author Gabriel Csollei[gcsollei@hotmail.com]
+ * @type {{bind, cleanUp}}
  */
-
 let imageManipulator = (function(){
+    "use strict";
     let loaded          = false;
     let init            = false;
-    let waitingArg      = null;
     let g_background    = null;
     let g_image         = null;
     let elements        = null;
     let onKeyDown       = null;
+    let waitingArg      = undefined;
     let def = {
         duration: 1000,
         offset: 40,
@@ -24,8 +27,12 @@ let imageManipulator = (function(){
         imageShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)"
     };
 
-
-    //funkcia na zobrazenie obrázku
+    /**
+     * Funkcia na zobrazenie obrázku
+     *
+     * @param element
+     * @param index
+     */
     function showImage(element, index){
         new G(g_image).attr({
             src : element.src,
@@ -40,7 +47,12 @@ let imageManipulator = (function(){
         showImage(this, this.getAttribute("l_index"));
     }
 
-    //funckia na načítanie externých knižníc
+    /**
+     * Funckia na načítanie externých knižníc
+     *
+     * @param url
+     * @param callback
+     */
     function loadScript(url, callback){
         let script = document.createElement("script");
         script.type = "text/javascript";
@@ -73,8 +85,11 @@ let imageManipulator = (function(){
         }
     });
 
-
-    //inicializácia všetkého
+    /**
+     * Inicializácia celého modulu
+     *
+     * @param data
+     */
     function initImages(data = {}){
         if(init){
             alert("nemôžu sa viac krát bindúť obrázky.\nNajprv ich odbindni!");
@@ -120,7 +135,10 @@ let imageManipulator = (function(){
         //pridáme key listenery na window
         window.addEventListener("keydown", onKeyDown);
 
-        //funckia na inicializáciu pozadia
+        /**
+         * Funckia na inicializáciu pozadia
+         *
+         */
         function initBackground(){
             let result = new G("div", {
                 style : {
@@ -145,7 +163,9 @@ let imageManipulator = (function(){
             return result;
         }
 
-        //funkcia na inicializáciu obrázku
+        /**
+         * Funkcia na inicializáciu obrázku
+         */
         function initImage(){
             let result = new G("img", {
                 style: {
@@ -170,12 +190,21 @@ let imageManipulator = (function(){
             g_image = result.first();
         }
 
+        /**
+         *
+         * @param element
+         */
         function showNextImage(element = g_image){
             let elem      = new G(element);
             let newIndex  = (parseInt(elem.attr("act_index")) + 1) % elements.length;
             element.src   = elements[newIndex].src;
             elem.attr("act_index", newIndex + "");
         }
+
+        /**
+         *
+         * @param element
+         */
         function showPrevImage(element = g_image){
             let elem      = new G(element);
             let newIndex  = (parseInt(elem.attr("act_index")) - 1) % elements.length;
@@ -187,21 +216,19 @@ let imageManipulator = (function(){
         }
 
         //prejdem všetky vyhovujúce elementy
-        for(let i in elements){
-            if(elements.hasOwnProperty(i)){
-                try{
-                    //ak je najdený element obrázok
-                    if(elements[i].matches("img")){
-                        elements[i].setAttribute("l_index", i);
-                        elements[i].addEventListener("click", imageListener);
-                        elements[i].style.cursor = "pointer";
-                    }
-                }
-                catch(e){
-                    console.error(e);
+        G.each(elements, (e, i) => {
+            try{
+                //ak je najdený element obrázok
+                if(e.matches("img")){
+                    e.setAttribute("l_index", i);
+                    e.addEventListener("click", imageListener);
+                    e.style.cursor = "pointer";
                 }
             }
-        }
+            catch(err){
+                console.error(err);
+            }
+        });
 
         //inicializujeme pozadie a globálny obrázok
         initImage();
@@ -211,6 +238,11 @@ let imageManipulator = (function(){
     }
 
     return {
+        /**
+         * Funkcia na bindtunie listenerov a inicializácia modulu
+         *
+         * @param data
+         */
         bind: function(data = {}){
             //ak nieje načítaný GQuery tak sa uloží argument do objektu
             if(!loaded){
@@ -221,6 +253,10 @@ let imageManipulator = (function(){
                 initImages(data);
             }
         },
+
+        /**
+         * Funkcia pre odpbindnutie všetkých listenerov
+         */
         cleanUp(){
             if(!init){
                 return;
@@ -230,18 +266,16 @@ let imageManipulator = (function(){
             window.removeEventListener("keydown", onKeyDown);
 
             //vyčistím všetky elementy
-            for(let i in elements){
-                if(elements.hasOwnProperty(i)){
-                    try{
-                        elements[i].removeAttribute("l_index");
-                        elements[i].removeEventListener("click", imageListener);
-                        elements[i].style.cursor = "auto";
-                    }
-                    catch(e){
-                        console.error(e);
-                    }
+            G.each(elemnts, e => {
+                try{
+                    e.removeAttribute("l_index");
+                    e.removeEventListener("click", imageListener);
+                    e.style.cursor = "auto";
                 }
-            }
+                catch(err){
+                    console.error(err);
+                }
+            });
             //zmažem pozadie
             G.delete(g_background);
 

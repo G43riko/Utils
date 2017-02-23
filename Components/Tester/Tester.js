@@ -3,13 +3,24 @@ let colors = require('colors');
 exports.Tester = function(){
 	this._tests = {};
 	this._testCounter = 0;
+
+    /**
+	 * Funkcia vráti počet testov
+     * @returns {number}
+     */
 	this.getTestNumber = function(){
 		return this._testCounter;
 	};
-	/**
+
+    /**
 	 * Pridá argumenty do už exisujúceho testu
 	 *
-	 */
+     * @param title
+     * @param args
+     * @param targetRes
+     * @param type
+     * @private
+     */
 	this._addArgs = function(title, args, targetRes, type){
 		if(!type){
 			type = "eq";
@@ -32,10 +43,15 @@ exports.Tester = function(){
 		return this._compareResults(targetRes, test.func.apply(test.thisArg, args), type);
 	};
 
-	/**
-	 * Porovná výsledky s požadovanými výsledkamy na názáklade typu
+    /**
+	 * Funkcia porovná výsledky s požadovanými výsledkamy na názáklade typu
 	 *
-	 */
+     * @param targetRes
+     * @param result
+     * @param type
+     * @returns {boolean}
+     * @private
+     */
 	this._compareResults = function(targetRes, result, type){
 		switch(type){
 			case "eq"://otestovane
@@ -86,10 +102,13 @@ exports.Tester = function(){
 		}
 	};
 
-	/**
+    /**
 	 * Funckia vráti objekt ktorým je možné určiť typ porovnania
 	 *
-	 */
+     * @param title
+     * @param args
+     * @returns {{eq: (function(*=)), gt: (function(*=)), ge: (function(*=)), lt: (function(*=)), le: (function(*=)), ok: (function()), true: (function()), false: (function()), undefined: (function()), null: (function()), NaN: (function()), empty: (function()), arguments: (function()), between: (function(*, *)), property: (function(*, *)), instanceof: (function(*=)), length: (function(*=)), members: (function(*=)), exist: (function()), finite: (function())}}
+     */
 	this.addArg = function(title, args){
 		return {
 			//lubovolne argumenty
@@ -129,10 +148,13 @@ exports.Tester = function(){
 		}
 	};
 
-	/**
-	 * Pridá nový test
+    /**
+	 * Funkcia pridá nový test
 	 *
-	 */
+     * @param title
+     * @param func
+     * @param thisArg
+     */
 	this.addTest = function(title, func, thisArg){
 		if(typeof thisArg === "undefined"){
 			thisArg = typeof window !== "undefined" ? window : this;
@@ -149,19 +171,30 @@ exports.Tester = function(){
 		this._testCounter++;
 	};
 
-	/**
-	 * Pridá nový test a rovno aj jeho argumenty
+    /**
+	 * Funkcia pridá nový test a rovno aj jeho argumenty
 	 *
-	 */
+     * @param title
+     * @param func
+     * @param thisArg
+     * @param args
+     * @param targetRes
+     */
 	this.addTestAndArgs = function(title, func, thisArg, args, targetRes){
 		this.addTest(title, func);
 		this._addArgs(title, args, targetRes);
 	};
 
-	/**
-	 * Podrobný výpis pri neúspešnom teste
-	 *
-	 */
+    /**
+	 * Funkcia pre podrobný výpis pri neúspešnom teste
+     * @param title
+     * @param targetRes
+     * @param args
+     * @param res
+     * @param time
+     * @param type
+     * @private
+     */
 	this._reportFailedTest = function(title, targetRes, args, res, time, type){
 		let report = "test " + title + "(" + args + "): " + res + " => ";
 
@@ -169,15 +202,24 @@ exports.Tester = function(){
 		console.log(report.red);
 	};
 
-	/**
-	 * Informatívny výpis po ukončený všetkých testov
-	 *
-	 */
+    /**
+	 * Funkcia pre Informatívny výpis po ukončený všetkých testov
+     * @param time
+     * @param testCounter
+     * @param failedTestCounter
+     * @private
+     */
 	this._finishOverview = function(time, testCounter, failedTestCounter){
 		console.log("testovalo sa " + time + "ms");
 		console.log("neuspesnych bolo " + failedTestCounter + " z " + testCounter + " testov");
 	};
 
+    /**
+	 *
+     * @param testName
+     * @param subtestArgs
+     * @returns {*}
+     */
 	this.runSubtest = function(testName, subtestArgs){
 		if(typeof this._tests[testName] === "undefined"){
 			return null;
@@ -191,10 +233,9 @@ exports.Tester = function(){
 		}
 	};
 
-	/**
-	 * Spustí všetky testy
-	 *
-	 */
+    /**
+	 * Funkcia spustí všetky testy
+     */
 	this.runTests = function(){
         let testCounter = 0;
         let failedTestCounter = 0;
