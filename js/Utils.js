@@ -1,20 +1,90 @@
+let Util = {};
+
 /**
  *
- * @param variable
- * @param value
- * @param newValue
- * @returns {*}
+ * @param time
+ * @param decimals
+ * @returns {string}
  */
-function changeIfEqual(variable, value, newValue){
-    return variable == value ? newValue : variable;
-}
+Util.toHHMMSS = function(time, decimals = 0) {
+    let sec_num = parseInt(time, 10) / 1000;
+    let hours   = Math.floor(sec_num / 3600);
+    let minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    let seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10){ hours   = "0" + hours;}
+    if (minutes < 10){ minutes = "0" + minutes;}
+    if (seconds < 10){
+        seconds = "0" + seconds.toFixed(decimals);
+    }
+    else {
+        seconds = seconds.toFixed(decimals);
+    }
+    return hours + ':' + minutes + ':' + seconds;
+};
+
+/**
+ *
+ * @returns {{}}
+ */
+Util.queryString = function(){
+    let query_string = {};
+    let query = window.location.search.substring(1);
+    let vars = query.split("&");
+    for (let i=0 ; i<vars.length ; i++) {
+        let pair = vars[i].split("=");
+        if(typeof query_string[pair[0]] === "undefined") {
+            query_string[pair[0]] = decodeURIComponent(pair[1]);
+        }
+        else if(typeof query_string[pair[0]] === "string") {
+            query_string[pair[0]] = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
+        }
+        else{
+            query_string[pair[0]].push(decodeURIComponent(pair[1]));
+        }
+    }
+    return query_string;
+};
+
+/**
+ *
+ * @param object
+ * @returns {number}
+ */
+Util.roughSizeOfObject = function(object) {
+    let objectList = [];
+    let stack = [object];
+    let bytes = 0;
+
+    while (stack.length) {
+        let value = stack.pop();
+        if(isBoolean(value)){
+            bytes += 4;
+        }
+        else if(isString(value)){
+            bytes += value.length << 1;
+        }
+        else if(isNumber(value)){
+            bytes += 8;
+        }
+        else if(isObject(value) && objectList.indexOf( value ) === -1){
+            objectList.push(value);
+            for(let i in value){
+                if(value.hasOwnProperty(i)){
+                    stack.push(value[i]);
+                }
+            }
+        }
+    }
+    return bytes;
+};
 
 /**
  *
  * @param obj
  * @returns {boolean}
  */
-function isIn(obj){
+Util.isIn = function(obj){
 	for(let i=1 ; i<arguments.length ; i++){
 		if(arguments[i] === obj){
 			return true;
@@ -22,52 +92,41 @@ function isIn(obj){
     }
 
 	return false;
-}
+};
 
 /**
  *
- * @param val
- * @returns {boolean}
+ * @param cname
+ * @param cvalue
+ * @param exdays
  */
-function isFunction(val){
-	return typeof val === "function";
-}
+Util.setCookie = function(cname, cvalue, exdays) {
+    let d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    document.cookie = cname + "=" + cvalue + ";expires="+ d.toUTCString();
+};
 
 /**
  *
- * @param val
- * @returns {boolean}
+ * @param cname
+ * @returns {*}
  */
-function callIfFunc(val){
-	return isFunction(val) ? val() : false;
-}
+Util.getCookie = function(cname) {
+    let name = cname + "=",
+        ca = document.cookie.split(';'),
+        i, c;
+    for(i = 0; i <ca.length; i++) {
+        c = ca[i];
+        while (c.charAt(0) == ' '){
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0){
+            return c.substring(name.length,c.length);
+        }
+    }
+    return "";
+};
 
-/**
- *
- * @param val
- * @returns {boolean}
- */
-function isUndefined(val){
-	return typeof val === "undefined";
-}
-
-/**
- *
- * @param n
- * @returns {boolean}
- */
-function isInt(n){
-	return Number(n) === n && n % 1 === 0;
-}
-
-/**
- *
- * @param n
- * @returns {boolean}
- */
-function isFloat(n){
-	return Number(n) === n && n % 1 !== 0;
-}
 
 /**
  *
