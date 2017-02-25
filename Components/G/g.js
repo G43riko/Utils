@@ -778,19 +778,23 @@ G.each = function(obj, func, thisArg){
 G.find = function(queryString, parent){//testovane 28.1.2017
     let result = [];
 
+    //ak nieje zadaný parent alebo parent nieje element tak parent bude document
 	if(!G.isElement(parent)){
 		parent = document;
 	}
 
-	if(G.isString(queryString)){
-        let data = parent.querySelectorAll(queryString);
-		G.each(data, e => result[result.length] = e);
-	}
-	else{
-		G.warn("argument funkcie musí byť string a je ", queryString);
+	//ak queryString nieje String
+	if(!G.isString(queryString)){
+        G.warn("argument funkcie musí byť string a je ", queryString);
+        return result;
 	}
 
-	return result;
+	//získame elementy a pridáme ich do pola
+    let data = parent.querySelectorAll(queryString);
+    G.each(data, e => result[result.length] = e);
+
+    //vrátime výsledok
+    return result;
 };
 
 /**
@@ -800,12 +804,14 @@ G.find = function(queryString, parent){//testovane 28.1.2017
  * @returns {Element} - rodičovský element alebo null ak sa nenašiel rodič
  */
 G.parent = function(element){//testovane 28.1.2017
-	if(G.isElement(element)){
-		return element.parentElement;
+	//ak argument nieje element;
+	if(!G.isElement(element)){
+        G.warn("argument funcie musí byť element a teraz je: ", element);
+        return null;
 	}
 
-	G.warn("argument funcie musí byť element a teraz je: ", element);
-	return null;
+	//vrátime rodičovský element
+    return element.parentElement;
 };
 
 /**
@@ -870,26 +876,27 @@ G._iterate = function(params){
  * @returns {*}
  */
 G.text = function(element, text, append = false){
-	if(G.isElement(element)){
-		if(G.isUndefined(text)){
-			return element.textContent;
-		}
+	//ak prvý argument nieje element
+	if(!G.isElement(element)) {
+        G.warn("prvý argument musí byť objekt a je: ", element);
+        return null;
+    }
 
-		if(G.isString(text)){
-			if(append === true){
-				element.textContent += text;
-			}
-			else{
-				element.textContent = text;
-			}
-		}
-		else{
-			G.warn("druhý argument musí byť string a je: ", text);
-		}
+	//ak druhý argument nieje string tak vrátime text
+	if(!G.isString(text)){
+        return element.textContent;
+    }
+
+	//pridá k elementu text
+	if(append === true){
+		element.textContent += text;
 	}
+	//nahradí text elementu;
 	else{
-		G.warn("prvý argument musí byť objekt a je: ", element);
+		element.textContent = text;
 	}
+
+	//vrátime element
 	return element;
 };
 
@@ -902,26 +909,27 @@ G.text = function(element, text, append = false){
  * @returns {*}
  */
 G.html = function(element, html, append = false){//testovane 29.1.2017
-	if(G.isElement(element)){
-		if(G.isUndefined(html)){
-			return element.innerHTML();
-		}
+	//ak prvý argument nieje element
+	if(G.isElement(element)) {
+        G.warn("prvý argument musí byť objekt a je: ", element);
+        return null;
+    }
 
-		if(G.isString(html)){
-			if(append){
-				element.innerHTML += html;
-			}
-			else{
-				element.innerHTML = html;
-			}
-		}
-		else{
-			G.warn("druhý argument musí byť string a je: ", html);
-		}
-	}
-	else{
-		G.warn("prvý argument musí byť objekt a je: ", element);
-	}
+    //ak druhý argument nieje string
+    if(!G.isString(html)) {
+        return element.innerHTML();
+    }
+
+    //pridám html
+    if(append === true){
+        element.innerHTML += html;
+    }
+    //nahradím html
+    else{
+        element.innerHTML = html;
+    }
+
+    //vrátim element
 	return element;
 };
 
@@ -1005,20 +1013,16 @@ G.children = function(element, condition = "*"){//testovane 28.1.2017 //deprecat
  * @param element - element ktorý sa má vymazať
  */
 G.delete = function(element){//testovane 21.2.2017
-	try{
-		element.parentElement.removeChild(element);
+	//pokúsime sa získať rodičovy element;
+	let parent = G.parent(element);
+
+	//ak získaný rodič nieje element
+	if(!G.isElement(parent)){
+		G.warn("nepodarilo sa získať rodičovský element");
+		return;
 	}
-	catch(err){
-		G.warn("pri mazaní nastala chyba: ", err);
-	}
-	/*
-	if(G.isElement(element)){
-		element.parentElement.removeChild(element);
-	}
-	else{
-		G.warn("argument funcie musí byť element a teraz je: ", element);
-	}
-	*/
+	//zmažeme element
+	parent.removeChild(element);
 };
 
 /*************************************************************************************
@@ -1033,10 +1037,12 @@ G.delete = function(element){//testovane 21.2.2017
  */
 
 G.prototype.is = function(selectorString){//testovane 28.1.2017
+	//ak je prázdy
 	if(this.isEmpty()){
 		return false;
 	}
 
+	//vrátime výsledok porovnania
 	return G.matches(this.first(), selectorString);
 };
 
@@ -1720,6 +1726,7 @@ G.attr = function(element, ...arg){
     //ak je 0 argumentov vráti objekt z atribútmi
     if(arg.length === 0){
         let result = {};
+        //prejde všetky atribúty elementu a pridá ich do výsledku
         G.each(element.attributes, e => {
             result[e.nodeName] = e.nodeValue;
         });
