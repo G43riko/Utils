@@ -1,5 +1,6 @@
 /**
  * Created by gabriel on 24.2.2017.
+ *
  * @author Gabriel Csollei[gcsollei@hotmail.com]
  */
 class EventTimer{

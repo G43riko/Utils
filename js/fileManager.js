@@ -1,5 +1,7 @@
 /**
  * Created by gabriel on 24.2.2017.
+ *
+ * @author Gabriel Csollei[gcsollei@hotmail.com]
  */
 let fileInput = (function(){
     "use strict";
@@ -14,18 +16,34 @@ let fileInput = (function(){
     link.setAttribute("href", "");
 
     return {
-        saveFile: (name, text, type = "text/plain") => {
+        /**
+         *
+         * @param name
+         * @param text
+         * @param type
+         */
+        saveLocalFile: (name, text, type = "text/plain") => {
             link.href = URL.createObjectURL(new Blob([text], {type: type}));
             link.download = name;
             link.click();
         },
-        saveImage: (name, image) => {
+
+        /**
+         *
+         * @param name
+         * @param image
+         */
+        saveLocalImage: (name, image) => {
             link.href = typeof image === "string" ? image : image.src;
             link.download = name;
             link.click();
         },
 
-        loadImage: func => {
+        /**
+         *
+         * @param func
+         */
+        loadLocalImage: func => {
             input.onchange = function(e){
                 let reader = new FileReader();
                 reader.onload = function(){
@@ -37,7 +55,12 @@ let fileInput = (function(){
             };
             input.click();
         },
-        loadFile: func => {
+
+        /**
+         *
+         * @param func
+         */
+        loadLocalFile: func => {
             input.onchange = function(e){
                 let reader = new FileReader();
                 reader.onload = () => func(reader.result);

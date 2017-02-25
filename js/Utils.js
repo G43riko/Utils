@@ -1,131 +1,134 @@
-let Util = {};
+let Util = (function(){
+    "use strict";
+    return {
+        /**
+         *
+         * @param time
+         * @param decimals
+         * @returns {string}
+         */
+        toHHMMSS: function(time, decimals = 0) {
+            let sec_num = parseInt(time, 10) / 1000;
+            let hours   = Math.floor(sec_num / 3600);
+            let minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+            let seconds = sec_num - (hours * 3600) - (minutes * 60);
 
-/**
- *
- * @param time
- * @param decimals
- * @returns {string}
- */
-Util.toHHMMSS = function(time, decimals = 0) {
-    let sec_num = parseInt(time, 10) / 1000;
-    let hours   = Math.floor(sec_num / 3600);
-    let minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-    let seconds = sec_num - (hours * 3600) - (minutes * 60);
+            if (hours   < 10){ hours   = "0" + hours;}
+            if (minutes < 10){ minutes = "0" + minutes;}
+            if (seconds < 10){
+                seconds = "0" + seconds.toFixed(decimals);
+            }
+            else {
+                seconds = seconds.toFixed(decimals);
+            }
+            return hours + ':' + minutes + ':' + seconds;
+        },
 
-    if (hours   < 10){ hours   = "0" + hours;}
-    if (minutes < 10){ minutes = "0" + minutes;}
-    if (seconds < 10){
-        seconds = "0" + seconds.toFixed(decimals);
-    }
-    else {
-        seconds = seconds.toFixed(decimals);
-    }
-    return hours + ':' + minutes + ':' + seconds;
-};
-
-/**
- *
- * @returns {{}}
- */
-Util.queryString = function(){
-    let query_string = {};
-    let query = window.location.search.substring(1);
-    let vars = query.split("&");
-    for (let i=0 ; i<vars.length ; i++) {
-        let pair = vars[i].split("=");
-        if(typeof query_string[pair[0]] === "undefined") {
-            query_string[pair[0]] = decodeURIComponent(pair[1]);
-        }
-        else if(typeof query_string[pair[0]] === "string") {
-            query_string[pair[0]] = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
-        }
-        else{
-            query_string[pair[0]].push(decodeURIComponent(pair[1]));
-        }
-    }
-    return query_string;
-};
-
-/**
- *
- * @param object
- * @returns {number}
- */
-Util.roughSizeOfObject = function(object) {
-    let objectList = [];
-    let stack = [object];
-    let bytes = 0;
-
-    while (stack.length) {
-        let value = stack.pop();
-        if(isBoolean(value)){
-            bytes += 4;
-        }
-        else if(isString(value)){
-            bytes += value.length << 1;
-        }
-        else if(isNumber(value)){
-            bytes += 8;
-        }
-        else if(isObject(value) && objectList.indexOf( value ) === -1){
-            objectList.push(value);
-            for(let i in value){
-                if(value.hasOwnProperty(i)){
-                    stack.push(value[i]);
+        /**
+         *
+         * @returns {{}}
+         */
+        queryString: function(){
+            let query_string = {};
+            let query = window.location.search.substring(1);
+            let vars = query.split("&");
+            for (let i=0 ; i<vars.length ; i++) {
+                let pair = vars[i].split("=");
+                if(typeof query_string[pair[0]] === "undefined") {
+                    query_string[pair[0]] = decodeURIComponent(pair[1]);
+                }
+                else if(typeof query_string[pair[0]] === "string") {
+                    query_string[pair[0]] = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
+                }
+                else{
+                   query_string[pair[0]].push(decodeURIComponent(pair[1]));
                 }
             }
+            return query_string;
+        },
+
+        /**
+         *
+         * @param object
+         * @returns {number}
+         */
+        roughSizeOfObject: function(object) {
+            let objectList = [];
+            let stack = [object];
+            let bytes = 0;
+
+            while (stack.length) {
+                let value = stack.pop();
+                if(isBoolean(value)){
+                    bytes += 4;
+                }
+                else if(isString(value)){
+                    bytes += value.length << 1;
+                }
+                else if(isNumber(value)){
+                    bytes += 8;
+                }
+                else if(isObject(value) && objectList.indexOf( value ) === -1){
+                    objectList.push(value);
+                    for(let i in value){
+                        if(value.hasOwnProperty(i)){
+                            stack.push(value[i]);
+                        }
+                    }
+                }
+            }
+            return bytes;
+        },
+
+        /**
+         *
+         * @param obj
+         * @returns {boolean}
+         */
+        isIn: function(obj){
+            for(let i=1 ; i<arguments.length ; i++){
+                if(arguments[i] === obj){
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        /**
+         *
+         * @param cname
+         * @param cvalue
+         * @param exdays
+         */
+        setCookie: function(cname, cvalue, exdays) {
+            let d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            document.cookie = cname + "=" + cvalue + ";expires="+ d.toUTCString();
+        },
+
+        /**
+         *
+         * @param cname
+         * @returns {*}
+         */
+        getCookie: function(cname) {
+            let name = cname + "=",
+            ca = document.cookie.split(';'),
+            i, c;
+            for(i = 0; i <ca.length; i++) {
+                c = ca[i];
+                while (c.charAt(0) == ' '){
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) === 0){
+                    return c.substring(name.length,c.length);
+                }
+            }
+            return "";
         }
     }
-    return bytes;
-};
+})();
 
-/**
- *
- * @param obj
- * @returns {boolean}
- */
-Util.isIn = function(obj){
-	for(let i=1 ; i<arguments.length ; i++){
-		if(arguments[i] === obj){
-			return true;
-        }
-    }
-
-	return false;
-};
-
-/**
- *
- * @param cname
- * @param cvalue
- * @param exdays
- */
-Util.setCookie = function(cname, cvalue, exdays) {
-    let d = new Date();
-    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-    document.cookie = cname + "=" + cvalue + ";expires="+ d.toUTCString();
-};
-
-/**
- *
- * @param cname
- * @returns {*}
- */
-Util.getCookie = function(cname) {
-    let name = cname + "=",
-        ca = document.cookie.split(';'),
-        i, c;
-    for(i = 0; i <ca.length; i++) {
-        c = ca[i];
-        while (c.charAt(0) == ' '){
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0){
-            return c.substring(name.length,c.length);
-        }
-    }
-    return "";
-};
 
 
 /**

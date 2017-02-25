@@ -34,10 +34,10 @@ class CanvasManager{
             }
         }
         this._context = this._canvas.getContext("2d");
-    }
 
+    }  
     /**
-     *
+     * 
      * @returns {*|Element|HTMLCanvasElement}
      */
     get canvas(){return this._canvas;}
@@ -123,6 +123,7 @@ class CanvasManager{
      *
      * @param ctx
      * @param color
+     * @static
      */
     static clearCanvas(ctx, color){
         if(color){
@@ -137,6 +138,7 @@ class CanvasManager{
      * @param c
      * @param width
      * @param height
+     * @static
      */
     static setCanvasSize(c, width = window.innerWidth, height = window.innerHeight){
         c.width = width;
@@ -150,6 +152,7 @@ class CanvasManager{
      * @param y
      * @param color
      * @param blur
+     * @static
      */
     static setShadow(ctx, x, y, color, blur){
         ctx.shadowColor = color;
@@ -161,6 +164,7 @@ class CanvasManager{
     /**
      *
      * @param image
+     * @static
      * @returns {Element}
      */
     static imageToCanvas(image){
@@ -175,6 +179,7 @@ class CanvasManager{
      *
      * @param ctx
      * @param args
+     * @static
      */
     static setLineDash(ctx, ...args){
         ctx.setLineDash(args);
@@ -185,6 +190,7 @@ class CanvasManager{
      * @param ctx
      * @param value
      * @param font
+     * @static
      * @returns {Number}
      */
     static calcTextWidth(ctx, value, font = false){
@@ -198,6 +204,7 @@ class CanvasManager{
      *
      * @param canvas
      * @param format
+     * @static
      * @returns {*}
      */
     static canvasToImage(canvas, format = "image/png"){
