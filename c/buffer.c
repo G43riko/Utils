@@ -26,7 +26,7 @@ void add(Buffer * buffer, void * item){
 	buffer -> size++;
 }
 
-void * delete(Buffer * buffer){
+void * remove(Buffer * buffer){
 	if(!buffer -> size)
 		return NULL;
 	struct node * last = buffer -> p_last;
@@ -79,13 +79,13 @@ int main(){
 	add(buffer, meno3);
 	printf("size: %d, get: %s\n", size(buffer), (char *)get(buffer));
 	printf("\n");
-	printf("del: %s\n", (char *)delete(buffer));
+	printf("del: %s\n", (char *)remove(buffer));
 	printf("size: %d, get: %s\n", size(buffer), (char *)get(buffer));
-	printf("del: %s\n", (char *)delete(buffer));
+	printf("del: %s\n", (char *)remove(buffer));
 	printf("size: %d, get: %s\n", size(buffer), (char *)get(buffer));
-	printf("del: %s\n", (char *)delete(buffer));
+	printf("del: %s\n", (char *)remove(buffer));
 	printf("size: %d, get: %s\n", size(buffer), (char *)get(buffer));
-	printf("del: %s\n", (char *)delete(buffer));
+	printf("del: %s\n", (char *)remove(buffer));
 	printf("size: %d, get: %s\n", size(buffer), (char *)get(buffer));
 	return 0;
 }

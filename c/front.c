@@ -27,7 +27,7 @@ void add(Front * front, void * item){
 	front -> size++;
 }
 
-void * delete(Front * front){
+void * remove(Front * front){
 	if(!front -> size)
 		return NULL;
 	struct node * first = front -> p_first;
@@ -82,13 +82,13 @@ int main(){
 	add(front, meno3);
 	printf("size: %d, get: %s\n", size(front), (char *)get(front));
 	printf("\n");
-	printf("del: %s\n", (char *)delete(front));
+	printf("del: %s\n", (char *)remove(front));
 	printf("size: %d, get: %s\n", size(front), (char *)get(front));
-	printf("del: %s\n", (char *)delete(front));
+	printf("del: %s\n", (char *)remove(front));
 	printf("size: %d, get: %s\n", size(front), (char *)get(front));
-	printf("del: %s\n", (char *)delete(front));
+	printf("del: %s\n", (char *)remove(front));
 	printf("size: %d, get: %s\n", size(front), (char *)get(front));
-	printf("del: %s\n", (char *)delete(front));
+	printf("del: %s\n", (char *)remove(front));
 	printf("size: %d, get: %s\n", size(front), (char *)get(front));
 	return 0;
 }
