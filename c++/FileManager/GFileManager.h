@@ -1,10 +1,12 @@
 #include <boost/iostreams/device/mapped_file.hpp> // for mmap
-#include <algorithm>  // for std::find
 #include <iostream>   // for std::cout
-#include <cstring>
 #include <sys/stat.h>
 #include <fstream>
+/*
+#include <cstring>
+#include <algorithm>  // for std::find
 #include <stdio.h>
+*/
 
 class FileManager{
 public:

@@ -1,6 +1,9 @@
 #include <algorithm>
 #include <functional>
 
+#ifndef G_HASHER_H
+#define G_HASHER_H
+
 class Hasher{
 public:
 	template<typename T>
@@ -26,3 +29,5 @@ public:
 int main(){
     return 0;
 }
+
+#endif //G_HASHER_H

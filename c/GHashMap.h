@@ -3,6 +3,9 @@
 #include <string.h>
 #include <sys/time.h>
 
+#ifndef G_HASH_MAP_H
+#define G_HASH_MAP_H
+
 struct node{
 	void * value;
 	unsigned int key;
@@ -156,7 +159,7 @@ int getHashVal(char * str){
 }
 
 
-int main(){
+int testHashMap(void){
 	Map * mapa = Map_newP(10);
 	int count = 100000;
 	char * meno = "abcdefghij";
@@ -216,3 +219,5 @@ int main(){
 	
 	return 0;
 }
+
+#endif //G_HASH_MAP_H

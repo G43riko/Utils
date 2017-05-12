@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef G_LINKED_LIST_H
+#define G_LINKED_LIST_H
+
 struct node{
 	void * data;
 	struct node * p_next;
@@ -78,7 +81,7 @@ void * deleteLast(List * list){
 	return result;
 }
 
-void * delete(List * list, int index){
+void * erase(List * list, int index){
 	if(index == 0){
 		return deleteFirst(list);
 	}
@@ -192,7 +195,7 @@ List List_new() {
 }
 
 List * List_newP() { 
-  List * res = (List *)malloc(sizeof(List))
+  List * res = (List *)malloc(sizeof(List));
   res -> size = 0;
   res -> first	= NULL;
   res -> last = NULL;
@@ -239,3 +242,5 @@ int main(void){
 	each(list, show);
 
 }
+
+#endif //G_LINKED_LIST_H

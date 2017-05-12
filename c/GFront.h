@@ -6,7 +6,7 @@ struct node{
 	struct node * p_prev;
 };
 
-typedef struct front{
+typedef struct GFront{
 	struct node * p_first;
 	struct node * p_last; 
 	int size;
@@ -27,7 +27,7 @@ void add(Front * front, void * item){
 	front -> size++;
 }
 
-void * remove(Front * front){
+void * erase(Front * front){
 	if(!front -> size)
 		return NULL;
 	struct node * first = front -> p_first;
@@ -50,7 +50,7 @@ void * get(Front * front){
 	return front -> p_first -> data;
 }
 
-Front Front_new(){
+Front Front_new(void){
 	Front res;
 	res.p_last = NULL;
 	res.p_first = NULL;
@@ -58,7 +58,7 @@ Front Front_new(){
 	return res;
 }
 
-Front * Front_newP(){
+Front * Front_newP(void){
 	Front * res = (Front *)malloc(sizeof(Front));
 	res -> p_last = NULL;
 	res -> p_first = NULL;
@@ -66,7 +66,7 @@ Front * Front_newP(){
 	return res;
 }
 
-int main(){
+int testFront(void){
 	Front * front = Front_newP();
 	char meno[] = "a";
 	char meno2[] = "b";
@@ -82,13 +82,13 @@ int main(){
 	add(front, meno3);
 	printf("size: %d, get: %s\n", size(front), (char *)get(front));
 	printf("\n");
-	printf("del: %s\n", (char *)remove(front));
+	printf("del: %s\n", (char *)erase(front));
 	printf("size: %d, get: %s\n", size(front), (char *)get(front));
-	printf("del: %s\n", (char *)remove(front));
+	printf("del: %s\n", (char *)erase(front));
 	printf("size: %d, get: %s\n", size(front), (char *)get(front));
-	printf("del: %s\n", (char *)remove(front));
+	printf("del: %s\n", (char *)erase(front));
 	printf("size: %d, get: %s\n", size(front), (char *)get(front));
-	printf("del: %s\n", (char *)remove(front));
+	printf("del: %s\n", (char *)erase(front));
 	printf("size: %d, get: %s\n", size(front), (char *)get(front));
 	return 0;
 }

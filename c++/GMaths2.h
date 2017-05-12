@@ -44,7 +44,7 @@ public:
         if(endLine)
             printf("\n");
     }
-    Vector2f& set(float x, float y){this -> x = x; this -> y = y; return *this}
+    Vector2f& set(float x, float y){this -> x = x; this -> y = y; return *this;}
     int getXi(){return (int)x;}
     int getYi(){return (int)y;}
     float dot(const Vector2f &u){return this -> x * u.x + this -> y * u.y;}

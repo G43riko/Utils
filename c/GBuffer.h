@@ -1,12 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+#ifndef	G_BUFFER_H
+#define G_BUFFER_H
+
 struct node{
 	void * data;
 	struct node * p_prev;
 };
 
-typedef struct buffer{
+typedef struct GBuffer{
 	struct node * p_last; 
 	int size;
 } Buffer;
@@ -26,7 +30,7 @@ void add(Buffer * buffer, void * item){
 	buffer -> size++;
 }
 
-void * remove(Buffer * buffer){
+void * erase(Buffer * buffer){
 	if(!buffer -> size)
 		return NULL;
 	struct node * last = buffer -> p_last;
@@ -49,21 +53,21 @@ void * get(Buffer * buffer){
 	return buffer -> p_last -> data;
 }
 
-Buffer Buffer_new(){
+Buffer Buffer_new(void){
 	Buffer res;
 	res.p_last = NULL;
 	res.size = 0;
 	return res;
 }
 
-Buffer * Buffer_newP(){
+Buffer * Buffer_newP(void){
 	Buffer * res = (Buffer *)malloc(sizeof(Buffer));
 	res -> p_last = NULL;
 	res -> size = 0;
 	return res;
 }
 
-int main(){
+int testBuffer(void){
 	Buffer * buffer = Buffer_newP();
 	char meno[] = "a";
 	char meno2[] = "b";
@@ -79,13 +83,14 @@ int main(){
 	add(buffer, meno3);
 	printf("size: %d, get: %s\n", size(buffer), (char *)get(buffer));
 	printf("\n");
-	printf("del: %s\n", (char *)remove(buffer));
+	printf("del: %s\n", (char *)erase(buffer));
 	printf("size: %d, get: %s\n", size(buffer), (char *)get(buffer));
-	printf("del: %s\n", (char *)remove(buffer));
+	printf("del: %s\n", (char *)erase(buffer));
 	printf("size: %d, get: %s\n", size(buffer), (char *)get(buffer));
-	printf("del: %s\n", (char *)remove(buffer));
+	printf("del: %s\n", (char *)erase(buffer));
 	printf("size: %d, get: %s\n", size(buffer), (char *)get(buffer));
-	printf("del: %s\n", (char *)remove(buffer));
+	printf("del: %s\n", (char *)erase(buffer));
 	printf("size: %d, get: %s\n", size(buffer), (char *)get(buffer));
 	return 0;
 }
+#endif //G_BUFFER_H
