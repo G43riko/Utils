@@ -58,21 +58,21 @@ let G = function(){
 let tests = function(G){
     let body = new G(document.body);
 
-	body.append(G.createElement("div", {id: "idecko"}, "id"));
-	body.append(G.createElement("div", {class: "classa"}, "id"));
-	body.append(G.createElement("div", {id: "rodic"}, [
-		G.createElement("div", {class: "aaa"}),
-		G.createElement("div", {class: "aaa"},
-			G.createElement("ul", {}, [
-				G.createElement("li"),
-				G.createElement("li", {class: "temno"}, "temno vnutorne"),
-				G.createElement("li"),
-				G.createElement("li")
-			])
-		),
-		G.createElement("div", {class: "aaa"})
-	]));
-	body.append(G.createElement("div", {class: "temno"}, "temno vonkajsie"));
+    body.append(G.createElement("div", {id: "idecko"}, "id"));
+    body.append(G.createElement("div", {class: "classa"}, "id"));
+    body.append(G.createElement("div", {id: "rodic"}, [
+        G.createElement("div", {class: "aaa"}),
+        G.createElement("div", {class: "aaa"},
+            G.createElement("ul", {}, [
+                G.createElement("li"),
+                G.createElement("li", {class: "temno"}, "temno vnutorne"),
+                G.createElement("li"),
+                G.createElement("li")
+            ])
+        ),
+        G.createElement("div", {class: "aaa"})
+    ]));
+    body.append(G.createElement("div", {class: "temno"}, "temno vonkajsie"));
 
 	/*
 	 * empty();
@@ -80,24 +80,24 @@ let tests = function(G){
 	 * length();
 	 * createElement();
 	 */
-	body.empty();
-	if(body.children().length() !== 0){
-		G.warn("dlžka prazdneho objektu je: " + body.length());
-	}
+    body.empty();
+    if(body.children().length() !== 0){
+        G.warn("dlžka prazdneho objektu je: " + body.length());
+    }
 
-	body.append("<div id='idecko'>jupilajda</div>");
-	body.append(new G("div", {
-		attr : {
-			class: "clasa"
-		},
-		cont: "toto je classsa"
-	}));
+    body.append("<div id='idecko'>jupilajda</div>");
+    body.append(new G("div", {
+        attr : {
+            class: "clasa"
+        },
+        cont: "toto je classsa"
+    }));
     let elementP = document.createElement("p");
-	elementP.appendChild(document.createTextNode("juhuuu toto je paragraf"));
-	body.append(elementP);
-	if(body.children().length() !== 3){
-		G.warn("dlžka objektu s 2 detmi je: " + body.children().length());
-	}
+    elementP.appendChild(document.createTextNode("juhuuu toto je paragraf"));
+    body.append(elementP);
+    if(body.children().length() !== 3){
+        G.warn("dlžka objektu s 2 detmi je: " + body.children().length());
+    }
 
     let idecko = new G("#idecko");
     let clasa = new G(".clasa");
@@ -109,49 +109,49 @@ let tests = function(G){
 	 * first();
 	 */
 
-	if(G.isDefined(new G().first())){
-		G.warn("pri prazdnom G to nevratilo ako prvý element null");
-	}
+    if(G.isDefined(new G().first())){
+        G.warn("pri prazdnom G to nevratilo ako prvý element null");
+    }
 
-	if(idecko.first() !== document.getElementById("idecko")){
-		G.warn("nenašiel sa správny element podla id");
-	}
+    if(idecko.first() !== document.getElementById("idecko")){
+        G.warn("nenašiel sa správny element podla id");
+    }
 
-	if(clasa.first() !== document.getElementsByClassName("clasa")[0]){
-		G.warn("nenašiel sa správny element podla class");
-	}
+    if(clasa.first() !== document.getElementsByClassName("clasa")[0]){
+        G.warn("nenašiel sa správny element podla class");
+    }
 
-	if(par.first() !== document.getElementsByTagName("p")[0]){
-		G.warn("nenašiel sa správny element podla tagu");
-	}
+    if(par.first() !== document.getElementsByTagName("p")[0]){
+        G.warn("nenašiel sa správny element podla tagu");
+    }
 
 	/*
 	 * css
 	 */
 
-	if(!G.isObject(idecko.css())){
-		G.warn("css() nevratilo objekt");
-	}
+    if(!G.isObject(idecko.css())){
+        G.warn("css() nevratilo objekt");
+    }
 
-	idecko.css("color", "");
-	if(idecko.css("color") !== ""){
-		G.warn("nenastavený css nieje prazdny");
-	}
+    idecko.css("color", "");
+    if(idecko.css("color") !== ""){
+        G.warn("nenastavený css nieje prazdny");
+    }
 
-	idecko.css("color", "red");
-	if(idecko.css("color") !== "red"){
-		G.warn("nesprávne to nastavilo css štýl");
-	}
+    idecko.css("color", "red");
+    if(idecko.css("color") !== "red"){
+        G.warn("nesprávne to nastavilo css štýl");
+    }
 
-	idecko.css({color: "blue", width: "200px"});
+    idecko.css({color: "blue", width: "200px"});
 
-	if(idecko.css("color") !== "blue" || idecko.css("width") !== "200px"){
-		G.warn("nesprávne to nastavilo css štýl s objektu");
-	}
+    if(idecko.css("color") !== "blue" || idecko.css("width") !== "200px"){
+        G.warn("nesprávne to nastavilo css štýl s objektu");
+    }
 
-	if(idecko.parent().first() !== body.first()){
-		G.warn("parent nefunguje správne");
-	}
+    if(idecko.parent().first() !== body.first()){
+        G.warn("parent nefunguje správne");
+    }
 
 	/*
 	 * extends
@@ -163,193 +163,193 @@ let tests = function(G){
 
     let res = G.extend({}, a, b, c);
 
-	if(res.a !== "aaa" || res.b !== "bb" || res.c !== "cccc"){
-		G.warn("nefunguje extendse pretože po zlučenie", a, b, c, " vzniklo: ", res, "a malo vzniknut: ", {a: "aaa", b: "bb", c: "cccc"});
-	}
+    if(res.a !== "aaa" || res.b !== "bb" || res.c !== "cccc"){
+        G.warn("nefunguje extendse pretože po zlučenie", a, b, c, " vzniklo: ", res, "a malo vzniknut: ", {a: "aaa", b: "bb", c: "cccc"});
+    }
 
 
 	/*
 	 * find, parents, parent, is, prev, childrens, next, attr
 	 */
 
-	G("div", {
-		attr: {id: "container"},
-		cont: [
-			G.createElement("nav", {id: "topMenu"}, [
-					G.createElement("ul", {}, [
-						G.createElement("li", {},
-							G.createElement("a", {class: "firstLink", href: "stranka"})
-						),
-						G.createElement("li", {},
-							G.createElement("a", {class: "secondLink"})
-						)
-					]),
-					G.createElement("div", {id: "wrapper", class: "wrappedDiv"},
-						G.createElement("nav", {id: "rightMenu"},
-							G.createElement("ul", {class: "secondUl"}, [
-								G.createElement("li", {class: "firstLi"},
-									G.createElement("a", {class: "firstLink"})
-								),
-								G.createElement("li", {class: "middleLi disabled"},
-									G.createElement("a", {class: "secondLink"})
-								),
-								G.createElement("li", {class: "lastLi disabled"},
-									G.createElement("a", {class: "thirdLink"})
-								),
-							])
-						)
-					)
-				]
-			)]
-	}).appendTo(body);
+    G("div", {
+        attr: {id: "container"},
+        cont: [
+            G.createElement("nav", {id: "topMenu"}, [
+                    G.createElement("ul", {}, [
+                        G.createElement("li", {},
+                            G.createElement("a", {class: "firstLink", href: "stranka"})
+                        ),
+                        G.createElement("li", {},
+                            G.createElement("a", {class: "secondLink"})
+                        )
+                    ]),
+                    G.createElement("div", {id: "wrapper", class: "wrappedDiv"},
+                        G.createElement("nav", {id: "rightMenu"},
+                            G.createElement("ul", {class: "secondUl"}, [
+                                G.createElement("li", {class: "firstLi"},
+                                    G.createElement("a", {class: "firstLink"})
+                                ),
+                                G.createElement("li", {class: "middleLi disabled"},
+                                    G.createElement("a", {class: "secondLink"})
+                                ),
+                                G.createElement("li", {class: "lastLi disabled"},
+                                    G.createElement("a", {class: "thirdLink"})
+                                ),
+                            ])
+                        )
+                    )
+                ]
+            )]
+    }).appendTo(body);
 
-	if(G("#topMenu").find(".firstLink").attr("href") !== "stranka"){
-		console.log("zlihalo 1");
-	}
-	if(G(".thirdLink").parents("#wrapper").is(".wrappedDiv") !== true){
-		console.log("zlihalo 2");
-	}
-	if(G("#rightMenu").find("ul").children(":not(.disabled)").is(".firstLi") === false){
-		console.log("zlihalo 3");
-	}
-	if(G(".middleLi").prev().is(".firstLi") !== true){
-		console.log("zlihalo 4");
-	}
-	if(G(".middleLi").next().is(".lastLi") !== true){
-		console.log("zlihalo 5");
-	}
-	if(G(".secondUl").parent().is("#rightMenu") !== true){
-		console.log("zlihalo 6");
-	}
+    if(G("#topMenu").find(".firstLink").attr("href") !== "stranka"){
+        G.log("zlihalo 1");
+    }
+    if(G(".thirdLink").parents("#wrapper").is(".wrappedDiv") !== true){
+        G.log("zlihalo 2");
+    }
+    if(G("#rightMenu").find("ul").children(":not(.disabled)").is(".firstLi") === false){
+        G.log("zlihalo 3");
+    }
+    if(G(".middleLi").prev().is(".firstLi") !== true){
+        G.log("zlihalo 4");
+    }
+    if(G(".middleLi").next().is(".lastLi") !== true){
+        G.log("zlihalo 5");
+    }
+    if(G(".secondUl").parent().is("#rightMenu") !== true){
+        G.log("zlihalo 6");
+    }
 
 	/*
-     * //click
+	 * //click
 	 */
 
-	body.append(G.createElement("span", {id: "resultSpan"}));
+    body.append(G.createElement("span", {id: "resultSpan"}));
 
-	if(G("#resultSpan").text() !== ""){
-		console.log("zlahalo 1");
-	}
-	body.append(G.createElement("input", {type: "button", id: "resultButton", value: "klikni"}));
+    if(G("#resultSpan").text() !== ""){
+        G.log("zlahalo 1");
+    }
+    body.append(G.createElement("input", {type: "button", id: "resultButton", value: "klikni"}));
 
 
     let clickFunction = function(){
-		G("#resultSpan").text("kuriatko");
-	};
+        G("#resultSpan").text("kuriatko");
+    };
 
-	G("#resultButton").click(clickFunction);
+    G("#resultButton").click(clickFunction);
 
-	G("#resultButton").first().click();
+    G("#resultButton").first().click();
 
-	if(G("#resultSpan").text() !== "kuriatko"){
-		console.log("zlahalo 2");
-	}
+    if(G("#resultSpan").text() !== "kuriatko"){
+        G.log("zlahalo 2");
+    }
 
-	G("#resultButton").unbind("click", clickFunction);
-	G("#resultSpan").text("maciatko");
-	G("#resultButton").first().click();
+    G("#resultButton").unbind("click", clickFunction);
+    G("#resultSpan").text("maciatko");
+    G("#resultButton").first().click();
 
-	if(G("#resultSpan").text() !== "maciatko"){
-		console.log("zlahalo 3");
-	}
+    if(G("#resultSpan").text() !== "maciatko"){
+        G.log("zlahalo 3");
+    }
 
 	/*
 	 * APPEND
 	 */
     let parent = new G("div", {attr: {id :"parentElement"}});
-	parent.append("<li>a</li>");
-	parent.append(new G("li", {cont: "b"}));
-	parent.append(G.createElement("li", {}, "c"));
-	if(parent.text() !== "abc"){
-		console.log("append nefunguje");
-	}
+    parent.append("<li>a</li>");
+    parent.append(new G("li", {cont: "b"}));
+    parent.append(G.createElement("li", {}, "c"));
+    if(parent.text() !== "abc"){
+        G.log("append nefunguje");
+    }
 
 	/*
 	 * HTML
 	 */
-	parent = new G("div", {attr: {id :"parentElement"}});
-	parent.html("<li>abc</li>");
-	if(parent.text() !== "abc" && parent.html() !== "<li>abc</li>"){
-		console.log("html nefunguje 1");
-	}
-	parent.html("abc");
-	if(parent.text() !== "abc" && parent.html() !== "abc"){
-		console.log("html nefunguje 2");
-	}
-	parent.html(G.createElement("li", {}, "abc"));
-	if(parent.text() !== "abc" && parent.html() !== "<li>abc</li>"){
-		console.log("html nefunguje 3");
-	}
-	parent.html("+abc");
-	if(parent.text() !== "abcabc" && parent.html() !== "<li>abc</li>abc"){
-		console.log("html nefunguje 4");
-	}
-	parent.html("+<li>abc</li>");
-	if(parent.text() !== "abcabcabc" && parent.html() !== "<li>abc</li>abc<li>abc</li>"){
-		console.log("html nefunguje 5");
-	}
-	if(parent.children().length() !== 2){
-		console.log("html nefunguje 6");
-	}
-	
+    parent = new G("div", {attr: {id :"parentElement"}});
+    parent.html("<li>abc</li>");
+    if(parent.text() !== "abc" && parent.html() !== "<li>abc</li>"){
+        G.log("html nefunguje 1");
+    }
+    parent.html("abc");
+    if(parent.text() !== "abc" && parent.html() !== "abc"){
+        G.log("html nefunguje 2");
+    }
+    parent.html(G.createElement("li", {}, "abc"));
+    if(parent.text() !== "abc" && parent.html() !== "<li>abc</li>"){
+        G.log("html nefunguje 3");
+    }
+    parent.html("+abc");
+    if(parent.text() !== "abcabc" && parent.html() !== "<li>abc</li>abc"){
+        G.log("html nefunguje 4");
+    }
+    parent.html("+<li>abc</li>");
+    if(parent.text() !== "abcabcabc" && parent.html() !== "<li>abc</li>abc<li>abc</li>"){
+        G.log("html nefunguje 5");
+    }
+    if(parent.children().length() !== 2){
+        G.log("html nefunguje 6");
+    }
 
-	//add, contains, equalAll
+
+    //add, contains, equalAll
 
     let data = new G();
     let el = G.createElement("span", {class: "pes macka"}, "volačo");
-	data.add(el);
-	data.add(G.createElement("div", {class: "pes kura"}, "niečo iné"));
-	data.add(G.createElement("p", {class: "macka kura"}, "niečo zasa iné"));
-	if(data.has(".pes").length() !== 2){
-		console.log("add nefunguje 1");
-	}
-	if(data.has(".pterodaktil").length() !== 0){
-		console.log("add nefunguje 2");
-	}
-	if(data.not(".kura").length() !== 1){
-		console.log("not nefunguje 2");
-	}
+    data.add(el);
+    data.add(G.createElement("div", {class: "pes kura"}, "niečo iné"));
+    data.add(G.createElement("p", {class: "macka kura"}, "niečo zasa iné"));
+    if(data.has(".pes").length() !== 2){
+        G.log("add nefunguje 1");
+    }
+    if(data.has(".pterodaktil").length() !== 0){
+        G.log("add nefunguje 2");
+    }
+    if(data.not(".kura").length() !== 1){
+        G.log("not nefunguje 2");
+    }
 
-	if(!data.contains(el)){
-		console.log("nefunguje contains");
-	}
+    if(!data.contains(el)){
+        G.log("nefunguje contains");
+    }
 
-	data.remove(el);
+    data.remove(el);
 
-	if(data.length() !== 2){
-		console.log("nefunguje remove");
-	}
+    if(data.length() !== 2){
+        G.log("nefunguje remove");
+    }
 
-	if(data.contains(el)){
-		console.log("nefunguje remove alebo contains");
-	}
+    if(data.contains(el)){
+        G.log("nefunguje remove alebo contains");
+    }
 
-	let dataNew = new G(data);
+    let dataNew = new G(data);
 
-	if(!data.equalAll(dataNew)){
-		console.log("nefunguje equalAll alebo konštruktor kde argument je G objekt");
-	}
-	dataNew.clear();
-	if(!dataNew.isEmpty()){
-		console.log("nefunguje clear");
-	}
-	if(data.equalAll(dataNew)){
-		console.log("nefunguje equalAll alebo clear");
-	}
+    if(!data.equalAll(dataNew)){
+        G.log("nefunguje equalAll alebo konštruktor kde argument je G objekt");
+    }
+    dataNew.clear();
+    if(!dataNew.isEmpty()){
+        G.log("nefunguje clear");
+    }
+    if(data.equalAll(dataNew)){
+        G.log("nefunguje equalAll alebo clear");
+    }
 
-	//delete, deleteAll
-	let items = new G(".disabled");
-	items.delete();
-	if(items.length() !== 1){
-		console.log("nefunguje delete");
-	}
+    //delete, deleteAll
+    let items = new G(".disabled");
+    items.delete();
+    if(items.length() !== 1){
+        G.log("nefunguje delete");
+    }
 
-	let items2 = new G("ul");
-	items2.deleteAll();
-	if(!items2.isEmpty()){
-		console.log("nefunguje deleteAll");
-	}
+    let items2 = new G("ul");
+    items2.deleteAll();
+    if(!items2.isEmpty()){
+        G.log("nefunguje deleteAll");
+    }
 };
 
 
@@ -465,13 +465,13 @@ G.loadScript = function(src, async) {
 */
 
 G.loadScript = function(url, callback){
-    let script = document.createElement("script")
+    let script = document.createElement("script");
     script.type = "text/javascript";
 
     if(script.readyState){  //IE
         script.onreadystatechange = function(){
-            if (script.readyState == "loaded" ||
-                    script.readyState == "complete"){
+            if (script.readyState === "loaded" ||
+                    script.readyState === "complete"){
                 script.onreadystatechange = null;
                 callback();
             }
@@ -1203,7 +1203,6 @@ G.prototype.equal = function(element) {
 /*************************************************************************************
  FUNKCIE NA ZJEDNODUSENIE
  *************************************************************************************/
-
 
 G.prototype.width = function(){//testovane 26.1.2017
 	if(this.isEmpty()){
@@ -1984,29 +1983,31 @@ let GO = function(element){
         target.prev = () => makeGO(target.previousSibling);
         target.next = () => makeGO(target.nextSibling);
 
-        target.text = () => {return {
-            get: () => target.textContent,
-            set: content => {
-                if(!G.isString(content)){
-                    G.warn("Argument[content] musí byť typu string a teraz je ", content);
+        target.text = () => {
+        	return {
+				get: () => target.textContent,
+				set: content => {
+					if(!G.isString(content)){
+						G.warn("Argument[content] musí byť typu string a teraz je ", content);
 
-                }
-                target.textContent = content;
-                return target;
-            },
-            add: content => {
-                if(!G.isString(content)){
-                    G.warn("Argument[content] musí byť typu string a teraz je ", content);
-                    return
-                }
-                target.textContent += content;
-                return target;
-            },
-            clear: () => {
-                target.textContent = "";
-                return target;
-            }
-        }};
+					}
+					target.textContent = content;
+					return target;
+				},
+				add: content => {
+					if(!G.isString(content)){
+						G.warn("Argument[content] musí byť typu string a teraz je ", content);
+						return;
+					}
+					target.textContent += content;
+					return target;
+				},
+				clear: () => {
+					target.textContent = "";
+					return target;
+				}
+			};
+        };
         target.attr = name => {
             if(!G.isString(name)){
                 G.warn("Argument[name] musí byť typu string a teraz je ", name);
@@ -2022,7 +2023,7 @@ let GO = function(element){
                     target.removeAttribute(name);
                     return target;
                 }
-            }
+            };
         };
         target.css = function(name){
             if(!G.isString(name)){
@@ -2039,7 +2040,7 @@ let GO = function(element){
                     target.style[name] = null;
                     return target;
                 }
-            }
+            };
         };
         target.class = function(name){
             if(!G.isString(name)){
@@ -2057,7 +2058,7 @@ let GO = function(element){
                     return target;
                 },
                 toggle: (force = undefined) => target.classList.toggle(name, force)
-            }
+            };
         };
         return target;
     };
@@ -2087,21 +2088,21 @@ G.object = function(element){
 				set: content => element.textContent = content,
 				add: content => element.textContent += content,
 				clear: () => element.textContent = ""
-			}
+			};
         },
     	attr: name => {
             return {
                 set: value => element.setAttribute(name, value),
                 get: () => element.getAttribute(name),
                 remove: () => element.removeAttribute(name)
-			}
+			};
 		},
 		css: name => {
             return {
             	set: value => element.style[name] = value,
 				get: () => element.style[name],
 				remove: () => element.style[name] = null
-			}
+			};
 		},
         class: name => {
             return {
@@ -2109,9 +2110,9 @@ G.object = function(element){
                 has: () => element.classList.has(name),
                 remove: () => element.classList.remove(name),
                 toggle: (force) => element.classList.toggle(name, force)
-            }
+            };
         }
-	}
+	};
 };
 /*
  G.ajax();
