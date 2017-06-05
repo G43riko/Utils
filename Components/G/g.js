@@ -8,47 +8,56 @@
  * @returns {G}
  * @constructor
  */
-let G = function(){
+let G = function(...args){
 	//ak sa nevolá ako konštruktor
 	if(!(this instanceof G)){
-		let inst = Object.create(G.prototype);
-		G.apply(inst, arguments);
+		const inst = Object.create(G.prototype);
+		G.apply(inst, args);
 		return inst;
 	}
-	if(arguments.length === 0){
+	//ak nieje žiadny argument tak vytoríme prazdne pole objektov a skončíme
+	if(args.length === 0){
 		this.elements = [];
+		return;
 	}
-	else if(arguments.length === 1){
-		if(G.isString(arguments[0])){ //query selector
-			this.elements = G.find(arguments[0]);
+
+	//ak su 2 argumenty a prvý je string a druhý objekt tak vytvoríme pole z jedným, práve vytvorenym elementom
+	if(args.length === 2 && G.isString(args[0]) && G.isObject(args[1])){
+		this.elements = [G.createElement(args[0], 
+										 args[1].attr  || {}, 
+										 args[1].cont  || "", 
+										 args[1].style || {})];
+		return;
+	}
+
+	if(args.length === 1){
+		if(G.isString(args[0])){ //query selector
+			this.elements = G.find(args[0]);
 		}
-		else if(G.isArray(arguments[0])){ //pole elementov
+		else if(G.isArray(args[0])){ //pole elementov
 			this.elements = [];
-			G.each(arguments[0], e => {
+			G.each(args[0], e => {
 				if(G.isElement(e)){
 					this.elements[this.elements.length] = e;
 				}
 			});
 		}
-		else if(G.isElement(arguments[0])){ //HTML Element
-			this.elements = [arguments[0]];
+		else if(G.isElement(args[0])){ //HTML Element
+			this.elements = [args[0]];
 		}
-		else if(arguments[0] !== null && G.isDefined(arguments[0]) && G.isG(arguments[0])){ //G Object
-			this.elements = arguments[0].elements;
+		else if(args[0] !== null && G.isDefined(args[0]) && G.isG(args[0])){ //G Object
+			this.elements = args[0].elements;
 		}
-	}
-	else if(arguments.length === 2 && G.isString(arguments[0]) && G.isObject(arguments[1])){
-		this.elements = [G.createElement(arguments[0], arguments[1].attr, arguments[1].cont, arguments[1].style)];
 	}
 
 	//ak nieje definované pole elementov upozorníme používatela a vytvoríme ho
 	if(G.isUndefined(this.elements)){
-		G.warn("nepodarilo sa rozpoznať argumenty: ", arguments);
+		G.warn("G: nepodarilo sa rozpoznať argumenty: ", args);
 		this.elements = [];
 	}
 	//ak zoznam elementov nieje pole tak vytvoríme pole a upozorníme používatela
 	if(!G.isArray(this.elements)){
-		G.warn("elementy niesu pole ale " + G.typeOf(this.elements), arguments);
+		G.warn("G: elementy niesu pole ale " + G.typeOf(this.elements), args);
 		this.elements = [];
 	}
 	this.size = this.length();
@@ -445,25 +454,6 @@ G.ajax = function(url, options, dataType){
  * @param async
  * @returns {Element|*}
  */
- /*
-G.loadScript = function(src, async) {
-    let script, tag;
-
-	if(!G.isBool(async)){
-		async = false;
-	}
-
-    script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.async = async;
-    script.src = src;
-
-    tag = G.byTag('script')[0];
-    tag.parentNode.insertBefore(script, tag);
-    return script;
-};
-*/
-
 G.loadScript = function(url, callback){
     let script = document.createElement("script")
     script.type = "text/javascript";
@@ -486,6 +476,24 @@ G.loadScript = function(url, callback){
     script.src = url;
     document.G.byTag('head')[0].appendChild(script);
 };
+ /*
+G.loadScript = function(src, async) {
+    let script, tag;
+
+	if(!G.isBool(async)){
+		async = false;
+	}
+
+    script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.async = async;
+    script.src = src;
+
+    tag = G.byTag('script')[0];
+    tag.parentNode.insertBefore(script, tag);
+    return script;
+};
+*/
 
 /*************************************************************************************
  UTILITOVE FUNKCIE
@@ -504,27 +512,36 @@ G.byId 		= title => document.getElementById(title);
  * @returns {boolean}
  */
 G.hasClass = function(element, className){
-	if(G.isElement(element) && G.isString(className)){
-		return element.classList.contains(className);
+	//ak nieje zadaný element kotrý sa má overovať
+	if(!G.isElement(element)){
+		G.warn("G.hasClass: prvý argument element[Element] je: ", element);
+		return false;
 	}
-	G.warn("argumenty musia byť (element, string) a sú ", G.typeOf(element), G.typeOf(className));
-	return false;
+
+	//ak nieje zadaný trieda ktorá sa má overovať
+	if(!G.isString(className)){
+		G.warn("G.hasClass: druhý argument className[String] je: ", className);
+		return false;
+	}
+
+	//vrátime výsledok overovania
+	return element.classList.contains(className);
 };
 
 /**
  * Funkcie spracuje chybové hlášky
- * @param arguments
+ * @param args
  */
-G.error = function(){
-	console.error.apply(console, arguments);
+G.error = function(...args){
+	console.error.apply(console, args);
 };
 
-G.warn = function(){
-	console.warn.apply(console, arguments);
+G.warn = function(...args){
+	console.warn.apply(console, args);
 };
 
-G.log = function(){
-	console.log.apply(console, arguments);
+G.log = function(...args){
+	console.log.apply(console, args);
 };
 
 /*
@@ -553,25 +570,29 @@ G.createElement = function(name, attr, cont, style){
 
 	//ak je prvý parameter objekt tak zavoláme rekurzívne túto funkciu s hodnotami objektu
 	if(G.isObject(name)){
-		if(G.isString(name.name)){
-			G.createElement(name.name, name.attr || {}, name.cont || "", name.style || {});
+		//ak objekt s udajmy o novom element neobsahuje názov elementu
+		if(!G.isString(name.name)){
+			G.warn("G.createElement: prví parameter musí byť typu [Object] ktorý obsahuje name[String] a je: ", name);
+			return null;
 		}
-		else{
-			return G.warn("prví parameter funkcie[Object] musí obsahovať name[String] ale ten je: ", name.name);
-		}
+
+		return G.createElement(name.name, name.attr || {}, name.cont || "", name.style || {});
 	}
 
-	//Vytvoríme element podla názvu
-	if(G.isString(name)){
-		el = document.createElement(name);
+	//ak nieje zadané meno elementu
+	if(!G.isString(name)){
+		G.warn("G.createElement: prvý parameter name[String] je: ", name);
+		return null;
+		
 	}
-	else{
-		return G.warn("prvý parameter(nazov elementu) musí byť string a je: ", name);
-	}
+
+	el = document.createElement(name);
+
 	//Ak sú atributy objekt tak priradíme elementu všetky atribúty
 	if(G.isObject(attr)){
 		G.each(attr, (e, i) => el.setAttribute(i, e));
 	}
+
 	//Ak sú štýly objekt tak priradíme elementu všetky štýly
 	if(G.isObject(style)){
 		G.each(style, (e, i) => el.style[i] = e);
@@ -630,20 +651,24 @@ G.isElement = obj => {
 
 
 /**
- * Funkcia vráti posledný prvok pola ak existuje alebo undefined
+ * Funkcia vráti posledný prvok pola ak existuje alebo null
  *
  * @param arr - pole ktorého posledný prvok potrebujeme
- * @returns {*} - posledný prvok alebo undefined
+ * @returns {*} - posledný prvok alebo null
  */
 G.last = function(arr){
+	//ak pole ktorému hladáme koniec nieje pole tak vrátime null
 	if(!G.isArray(arr)){
-		return undefined;
+		return null;
 	}
 
-	if(arr.length === 0){
-		return undefined;
+
+	//ak je pole prázdne vrátime null
+	if(G.isEmpty(arr)){
+		return null;
 	}
 
+	//vrátime posledný prvok
 	return arr[arr.length - 1];
 };
 
@@ -679,20 +704,24 @@ G.isIn = function(obj, data){//testovane 8.1.2017
  * @returns {*}
  */
  G.extend = function(target, ... args){
-	 if(G.isObject(target)){
-		G.each(args, (e, i) => {
-			if(G.isObject(e)){
-				G.each(e, (ee, key) => target[key] = ee);
-			}
-			else{
-				G.warn("args[" + i + "] ma byť object a je : ", e);
-			}
-		});
-	 }
-	 else{
-	 	G.warn("prvý argument musí byť objekt. teraz je: ", target);
-	 }
-	 return target;
+ 	//ak objekt do ktorého sa ide mergovať nieje objekt tak skončíme
+ 	if(!G.isObject(target)){
+		G.warn("G.extend: prvý parameter target[Object] je: ", target);
+		return target;
+ 	}
+
+	G.each(args, (e, i) => {//TODO ak je to objekt musí sa toto pravdepodobne volať rekurzivne
+		//ak argument nieje objekt
+		if(G.isObject(e)){
+			G.each(e, (ee, key) => target[key] = ee);
+		}
+		else{
+			G.warn("G.extend:  argument args[" + i + "][Object] je : ", e);
+		}
+	});
+
+	//vrátime zmergovaný objekt
+	return target;
  };
 
 /**
@@ -708,7 +737,7 @@ G.isIn = function(obj, data){//testovane 8.1.2017
 		return element.matches(queryString);
 	}
 	catch(err){
-		G.warn(err);
+		G.warn("G.matches: ", err);
 	}
  	return false;
  };
@@ -724,46 +753,51 @@ G.isIn = function(obj, data){//testovane 8.1.2017
  */
 G.each = function(obj, func, thisArg){
     let i;
-	if(G.isObject(obj) && G.isFunction(func)){
-		if(G.isArray(obj)){
-			if(G.isObject(thisArg)){
-				for(i = 0 ; i<obj.length ; i++){
-					if(func.call(thisArg, obj[i], i, obj) === false){
-						break;
-					}
+    if(!G.isObject(obj)){
+		G.warn("G.each: prvý parameter obj[Object] je:", obj);
+		return false;
+    }
+    if(!G.isFunction(func)){
+		G.warn("G.each: druhý parameter func[Function] je:", func);
+		return false;
+    }
+
+
+	if(G.isArray(obj)){
+		if(G.isObject(thisArg)){
+			for(i = 0 ; i<obj.length ; i++){
+				if(func.call(thisArg, obj[i], i, obj) === false){
+					break;
 				}
 			}
-			else{
-				for(i = 0 ; i<obj.length ; i++){
-					if(func(obj[i], i, obj) === false){
+		}
+		else{
+			for(i = 0 ; i<obj.length ; i++){
+				if(func(obj[i], i, obj) === false){
+					break;
+				}
+			}
+		}
+	}
+	else{
+		if(G.isObject(thisArg)){
+			for(i in obj){
+				if(obj.hasOwnProperty(i)){
+					if(func.call(thisArg, obj[i], i, obj) === false){
 						break;
 					}
 				}
 			}
 		}
 		else{
-			if(G.isObject(thisArg)){
-				for(i in obj){
-					if(obj.hasOwnProperty(i)){
-						if(func.call(thisArg, obj[i], i, obj) === false){
-							break;
-						}
-					}
-				}
-			}
-			else{
-				for(i in obj){
-					if(obj.hasOwnProperty(i)){
-						if(func(obj[i], i, obj) === false){
-							break;
-						}
+			for(i in obj){
+				if(obj.hasOwnProperty(i)){
+					if(func(obj[i], i, obj) === false){
+						break;
 					}
 				}
 			}
 		}
-	}
-	else{
-		G.warn("argumenty majú byť (object, function) a sú:", obj, func);
 	}
 };
 
@@ -778,22 +812,26 @@ G.each = function(obj, func, thisArg){
 G.find = function(queryString, parent){//testovane 28.1.2017
     let result = [];
 
-    //ak nieje zadaný parent alebo parent nieje element tak parent bude document
-	if(!G.isElement(parent)){
-		parent = document;
-	}
-
 	//ak queryString nieje String
 	if(!G.isString(queryString)){
-        G.warn("argument funkcie musí byť string a je ", queryString);
+        G.warn("G.find: prvý parameter queryString[String] je ", queryString);
         return result;
 	}
 
-	//získame elementy a pridáme ich do pola
-    let data = parent.querySelectorAll(queryString);
+    //ak nieje zadaný parent alebo parent nieje element tak sa parent nastavný na document
+	if(!G.isElement(parent)){
+        //G.warn("G.find: druhý parameter parent[Element] je ", parent);
+		parent = document;
+	}
+
+
+	//získame elementy do notlive collection
+    const data = parent.querySelectorAll(queryString);
+
+    //prejdeme všetký elementy a pridáme ich do výsledného pola
     G.each(data, e => result[result.length] = e);
 
-    //vrátime výsledok
+    //vrátime výsledné pole
     return result;
 };
 
@@ -806,7 +844,7 @@ G.find = function(queryString, parent){//testovane 28.1.2017
 G.parent = function(element){//testovane 28.1.2017
 	//ak argument nieje element;
 	if(!G.isElement(element)){
-        G.warn("argument funcie musí byť element a teraz je: ", element);
+        G.warn("G.parent: prvý parameter element[Element] je: ", element);
         return null;
 	}
 
@@ -910,8 +948,8 @@ G.text = function(element, text, append = false){
  */
 G.html = function(element, html, append = false){//testovane 29.1.2017
 	//ak prvý argument nieje element
-	if(G.isElement(element)) {
-        G.warn("prvý argument musí byť objekt a je: ", element);
+	if(!G.isElement(element)) {
+        G.warn("G.html: prvý parameter element[Element] je: ", element);
         return null;
     }
 
@@ -982,23 +1020,24 @@ G.prev = function (params){//testovane 28.1.2017
  */
 
 G.childrens = function(element, condition = "*"){
+	//ak nieje podmienka vyhladavanie nieje string alebo je prázdny string tak ho nastavíme na predvolený
 	if(!G.isString(condition) || G.isEmpty(condition)){
 		condition = "*";
 	}
 	let result = [];
-	if(G.isElement(element)){
-        let data = element.children;
-		G.each(data, element => {
-			if(result.indexOf(element) < 0){//ak sa nenachádze medzi výsledkami
-				if(G.matches(element, condition)){
-					result[result.length] = element;
-				}
+	if(!G.isElement(element)){
+		G.warn("G.childrens: prvý paramter element[element] je: ", element);
+		return result;
+	}
+
+    const data = element.children;
+	G.each(data, element => {
+		if(result.indexOf(element) < 0){//ak sa nenachádze medzi výsledkami
+			if(G.matches(element, condition)){
+				result[result.length] = element;
 			}
-		});
-	}
-	else{
-		G.warn("argument funcie musí byť element a teraz je: ", element);
-	}
+		}
+	});
 	return result;
 };
 
@@ -1014,11 +1053,11 @@ G.children = function(element, condition = "*"){//testovane 28.1.2017 //deprecat
  */
 G.delete = function(element){//testovane 21.2.2017
 	//pokúsime sa získať rodičovy element;
-	let parent = G.parent(element);
+	const parent = G.parent(element);
 
 	//ak získaný rodič nieje element
 	if(!G.isElement(parent)){
-		G.warn("nepodarilo sa získať rodičovský element");
+		G.warn("G.delete: nepodarilo sa získať rodiča elementu ", element);
 		return;
 	}
 	//zmažeme element
@@ -1090,7 +1129,7 @@ G.prototype.add = function(){//testovane 21.2.2017
 			this.elements.push.apply(this, G.find(e));
 		}
 		else{
-			G.warn("argumenty funkcie: (string[]), " + i +" -ty argument: ", e);
+			G.warn("G.prototype.add: argumenty funkcie: (string[]), " + i +" -ty argument: ", e);
 		}
 	});
 	return this;
@@ -1167,15 +1206,15 @@ G.prototype.equalAll = function(obj){//testovane 21.2.2017
  * @returns {boolean}
  */
 G.prototype.contains = function(element){//testovane 21.2.2017
-	if(G.isElement(element)){
-		for(let i=0 ; i<this.elements.length ; i++){
-			if(this.elements[i] === element){
-				return true;
-			}
-		}
+	if(!G.isElement(element)){
+		G.warn("G.prototype.contains: prvý paramter element[Element] je: ", element);
+		return false;
 	}
-	else{
-		G.warn("argument funkcie musí byť element a teraz je: ", element);
+
+	for(let i=0 ; i<this.elements.length ; i++){
+		if(this.elements[i] === element){
+			return true;
+		}
 	}
 
 	return false;
@@ -1195,7 +1234,7 @@ G.prototype.equal = function(element) {
 		return this.first() === element;
 	}
 	else{
-		G.warn("argument funkcie môže byť iba element alebo G objekt");
+		G.warn("G.prototype.equal: prvý parameter element[Element|G] je ", element);
 	}
 	return false;
 };
@@ -1405,12 +1444,13 @@ G.prototype.isEmpty = function(){//testovane 29.1.2017
 };
 
 G.prototype.each = function(func, ...args){//testovane 29.1.2017
-	if(G.isFunction(func)){
-		G.each(this.elements, e => func.apply(e, args));
+	//aj callback nieje funkcia tak skončíme
+	if(!G.isFunction(func)){
+		G.warn("G.prototype.each: prvý parameter func[Function] je: ", func);
+		return this;
 	}
-	else{
-		G.warn("prvý parameter musí byť funkcia a je: ", func);
-	}
+
+	G.each(this.elements, e => func.apply(e, args));
 
 	return this;
  };
@@ -1447,7 +1487,7 @@ G.prototype.prependTo = function(data){//TODO otestovať
 		data.parent().first().insertBefore(this.first(), data.parent().first().firstElementChild);
 	}
 	else{
-		G.warn("argument funkcie musí byť element a je: ", data);
+		G.warn("G.prototype.prependTo: argument funkcie musí byť element a je: ", data);
 	}
 	return this;
 };
@@ -1469,7 +1509,7 @@ G.prototype.appendTo = function(data){//testovane 28.1.2017
 		data.first().appendChild(this.first());
 	}
 	else{
-		G.warn("argument funkcie musí byť element a je: ", data);
+		G.warn("G.prototype.appendTo: argument funkcie musí byť element a je: ", data);
 	}
 
 	return this;
@@ -1492,7 +1532,7 @@ G.prototype.prepend = function(data){//testovane 29.1.2017
 		this.html(data + this.html());
 	}
 	else{
-		G.warn("argument funkcie musí byť element alebo string a teraz je: ", data);
+		G.warn("G.prototype.prepend: argument funkcie musí byť element alebo string a teraz je: ", data);
 	}
 	return this;
 };
@@ -1518,7 +1558,7 @@ G.prototype.append = function(data){//testovane 28.1.2017 //testovane 29.1.2017
 		this.first().appendChild(data.first());
 	}
 	else{
-		G.warn("argument funkcie musí byť element alebo string a teraz je: ", data);
+		G.warn("G.prototype.append: argument funkcie musí byť element alebo string a teraz je: ", data);
 	}
 
 	return this;
@@ -1661,7 +1701,7 @@ G.prototype.class = function(name, force){//testovane 28.1.2017
 
 G.css = function(element, ...args){
     if(!G.isElement(element)){
-        G.warn("Prvý agument[element] musí byť element a teraz je:", element);
+        G.warn("G.css: prvý parameter element[Element] je:", element);
         return;
     }
 
@@ -1713,13 +1753,13 @@ G.css = function(element, ...args){
  * @returns {*}
  */
 G.prototype.css = function(){//testovane 29.1.2017
-    let result = G.css(this.first(), arguments[0], arguments[1]);
+    const result = G.css(this.first(), arguments[0], arguments[1]);
     return G.isUndefined(result) ? this : result;
 };
 
 G.attr = function(element, ...arg){
 	if(!G.isElement(element)){
-		G.warn("Prvý agument[element] musí byť element a teraz je:", element);
+		G.warn("G.attr: prvý parameter element[Element] je:", element);
 		return;
 	}
 
@@ -1757,7 +1797,7 @@ G.attr = function(element, ...arg){
         });
     }
     else{
-        G.warn("prvý parameter musí byť String alebo objekt a je: ", arguments[0]);
+        G.warn("G.attr: druhý parameter arg[0][String|Object] je: ", arguments[0]);
     }
 };
 
@@ -1792,27 +1832,32 @@ G.prototype.attr = function(){//testovane 29.1.2017
  */
 G._modifyListener = function(element, listener, func, type){//testovane 29.1.2017
     let allowedListeners = ["click", "blur", "submit", "focus", "scroll", "keydown", "keyup", "dblclick"];
-	if(G.isElement(element)){
-		if(G.isIn(listener, allowedListeners)){
-			if(G.isFunction(func)){
-				if(type === "unbind"){
-					element.removeEventListener(listener, func);
-				}
-				else if(type === "bind"){
-					element.addEventListener(listener, func);
-				}
-			}
-			else{
-				G.warn("tretí parameter musí byť funkcia ale je", G.typeOf(func));
-			}
-		}
-		else{
-			G.warn("druhý parameter nieje platný listenre");
-		}
+
+    //ak element ktorý sa ide modifikovať nieje element tak skončíme
+    if(!G.isElement(element)){
+    	G.warn("G._modifyListener: prvý parameter element[Element] je", element);
+    	return element;
+    }
+
+    //ak listener ktorý sa ide modifikovať nieje platný tak skončíme
+    if(!G.isIn(listener, allowedListeners)){
+    	G.warn("G._modifyListener: druhý parameter(", listener, ") nieje platný listenre");
+    	return element;
+    }
+
+    //ak callback nieje funkcia tak skončíme
+    if(!G.isFunction(func)){
+    	G.warn("G._modifyListener: tretí parameter func[Function] je ",func);
+    	return element;
+    }
+
+	if(type === "unbind"){
+		element.removeEventListener(listener, func);
 	}
-	else{
-		G.warn("prví parameter musí byť element ale je", G.typeOf(element));
+	else if(type === "bind"){
+		element.addEventListener(listener, func);
 	}
+
 	return element;
 };
 
@@ -1835,16 +1880,17 @@ G.prototype.undelegate = function(listener, func){//TODO otestovať
  * @returns {G}
  */
 G.prototype.delegate = function(condition, listener, func){//TODO otestovať
-	if(G.isString(condition)){
-		this.bind(listener, (e) => {
-			if(G.matches(e.target, condition)){
-				func(e);
-			}
-		});
+	if(!G.isString(condition)){
+		G.warn("G.prototype.delegate: prvy parameter contidion[String] je ", condition);
+		return this;
 	}
-	else{
-		G.warn("prví parameter musí byť string a teraz je ", G.typeOf(condition));
-	}
+
+	this.bind(listener, (e) => {
+		if(G.matches(e.target, condition)){
+			func(e);
+		}
+	});
+
 	return this;
 	
 };
@@ -1942,7 +1988,7 @@ G.top = function(element){//testovane 29.1.2017
  */
 G.size = function(element){//testovane 29.1.2017
 	if(!G.isElement(element)){
-		G.warn("argument musí byť element");
+		G.warn("G.size: prvý parameter element[Element] je: ", element);
 		return {width: 0, height: 0};
 	}
 	return {
@@ -2070,6 +2116,31 @@ let GO = function(element){
 	}
     return element;
 };
+
+
+G.create = {
+	table: function(args){
+
+	},
+	input: function(argument){
+		let data = {
+			name: "input"
+		};
+		return {
+			text: function(args = {}){
+				let attributes = {type: "text"};
+				if(args.placeholder){attributes.placeholder = args.placeholder;}
+				if(args.onchange){attributes.onchange = args.onchange;}
+				if(args.value){attributes.value = args.value;}
+				if(args.class){attributes.class = args.class;}
+				if(args.name){attributes.name = args.name;}
+				if(args.id){attributes.id = args.id;}
+				data.attr = attributes;
+				return G.createElement(data);
+			}
+		}
+	}
+}
 
 G.object = function(element){
 	"use strict";
