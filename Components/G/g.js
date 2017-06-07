@@ -10,9 +10,12 @@
  * @constructor
  */
 
-let G = function(...args){
+let G;
+
+G = function(...args){
+
     //ak sa nevolá ako konštruktor
-    if(!(this instanceof G)){
+    if(!((this) instanceof G)){
         const inst = Object.create(G.prototype);
         G.apply(inst, args);
         return inst;
@@ -38,7 +41,7 @@ let G = function(...args){
         }
         else if(G.isArray(args[0])){ //pole elementov
             this.elements = [];
-            G.each(args[0], e => {
+            G.each(args[0], (e) => {
                 if(G.isElement(e)){
                     this.elements[this.elements.length] = e;
                 }
@@ -67,11 +70,13 @@ let G = function(...args){
 
 
 let tests = function(G){
+    "use strict";
+
     function justCallFunctions(){
         function callAndPrint(title, ...args){
             G.log("vola sa:" + title + ":", G[title].apply(window, args));
         }
-        G();
+        let tmp = new G();
         let bodyElement = document.body;
         callAndPrint("loadScript");
         callAndPrint("byClass", "*");
@@ -89,7 +94,7 @@ let tests = function(G){
         callAndPrint("isIn");
         callAndPrint("extend", {});
         callAndPrint("matches", bodyElement);
-        callAndPrint("each", {}, a => a);
+        callAndPrint("each", {}, (a) => a);
         callAndPrint("find", "*");
         callAndPrint("parent", bodyElement);
         callAndPrint("parents", bodyElement);
@@ -101,7 +106,7 @@ let tests = function(G){
         callAndPrint("class", bodyElement);
         callAndPrint("css", bodyElement);
         callAndPrint("attr", bodyElement);
-        callAndPrint("_modifyListener", bodyElement, "click", a => a);
+        callAndPrint("_modifyListener", bodyElement, "click", (a) => a);
         callAndPrint("position", bodyElement);
         callAndPrint("width", bodyElement);
         callAndPrint("height", bodyElement);
@@ -175,7 +180,7 @@ let tests = function(G){
         window.console.assert(!G.class(element, "b"), "obsahuje triedu ktorú nemá zadanú6");
         window.console.assert(!G.class(element, "c"), "obsahuje triedu ktorú nemá zadanú7");
     };
-    localTests.testHTML = function(){};
+    //localTests.testHTML = function(){};
     localTests.testText = function(){
         let a = G.createElement("input");
         window.console.assert(G.text(a) === "", "text nieje prázdny");
@@ -213,17 +218,17 @@ let tests = function(G){
         let result = G.extend(a, b, c);
         window.console.assert(result.aa.b === "bb", "nefunguje extends");
     };
-    localTests.testAjax = function(){};
-    localTests.testParents = function(){};
-    localTests.testEach = function(){};
-    localTests.testContainsIsHas = function(){};
+    //localTests.testAjax = function(){};
+    //localTests.testParents = function(){};
+    //localTests.testEach = function(){};
+    //localTests.testContainsIsHas = function(){};
 
 
     //zavoláme všetky lokálne testy
-    G.each(localTests, e => e());
+    G.each(localTests, (e) => e());
 
     //zavoláme všetky funkcie z defaultným argumentom aby prešli
-    //justCallFunctions();
+    justCallFunctions();
 
     G.log("...................................");
     let body = new G(document.body);
@@ -342,7 +347,7 @@ let tests = function(G){
      * find, parents, parent, is, prev, childrens, next, attr
      */
 
-    G("div", {
+    new G("div", {
         attr: {id: "container"},
         cont: [
             G.createElement("nav", {id: "topMenu"}, [
@@ -365,7 +370,7 @@ let tests = function(G){
                                 ),
                                 G.createElement("li", {class: "lastLi disabled"},
                                     G.createElement("a", {class: "thirdLink"})
-                                ),
+                                )
                             ])
                         )
                     )
@@ -373,22 +378,22 @@ let tests = function(G){
             )]
     }).appendTo(body);
 
-    if(G("#topMenu").find(".firstLink").attr("href") !== "stranka"){
+    if(new G("#topMenu").find(".firstLink").attr("href") !== "stranka"){
         window.console.log("zlihalo 1");
     }
-    if(G(".thirdLink").parents("#wrapper").is(".wrappedDiv") !== true){
+    if(new G(".thirdLink").parents("#wrapper").is(".wrappedDiv") !== true){
         window.console.log("zlihalo 2");
     }
-    if(G("#rightMenu").find("ul").children(":not(.disabled)").is(".firstLi") === false){
+    if(new G("#rightMenu").find("ul").childrens(":not(.disabled)").is(".firstLi") === false){
         window.console.log("zlihalo 3");
     }
-    if(G(".middleLi").prev().is(".firstLi") !== true){
+    if(new G(".middleLi").prev().is(".firstLi") !== true){
         window.console.log("zlihalo 4");
     }
-    if(G(".middleLi").next().is(".lastLi") !== true){
+    if(new G(".middleLi").next().is(".lastLi") !== true){
         window.console.log("zlihalo 5");
     }
-    if(G(".secondUl").parent().is("#rightMenu") !== true){
+    if(new G(".secondUl").parent().is("#rightMenu") !== true){
         window.console.log("zlihalo 6");
     }
 
@@ -398,29 +403,29 @@ let tests = function(G){
 
     body.append(G.createElement("span", {id: "resultSpan"}));
 
-    if(G("#resultSpan").text() !== ""){
+    if(new G("#resultSpan").text() !== ""){
         window.console.log("zlahalo 1");
     }
     body.append(G.createElement("input", {type: "button", id: "resultButton", value: "klikni"}));
 
 
     let clickFunction = function(){
-        G("#resultSpan").text("kuriatko");
+        new G("#resultSpan").text("kuriatko");
     };
 
-    G("#resultButton").click(clickFunction);
+    new G("#resultButton").click(clickFunction);
 
-    G("#resultButton").first().click();
+    new G("#resultButton").first().click();
 
-    if(G("#resultSpan").text() !== "kuriatko"){
+    if(new G("#resultSpan").text() !== "kuriatko"){
         window.console.log("zlahalo 2");
     }
 
-    G("#resultButton").unbind("click", clickFunction);
-    G("#resultSpan").text("maciatko");
-    G("#resultButton").first().click();
+    new G("#resultButton").unbind("click", clickFunction);
+    new G("#resultSpan").text("maciatko");
+    new G("#resultButton").first().click();
 
-    if(G("#resultSpan").text() !== "maciatko"){
+    if(new G("#resultSpan").text() !== "maciatko"){
         window.console.log("zlahalo 3");
     }
 
@@ -525,17 +530,20 @@ let tests = function(G){
 /**
  * Funkcia spustí AJAXové volanie na danu url a po uspešnej odpovedi zavolá callback funkciu
  *
- * @param {String}			url
- * @param {Object|Function}	options
- * @param {Function=}	    options.loadStart
- * @param {Function=}	    options.loadEnd
+ * @param {String}          url
+ * @param {Object|Function} options
+ * @param {Function=}       options.loadStart
+ * @param {Function=}       options.loadEnd
  * @param {String=}         options.method
  * @param {String=}         options.dataType
- * @param {Boolean=}	    options.async
- * @param {String=} 		dataType
+ * @param {Boolean=}        options.async
+ * @param {String=}         dataType
  * @returns {Boolean|Object}
  */
-G.ajax = function(url, options, dataType){//TODO pred options(ako callback) by mali ísť parametre
+
+G.ajax = function(url, options, dataType){
+    "use strict";
+    // TODO: pred options(ako callback) by mali ísť parametre
     let start = 0;
     /*
      if(!window.XMLHttpRequest){
@@ -578,7 +586,7 @@ G.ajax = function(url, options, dataType){//TODO pred options(ako callback) by m
         http.ontimeout = options.timeout;
     }
     if(G.isFunction(options.loadEnd)){
-        http.onloadend = () => options.loadEnd((G.now() - start));
+        http.onloadend = () => options.loadEnd(G.now() - start);
     }
     if(G.isFunction(options.loadStart)){
         http.onloadstart = () => {
@@ -617,11 +625,12 @@ G.ajax = function(url, options, dataType){//TODO pred options(ako callback) by m
 /**
  * Funkcia načíta a spustí externý Script
  *
- * @param {String}		url
- * @param {Function=}	callback
+ * @param {String}      url
+ * @param {Function=}   callback
  * @returns {Element|*}
  */
 G.loadScript = function(url, callback){
+    "use strict";
     let script = document.createElement("script");
     script.type = "text/javascript";
 
@@ -640,7 +649,7 @@ G.loadScript = function(url, callback){
     }
 
     script.src = url;
-    G.byTag('head')[0].appendChild(script);
+    G.byTag("head")[0].appendChild(script);
 };
 /*
  G.loadScript = function(src, async) {
@@ -665,19 +674,20 @@ G.loadScript = function(url, callback){
  UTILITOVE FUNKCIE
  *************************************************************************************/
 
-G.byClass 	= title => document.getElementsByClassName(title);
-G.byName 	= title => document.getElementsByName(title);
-G.byTag 	= title => document.getElementsByTagName(title);
-G.byId 		= title => document.getElementById(title);
+G.byClass    = (title) => document.getElementsByClassName(title);
+G.byName    = (title) => document.getElementsByName(title);
+G.byTag    = (title) => document.getElementsByTagName(title);
+G.byId       = (title) => document.getElementById(title);
 
 /**
  * Funkcia zistí či element má danú triedu
  *
- * @param {Element}	element
- * @param {String}	className
+ * @param {Element}   element
+ * @param {String}   className
  * @returns {Boolean}
  */
 G.hasClass = function(element, className){
+    "use strict";
     //ak nieje zadaný element kotrý sa má overovať
     if(!G.isElement(element)){
         G.warn("G.hasClass: prvý parameter element{Element} je: ", element);
@@ -740,13 +750,14 @@ G.log = function(...args){
  * G.createElement({name: "div"}) => <div></div>;
  * G.createElement({name: "div", attr: {id: "ide"}}) => <div id="ide"></div>;
  *
- * @param {String|Object} 	    name  - názov elementu alebo object {name: "", attr: {}, style: {}, cont: ""}
- * @param {Object} 			    attr  - objekt kde kluče su nazvy atribútov a hodnoty su hodnoty atribútov
- * @param {String|Element|G} 	cont  - string s textom alebo element alebo pole elementov
- * @param {Object} 			    style - objekt kde kluče su nazvy štýlov a hodnoty su hodnoty štýlov
+ * @param {String|Object}        name  - názov elementu alebo object {name: "", attr: {}, style: {}, cont: ""}
+ * @param {Object}              attr  - objekt kde kluče su nazvy atribútov a hodnoty su hodnoty atribútov
+ * @param {String|Element|G}    cont  - string s textom alebo element alebo pole elementov
+ * @param {Object}              style - objekt kde kluče su nazvy štýlov a hodnoty su hodnoty štýlov
  * @returns {Element} - novo vytvorený element
  */
 G.createElement = function(name, attr, cont, style){
+    "use strict";
     let el;
 
     //ak je prvý parameter objekt tak zavoláme rekurzívne túto funkciu s hodnotami objektu
@@ -784,7 +795,7 @@ G.createElement = function(name, attr, cont, style){
         G.html(el, cont);
     }
     else if(G.isArray(cont)){
-        G.each(cont, e => {
+        G.each(cont, (e) => {
             if(G.isElement(e)){
                 el.appendChild(e);
             }
@@ -801,25 +812,25 @@ G.createElement = function(name, attr, cont, style){
 };
 //G.now = () => new Date().getTime();
 G.now = () => (performance || Date).now();
-G.typeOf = val => typeof val;
-G.isFunction = val => G.typeOf(val) === "function";
-G.isDefined = val => G.typeOf(val) !== "undefined";
-G.isString = val => G.typeOf(val) === "string";
-G.isObject = val => G.typeOf(val) === "object";
-G.isNumber = val => G.typeOf(val) === "number";
+G.typeOf = (val) => typeof val;
+G.isFunction = (val) => G.typeOf(val) === "function";
+G.isDefined = (val) => G.typeOf(val) !== "undefined";
+G.isString = (val) => G.typeOf(val) === "string";
+G.isObject = (val) => G.typeOf(val) === "object";
+G.isNumber = (val) => G.typeOf(val) === "number";
 //G.isNum = obj => !G.isArray(obj) && (obj - parseFloat(obj) + 1) >= 0;
-G.isInt = val => G.isNumber(val) && val % 1 === 0;
-G.isFloat = val => G.isNumber(val) && val % 1 !== 0;
-G.isBool = val => G.typeOf(val) === "boolean";
-//G.isG = val => G.isObject(val) && val.__proto__ === G.prototype;
-G.isG = val => G.isObject(val) && Object.getPrototypeOf(val) === G.prototype;
-G.isUndefined = val => !G.isDefined(val);
-//G.isArray = val => Array.isArray(val);
-G.isArray = val => Object.prototype.toString.call(val) === '[object Array]';
-G.isToStringable = val => G.isNumber(val) || G.isString(val) || G.isBool(val); //deprecated since 29.1.2017
-G.isEmpty = val => Object.keys(val).length === 0 || val === [] || val === "";
-//G.isGElement = val => val["isGElement"] === true;
-G.isElement = obj => {
+G.isInt = (val) => G.isNumber(val) && val % 1 === 0;
+G.isFloat = (val) => G.isNumber(val) && val % 1 !== 0;
+G.isBool = (val) => G.typeOf(val) === "boolean";
+//G.isG = (val) => G.isObject(val) && val.__proto__ === G.prototype;
+G.isG = (val) => G.isObject(val) && Object.getPrototypeOf(val) === G.prototype;
+G.isUndefined = (val) => !G.isDefined(val);
+//G.isArray = (val) => Array.isArray(val);
+G.isArray = (val) => Object.prototype.toString.call(val) === "[object Array]";
+G.isToStringable = (val) => G.isNumber(val) || G.isString(val) || G.isBool(val); //deprecated since 29.1.2017
+G.isEmpty = (val) => Object.keys(val).length === 0 || val === [] || val === "";
+//G.isGElement = (val) => val["isGElement"] === true;
+G.isElement = (obj) => {
     try {
         return obj instanceof HTMLElement;
     }
@@ -835,10 +846,11 @@ G.isElement = obj => {
 /**
  * Funkcia vráti posledný prvok pola ak existuje alebo null
  *
- * @param {*[]}	arr - pole ktorého posledný prvok potrebujeme
+ * @param {*[]}   arr - pole ktorého posledný prvok potrebujeme
  * @returns {*} - posledný prvok alebo null
  */
 G.last = function(arr){//TODO malo by to vedieť vytiahnuť aj posledny prvok z objektu
+    "use strict";
     //ak pole ktorému hladáme koniec nieje pole tak vrátime null
     if(!G.isArray(arr)){
         return null;
@@ -857,18 +869,20 @@ G.last = function(arr){//TODO malo by to vedieť vytiahnuť aj posledny prvok z 
 /**
  * Funkcia či sa prvok nachádza v poli alebo v zozname parametrov
  *
- * @param {*}		obj
- * @param {*|*[]}	data
+ * @param {*}      obj
+ * @param {*|*[]}   data
  * @returns {Boolean}
  */
 G.isIn = function(obj, data){//testovane 8.1.2017
+    "use strict";
     if(G.isArray(data)){
         if(data.indexOf(obj) >= 0){
             return true;
         }
     }
     else{
-        for(let i=1 ; i<arguments.length ; i++){
+        let i;
+        for(i=1 ; i<arguments.length ; i++){
             if(arguments[i] === obj){
                 return true;
             }
@@ -881,8 +895,8 @@ G.isIn = function(obj, data){//testovane 8.1.2017
  * Funkcia zlúči objekty na vstupe do jedného (prvého) objektu
  * G.extend({a: "aa", b: "bb"}, {c: "cc", a: "aaa"}, {c: "ccc"}) => Object {a: "aaa", b: "bb", c: "ccc"}
  *
- * @param {Object}			target
- * @param {Object|Object[]}	args
+ * @param {Object}         target
+ * @param {Object|Object[]}   args
  * @returns {Object}
  */
 G.extend = function(target, ... args){
@@ -918,12 +932,13 @@ G.extend = function(target, ... args){
 /**
  * Funkcia zistí či element spĺňa daný selector
  *
- * @param {Element}	    element
- * @param {Function}	element.matches
- * @param {String}	    queryString
+ * @param {Element}       element
+ * @param {Function}   element.matches
+ * @param {String}       queryString
  * @returns {Boolean}
  */
 G.matches = function(element, queryString){
+    "use strict";
     //porovnám či element vyhovuje selectoru
     try{
         return element.matches(queryString);
@@ -939,11 +954,12 @@ G.matches = function(element, queryString){
  * umožnuje nastaviť lubovolný this objekt.
  * V prípade že funckia daná ako argument vráti false tak sa loop ukončí
  *
- * @param {Object}		obj - objekt ktorý sa má preloopovať
- * @param {Function}	func - funkcia ktorá sa má zavoláť pre každý objekt a jej parametre su: (element, index, pole)
- * @param {Object=}		thisArg - objekt ktorý má byť dosadený sa this premennú
+ * @param {Object}      obj - objekt ktorý sa má preloopovať
+ * @param {Function}   func - funkcia ktorá sa má zavoláť pre každý objekt a jej parametre su: (element, index, pole)
+ * @param {Object=}      thisArg - objekt ktorý má byť dosadený sa this premennú
  */
 G.each = function(obj, func, thisArg){
+    "use strict";
     let i;
     if(!G.isObject(obj)){
         G.warn("G.each: prvý parameter obj{Object} je:", obj);
@@ -996,11 +1012,12 @@ G.each = function(obj, func, thisArg){
 /**
  * Funkcia najde v rodičovnskom objekde objekty ktoré najde CSS selector
  *
- * @param {String}	queryString - klúč podla ktorého sa má hladať
- * @param {Element}	parent - element v ktorom sa má hladadť. Defaultne je do document
+ * @param {String}   queryString - klúč podla ktorého sa má hladať
+ * @param {Element}   parent - element v ktorom sa má hladadť. Defaultne je do document
  * @returns {Element[]} - pole nájdených výsledkov
  */
 G.find = function(queryString, parent){//testovane 28.1.2017
+    "use strict";
     let result = [];
 
     //ak queryString nieje String
@@ -1020,7 +1037,7 @@ G.find = function(queryString, parent){//testovane 28.1.2017
     const data = parent.querySelectorAll(queryString);
 
     //prejdeme všetký elementy a pridáme ich do výsledného pola
-    G.each(data, e => result[result.length] = e);
+    G.each(data, (e) => result[result.length] = e);
 
     //vrátime výsledné pole
     return result;
@@ -1029,10 +1046,11 @@ G.find = function(queryString, parent){//testovane 28.1.2017
 /**
  * Funkcia vráti rodičovský element elementu na vstupe alebo null
  *
- * @param {Element}	element - element ktorému sa hladá rodičovský element
+ * @param {Element}   element - element ktorému sa hladá rodičovský element
  * @returns {Element} - rodičovský element alebo null ak sa nenašiel rodič
  */
 G.parent = function(element){//testovane 28.1.2017
+    "use strict";
     //ak argument nieje element;
     if(!G.isElement(element)){
         G.warn("G.parent: prvý parameter element{Element} je: ", element);
@@ -1046,37 +1064,39 @@ G.parent = function(element){//testovane 28.1.2017
 /**
  * Funkcia vráti rodičovské elementy elementu na vstupe alebo []
  *
- * @param {Object} 		params - parametre funkcie
- * @param {Element}		params.element - element ktorému sa hladájú rodičovské elementy
- * @param {String=""}	params.condition - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
- * @param {String=""}	params.finish - podmienka rodičovký element po ktorý sa má hladať
- * @param {Number=0}	params.limit- maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
+ * @param {Object}       params - parametre funkcie
+ * @param {Element}      params.element - element ktorému sa hladájú rodičovské elementy
+ * @param {String=""}   params.condition - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
+ * @param {String=""}   params.finish - podmienka rodičovký element po ktorý sa má hladať
+ * @param {Number=0}   params.limit- maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
  * @returns {Element[]} - rodičovské elementy alebo [] ak sa nenašiel žiadny rodič
  */
 G.parents = function(params){//testovane 28.1.2017
+    "use strict";
     return G._iterate({
-        condition: 	G.isString(params.condition) ? params.condition : "",
-        finish: 	G.isString(params.finish) ? params.finish : "",
-        limit: 		G.isNumber(params.limit) ? params.limit : 0,
-        operation: 	e => e.parentElement,
-        element: 	params.element
+        condition:    G.isString(params.condition) ? params.condition : "",
+        finish:    G.isString(params.finish) ? params.finish : "",
+        limit:       G.isNumber(params.limit) ? params.limit : 0,
+        operation:    (e) => e.parentElement,
+        element:    params.element
     });
 };
 
 /**
  * Funkcia preiteruje všetky elementy a vráti ich zoznam
  *
- * @param {Object} 		params - parametre funkcie
- * @param {Element}		params.element - element ktorému sa hladájú rodičovské elementy
- * @param {String=""}	params.condition - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
- * @param {Function}	params.operation - funkcia ktorou sa dostaneme k dalšiemu elementu
- * @param {String=""}	params.finish - podmienka rodičovký element po ktorý sa má hladať
- * @param {Number=0}	params.limit- maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
+ * @param {Object}       params - parametre funkcie
+ * @param {Element}      params.element - element ktorému sa hladájú rodičovské elementy
+ * @param {String=""}   params.condition - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
+ * @param {Function}   params.operation - funkcia ktorou sa dostaneme k dalšiemu elementu
+ * @param {String=""}   params.finish - podmienka rodičovký element po ktorý sa má hladať
+ * @param {Number=0}   params.limit- maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
  * @returns {Element[]} - rodičovské elementy alebo [] ak sa nenašiel žiadny rodič
  * @private
  */
 G._iterate = function(params){
-    let result 	= [];
+    "use strict";
+    let result    = [];
 
     if(!G.isElement(params.element) || !G.isFunction(params.operation)){
         return result;
@@ -1101,9 +1121,9 @@ G._iterate = function(params){
 /**
  * Funkcia nastavý alebo pridá obsah elementu
  *
- * @param {Element}			element
- * @param {String}			text
- * @param {Boolean=false}	append = false
+ * @param {Element}         element
+ * @param {String}         text
+ * @param {Boolean=false}   append = false
  * @returns {String|Element}
  */
 G.text = function(element, text, append = false){
@@ -1134,13 +1154,12 @@ G.text = function(element, text, append = false){
 /**
  * Funkcia nastavý alebo pridá html obsah elementu
  *
- * @param {Element}			element
- * @param {Element|String}	html
- * @param {Boolean=false}	append = true
+ * @param {Element}         element
+ * @param {Element|String}   html
+ * @param {Boolean=false}   append = true
  * @returns {String|Element}
  */
 G.html = function(element, html, append = false){//testovane 29.1.2017
-
     //ak prvý parameter nieje element
     if(!G.isElement(element)) {
         G.warn("G.html: prvý parameter element{Element} je: ", element);
@@ -1168,54 +1187,56 @@ G.html = function(element, html, append = false){//testovane 29.1.2017
 /**
  * Funkcia vráti dalšieho surodenca elementu
  *
- * @param {Object} 		params - parametre funkcie
- * @param {Element}		params.element - element ktorému sa hladájú rodičovské elementy
- * @param {String=""}	params.condition - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
- * @param {String=""}	params.finish - podmienka rodičovký element po ktorý sa má hladať
- * @param {Number=0}	params.limit- maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
+ * @param {Object}       params - parametre funkcie
+ * @param {Element}      params.element - element ktorému sa hladájú rodičovské elementy
+ * @param {String=""}   params.condition - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
+ * @param {String=""}   params.finish - podmienka rodičovký element po ktorý sa má hladať
+ * @param {Number=0}   params.limit- maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
  * @returns {*}
  */
 G.next = function (params){//testovane 28.1.2017
+    "use strict";
     if(G.isElement(params)){
         return params.nextElementSibling;
     }
     return G._iterate({
-        condition: 	G.isString(params.condition) ? params.condition : "",
-        finish: 	G.isString(params.finish) ? params.finish : "",
-        limit: 		G.isNumber(params.limit) ? params.limit : 0,
-        operation: 	e => e.nextElementSibling,
-        element: 	params.element
+        condition:    G.isString(params.condition) ? params.condition : "",
+        finish:    G.isString(params.finish) ? params.finish : "",
+        limit:       G.isNumber(params.limit) ? params.limit : 0,
+        operation:    (e) => e.nextElementSibling,
+        element:    params.element
     });
 };
 
 /**
  * Funkcia vráti predchádzajúceho súrodenca elementu
  *
- * @param {Object} 		params - parametre funkcie
- * @param {Element}		params.element - element ktorému sa hladájú rodičovské elementy
- * @param {String=""}	params.condition - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
- * @param {String=""}	params.finish - podmienka rodičovký element po ktorý sa má hladať
- * @param {Number=0}	params.limit- maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
+ * @param {Object}       params - parametre funkcie
+ * @param {Element}      params.element - element ktorému sa hladájú rodičovské elementy
+ * @param {String=""}   params.condition - podmienka pre rodičovksé elementy ktoré sa majú vrátiť
+ * @param {String=""}   params.finish - podmienka rodičovký element po ktorý sa má hladať
+ * @param {Number=0}   params.limit- maximálne počet elementov kolko sa má nájsť alebo 0 ak hladáme všetky
  * @returns {*}
  */
 G.prev = function (params){//testovane 28.1.2017
+    "use strict";
     if(G.isElement(params)){
         return params.previousElementSibling;
     }
     return G._iterate({
-        condition: 	G.isString(params.condition) ? params.condition : "",
-        finish: 	G.isString(params.finish) ? params.finish : "",
-        limit: 		G.isNumber(params.limit) ? params.limit : 0,
-        operation: 	e => e.previousElementSibling,
-        element: 	params.element
+        condition:    G.isString(params.condition) ? params.condition : "",
+        finish:    G.isString(params.finish) ? params.finish : "",
+        limit:       G.isNumber(params.limit) ? params.limit : 0,
+        operation:    (e) => e.previousElementSibling,
+        element:    params.element
     });
 };
 
 /**
  * Funkcia vráti pole deti elementu na vstupe
  *
- * @param {Element}		element - element ktorého deti sa majú vrátiť
- * @param {String=""}	condition - podmienka pre deti ktoré sa majú vrátiť
+ * @param {Element}      element - element ktorého deti sa majú vrátiť
+ * @param {String=""}   condition - podmienka pre deti ktoré sa majú vrátiť
  * @returns {Element[]} - pole elementov detí elebo prázdne pole ak element nemá žiadne deti
  */
 G.childrens = function(element, condition = ""){
@@ -1230,7 +1251,7 @@ G.childrens = function(element, condition = ""){
     }
 
     const data = element.children;
-    G.each(data, element => {
+    G.each(data, (element) => {
         if(result.indexOf(element) < 0){//ak sa nenachádze medzi výsledkami
             if(G.matches(element, condition)){
                 result[result.length] = element;
@@ -1253,9 +1274,10 @@ G.children = function(element, condition = "*"){//testovane 28.1.2017
 /**
  * Funkcia vymaže element na vstupe
  *
- * @param {Element}	element - element ktorý sa má vymazať
+ * @param {Element}   element - element ktorý sa má vymazať
  */
 G.delete = function(element){//testovane 21.2.2017
+    "use strict";
     //pokúsime sa získať rodičovy element;
     const parent = G.parent(element);
 
@@ -1275,11 +1297,12 @@ G.delete = function(element){//testovane 21.2.2017
 /**
  * Funcia zistí čí prví element spĺňa podmienku
  *
- * @param {String}	selectorString - podmienka ktorú musí element splniť
+ * @param {String}   selectorString - podmienka ktorú musí element splniť
  * @return {Boolean} - či objekt spĺňa podmienku alebo null ak sa žiadny objekt nenachádza alebo je zlý selector
  */
 
 G.prototype.is = function(selectorString){//testovane 28.1.2017
+    "use strict";
     //ak je prázdy
     if(this.isEmpty()){
         return false;
@@ -1292,10 +1315,11 @@ G.prototype.is = function(selectorString){//testovane 28.1.2017
 /**
  * Funckia zistí či sa selector zadaný ako parameter nezhoduje s elementom
  *
- * @param {String}	selectorString - paramter ktorý sa negovaný porovná s elementom
+ * @param {String}   selectorString - paramter ktorý sa negovaný porovná s elementom
  * @returns {G} - či objekt spĺna podmienku
  */
 G.prototype.not = function(selectorString){
+    "use strict";
     return this.has(":not(" + selectorString + ")");
 };
 
@@ -1303,10 +1327,11 @@ G.prototype.not = function(selectorString){
  * Funkcia vráti G objekt obsahujúci elementy s pôvodného objektu
  * ktoré spĺnajú podmienku danú ako parameter
  *
- * @param {String}	selectorString - podmienka podla ktorého sa vyberajú vhodné elementy
+ * @param {String}   selectorString - podmienka podla ktorého sa vyberajú vhodné elementy
  * @returns {G} - G objekt
  */
 G.prototype.has = function(selectorString){
+    "use strict";
     let result = new G();
 
     this.each(function(){
@@ -1321,7 +1346,7 @@ G.prototype.has = function(selectorString){
 /**
  * Funkcia pridá do objektu elementy ktoré sú na vstupe alebo string pre vyhladanie
  *
- * @param {Element[]|String[]}	args - objekty ktoré sa majú pridať
+ * @param {Element[]|String[]}   args - objekty ktoré sa majú pridať
  * @returns {G} - G objekt
  */
 G.prototype.add = function(...args){//testovane 21.2.2017
@@ -1351,20 +1376,21 @@ G.prototype.add = function(...args){//testovane 21.2.2017
  return result;
  }
  const elements = G.find(selectorString, this.first());
- G.each(elements, e => result.add(e));
+ G.each(elements, (e) => result.add(e));
  return result;
  };
- /*
+ */
 
  /**
  * Funkcia vymaže všetky objekty na vstupe
  *
- * @param {Element[]}	arguments
+ * @param {Element[]}   arguments
  * @returns {G}
  */
 G.prototype.remove = function(){//testovane 21.2.2017
+    "use strict";
     let index;
-    G.each(arguments, e => {
+    G.each(arguments, (e) => {
         if(G.isElement(e)){
             index = this.elements.indexOf(e);
             if(index >= 0){
@@ -1381,6 +1407,7 @@ G.prototype.remove = function(){//testovane 21.2.2017
  * @returns {G}
  */
 G.prototype.clear = function(){//testovane 21.2.2017
+    "use strict";
     this.elements = [];
     return this;
 };
@@ -1388,10 +1415,11 @@ G.prototype.clear = function(){//testovane 21.2.2017
 /**
  * Funckia porovná 2 G objekty či majú všetky prvky rovnaké
  *
- * @param {G|Element[]}	obj - G objekt s ktorým sa má porovnať
+ * @param {G|Element[]}   obj - G objekt s ktorým sa má porovnať
  * @returns {Boolean}
  */
 G.prototype.equalAll = function(obj){//testovane 21.2.2017
+    "use strict";
     //ak parameter nieje G objekt tak vráti false
     if(!G.isG(obj)){
         return false;
@@ -1403,14 +1431,14 @@ G.prototype.equalAll = function(obj){//testovane 21.2.2017
     }
 
     //ak sa nejaký element nenachádza v druhom elemente tak vráti false
-    G.each(this.elements, e => {
+    G.each(this.elements, (e) => {
         if(obj.elements.indexOf(e) < 0){
             return false;
         }
     });
 
     //ak sa nejaký element nenachádza v tomto element tak vráti false
-    G.each(obj.elements, e => {
+    G.each(obj.elements, (e) => {
         if(this.elements.indexOf(e) < 0){
             return false;
         }
@@ -1421,16 +1449,17 @@ G.prototype.equalAll = function(obj){//testovane 21.2.2017
 
 /**
  *
- * @param {Element}	element
+ * @param {Element}   element
  * @returns {Boolean}
  */
 G.prototype.contains = function(element){//testovane 21.2.2017
+    "use strict";
     if(!G.isElement(element)){
         G.warn("G.prototype.contains: prvý paramter element{Element} je: ", element);
         return false;
     }
-
-    for(let i=0 ; i<this.elements.length ; i++){
+    let i;
+    for(i=0 ; i<this.elements.length ; i++){
         if(this.elements[i] === element){
             return true;
         }
@@ -1442,10 +1471,11 @@ G.prototype.contains = function(element){//testovane 21.2.2017
 /**
  * Funcka porovná či sa G objekt zhoduje s parametrom čo je buď G objekt alebo element
  *
- * @param {Element|G}	element
+ * @param {Element|G}   element
  * @returns {Boolean}
  */
 G.prototype.equal = function(element) {
+    "use strict";
     if (G.isG(element)){
         return this.first() === element.first();
     }
@@ -1464,6 +1494,7 @@ G.prototype.equal = function(element) {
 
 
 G.prototype.width = function(){//testovane 26.1.2017
+    "use strict";
     if(this.isEmpty()){
         return null;
     }
@@ -1471,6 +1502,7 @@ G.prototype.width = function(){//testovane 26.1.2017
 };
 
 G.prototype.height = function(){//testovane 26.1.2017
+    "use strict";
     if(this.isEmpty()){
         return null;
     }
@@ -1478,43 +1510,53 @@ G.prototype.height = function(){//testovane 26.1.2017
 };
 
 G.prototype.show = function(){
+    "use strict";
     return this.css("display", "block");
 };
 
 G.prototype.hide = function(){
+    "use strict";
     return this.css("display", "none");
 };
 
 G.prototype.toggle = function(){
+    "use strict";
     return  this.css("display") === "none" ? this.show() : this.hide();
 };
 
 G.prototype.emptyAll = function(){
-    G.each(this.elements, e => G.html(e, ""));
+    "use strict";
+    G.each(this.elements, (e) => G.html(e, ""));
     return this;
 };
 
 G.prototype.empty = function(){
+    "use strict";
     return this.html("");
 };
 
 G.prototype.hasClass = function(className){
+    "use strict";
     return this.class(className);
 };
 
 G.prototype.val = function(){
+    "use strict";
     return this.attr("value", arguments[0]);
 };
 
 G.prototype.addClass = function(className){
+    "use strict";
     return this.class("+" + className);
 };
 
 G.prototype.removeClass = function(className){
+    "use strict";
     return this.class("-" + className);
 };
 
 G.prototype.toggleClass = function(className){
+    "use strict";
     return this.class("/" + className);
 };
 
@@ -1525,7 +1567,7 @@ G.prototype.toggleClass = function(className){
 /**
  * Funkcia vráti všetkých rodičov elementu ktorý spĺňajú selector v argumente
  *
- * @param {String=""}	selectorString
+ * @param {String=""}   selectorString
  * @returns {G}
  */
 G.prototype.parents = function(selectorString = ""){//testovane 28.1.2017
@@ -1537,7 +1579,7 @@ G.prototype.parents = function(selectorString = ""){//testovane 28.1.2017
 
 /**
  * Funkcia vráti všetkych rodičov až kým neobjaví rodiča ktorý spĺňa selector v argumente
- * @param {String=""}	selectorString
+ * @param {String=""}   selectorString
  * @returns {G}
  */
 G.prototype.parentsUntil = function(selectorString = ""){//testovane 28.1.2017
@@ -1549,10 +1591,11 @@ G.prototype.parentsUntil = function(selectorString = ""){//testovane 28.1.2017
 
 /**
  * Funkcia vyhladá v element všetky elementy spĺnajúce selector a vráti ich v novom G objekte
- * @param {String}	selectorString
+ * @param {String}   selectorString
  * @returns {G}
  */
 G.prototype.find = function(selectorString){//testovane 28.1.2017
+    "use strict";
     return new G(G.find(selectorString, this.first()));
 };
 
@@ -1562,6 +1605,7 @@ G.prototype.find = function(selectorString){//testovane 28.1.2017
  * @returns {G}
  */
 G.prototype.parent = function(){//testovane 29.1.2017
+    "use strict";
     return new G(G.parent(this.first()));
 };
 
@@ -1570,12 +1614,13 @@ G.prototype.parent = function(){//testovane 29.1.2017
  * @returns {G}
  */
 G.prototype.next = function(){//testovane 29.1.2017
+    "use strict";
     return new G(G.next(this.first()));
 };
 
 /**
  *
- * @param {String=""}	selectorString
+ * @param {String=""}   selectorString
  * @returns {G}
  */
 G.prototype.nextAll = function(selectorString = ""){//TODO otestovať
@@ -1587,7 +1632,7 @@ G.prototype.nextAll = function(selectorString = ""){//TODO otestovať
 
 /**
  *
- * @param {String=""}	selectorString
+ * @param {String=""}   selectorString
  * @returns {G}
  */
 G.prototype.nextUntil = function(selectorString = ""){//TODO otestovať
@@ -1602,12 +1647,13 @@ G.prototype.nextUntil = function(selectorString = ""){//TODO otestovať
  * @returns {G}
  */
 G.prototype.prev = function(){//testovane 29.1.2017
+    "use strict";
     return new G(G.prev(this.first()));
 };
 
 /**
  *
- * @param {String=""}	selectorString
+ * @param {String=""}   selectorString
  * @returns {G}
  */
 G.prototype.prevAll = function(selectorString = ""){//TODO otestovať
@@ -1619,7 +1665,7 @@ G.prototype.prevAll = function(selectorString = ""){//TODO otestovať
 
 /**
  *
- * @param {String=""}	selectorString
+ * @param {String=""}   selectorString
  * @returns {G}
  */
 G.prototype.prevUntil = function(selectorString = ""){//TODO otestovať
@@ -1631,7 +1677,7 @@ G.prototype.prevUntil = function(selectorString = ""){//TODO otestovať
 
 /**
  * @deprecated od 11.2.2017 - použiť G.prototype.childrens
- * @param {String=""}	selectorString
+ * @param {String=""}   selectorString
  * @returns {G}
  */
 G.prototype.children = function(selectorString = ""){
@@ -1654,6 +1700,7 @@ G.prototype.childrens = function(selectorString = ""){//TODO otestovať - prida�
  * Funkcia vráti prvý element z G objektu
  */
 G.prototype.first = function(){//testovane 29.1.2017
+    "use strict";
     return this.elements[0];
 };
 
@@ -1663,6 +1710,7 @@ G.prototype.first = function(){//testovane 29.1.2017
  * @returns {Number} - počet elementov v G objekte
  */
 G.prototype.length = function(){//testovane 29.1.2017
+    "use strict";
     return this.elements.length;
 };
 
@@ -1672,6 +1720,7 @@ G.prototype.length = function(){//testovane 29.1.2017
  * @returns {Boolean}
  */
 G.prototype.isEmpty = function(){//testovane 29.1.2017
+    "use strict";
     return this.length() === 0;
 };
 
@@ -1690,7 +1739,7 @@ G.prototype.each = function(func, ...args){//testovane 29.1.2017
         return this;
     }
 
-    G.each(this.elements, e => func.apply(e, args));
+    G.each(this.elements, (e) => func.apply(e, args));
 
     return this;
 };
@@ -1705,7 +1754,8 @@ G.prototype.each = function(func, ...args){//testovane 29.1.2017
  * @returns {G}
  */
 G.prototype.deleteAll = function(){//testovane 21.2.2017
-    G.each(this.elements, e => G.delete(e));
+    "use strict";
+    G.each(this.elements, (e) => G.delete(e));
     this.elements = [];
     return this;
 };
@@ -1716,6 +1766,7 @@ G.prototype.deleteAll = function(){//testovane 21.2.2017
  * @returns {G}
  */
 G.prototype.prependTo = function(data){//TODO otestovať
+    "use strict";
     if(this.isEmpty()){
         return this;
     }
@@ -1738,6 +1789,7 @@ G.prototype.prependTo = function(data){//TODO otestovať
  * @returns {G}
  */
 G.prototype.appendTo = function(data){//testovane 28.1.2017
+    "use strict";
     if(this.isEmpty()){
         return this;
     }
@@ -1761,6 +1813,7 @@ G.prototype.appendTo = function(data){//testovane 28.1.2017
  * @returns {G}
  */
 G.prototype.prepend = function(data){//testovane 29.1.2017
+    "use strict";
     if(this.isEmpty()){
         return this;
     }
@@ -1784,6 +1837,7 @@ G.prototype.prepend = function(data){//testovane 29.1.2017
  * @return {*}
  */
 G.prototype.append = function(data){//testovane 28.1.2017 //testovane 29.1.2017
+    "use strict";
     if(this.isEmpty()){
         return this;
     }
@@ -1806,8 +1860,8 @@ G.prototype.append = function(data){//testovane 28.1.2017 //testovane 29.1.2017
 
 /**
  *
- * @param {Function}	func
- * @param {Number=0}	delay
+ * @param {Function}   func
+ * @param {Number=0}   delay
  * @returns {G}
  */
 G.prototype.delay = function(func, delay = 0){
@@ -1824,8 +1878,8 @@ G.prototype.delay = function(func, delay = 0){
  * text("juhuuu") - text elementu bude "juchuuu"
  * text("<b>ju</b><p>huuu</p>") - text elementu bude "juhuuu"
  *
- * @param {String}			text
- * @param {Boolean=False}	append
+ * @param {String}         text
+ * @param {Boolean=False}   append
  * @returns {String|G}
  */
 G.prototype.text = function(text, append = false){//testovane 29.1.2017
@@ -1853,10 +1907,11 @@ G.prototype.text = function(text, append = false){//testovane 29.1.2017
  * html("<b>bold</b>") - nastavý HTML obsah elementu
  * html("Element") - nastavý ako jedine dieťa nový element
  *
- * @param {(String|Element)=}	html
+ * @param {(String|Element)=}   html
  * @returns {Element|G}
  */
 G.prototype.html = function(html){//testovane 26.1.2017 //testovane 29.1.2017
+    "use strict";
     //ak je G objekt prázdny tak vráti G objekt
     if(this.isEmpty()){
         return this;
@@ -1887,6 +1942,7 @@ G.prototype.html = function(html){//testovane 26.1.2017 //testovane 29.1.2017
  * @returns {G}
  */
 G.prototype.delete = function(){//testovane 21.2.2017 //TODO pridať možnosť filtrovať vymazane //testovane 29.1.2017
+    "use strict";
     if(this.isEmpty()){
         return this;
     }
@@ -1907,8 +1963,9 @@ G.prototype.delete = function(){//testovane 21.2.2017 //TODO pridať možnosť f
  * @returns {boolean}
  */
 G.class = function(element, name, force){
+    "use strict";
     if(G.isArray(name)){
-        G.each(name, e => G.class(element, e, force));
+        G.each(name, (e) => G.class(element, e, force));
     }
     else if(G.isString(name)){
         switch(name[0]){
@@ -1939,11 +1996,12 @@ G.class = function(element, name, force){
  * class("-nazov") - odstráni objektu danú triedu
  * class("/nazov") - pridá objektu danú triedu ak neexistuje ináč ju odstráni
  *
- * @param {String} 	name - názov triedy
- * @param {Boolean}	force - hodnota pri toggleovaní triedy
+ * @param {String}    name - názov triedy
+ * @param {Boolean}   force - hodnota pri toggleovaní triedy
  * @returns {G|Boolean}
  */
 G.prototype.class = function(name, force){//testovane 28.1.2017
+    "use strict";
     let result = G.class(this.first(), name, force);
     return G.isUndefined(result) ? this : result;
 };
@@ -1965,7 +2023,7 @@ G.css = function(element, ...args){
     if(args.length === 0){
         let result = {};
         let css = window.getComputedStyle(element);
-        G.each(css, e => {
+        G.each(css, (e) => {
             if(css.getPropertyValue(e) !== ""){
                 result[e] = css.getPropertyValue(e);
             }
@@ -2031,7 +2089,7 @@ G.attr = function(element, ...arg){
     if(arg.length === 0){
         let result = {};
         //prejde všetky atribúty elementu a pridá ich do výsledku
-        G.each(element.attributes, e => {
+        G.each(element.attributes, (e) => {
             result[e.nodeName] = e.nodeValue;
         });
         return result;
@@ -2072,11 +2130,12 @@ G.attr = function(element, ...arg){
  * attr("nazov", "hodnota") - nastavý danému atribútu hodnotu;
  * attr({"nazov1": "hodnota1", "nazov2" : "hodnota2"}) - nastavý všétkým atribútom hodnoty;
  *
- * @param {String|Object}	key
- * @param {String=}			value
+ * @param {String|Object}   key
+ * @param {String=}         value
  * @returns {G|Object|String}
  */
 G.prototype.attr = function(key, value){//testovane 29.1.2017
+    "use strict";
     let result = G.attr(this.first(), key, value);
     return G.isUndefined(result) ? this : result;
 };
@@ -2088,14 +2147,15 @@ G.prototype.attr = function(key, value){//testovane 29.1.2017
 /**
  * Funkcia upravý listener na elemente
  *
- * @param {Element}		element
- * @param {String}		listener
- * @param {Function}	func
- * @param {String}		type
+ * @param {Element}      element
+ * @param {String}      listener
+ * @param {Function}   func
+ * @param {String}      type
  * @returns {Element}
  * @private
  */
 G._modifyListener = function(element, listener, func, type){//testovane 29.1.2017
+    "use strict";
     let allowedListeners = ["click", "blur", "submit", "focus", "scroll", "keydown", "keyup", "dblclick"];
 
     //ak element ktorý sa ide modifikovať nieje element tak skončíme
@@ -2129,22 +2189,24 @@ G._modifyListener = function(element, listener, func, type){//testovane 29.1.201
 /**
  * Funkcia odbindne listener z elementu
  *
- * @param {String}		listener
- * @param {Function}	func
+ * @param {String}      listener
+ * @param {Function}   func
  */
 G.prototype.undelegate = function(listener, func){//TODO otestovať
+    "use strict";
     this.unbind(listener, func);
 };
 
 /**
  * Funkcia bindne k elementu listener na počúvanie udalosti u všetkých deťoch
  *
- * @param {String}		condition - selector ktorým vyberie deti pri ktorých sa má zavolať funkcia
- * @param {String}		listener
- * @param {Function}	func
+ * @param {String}      condition - selector ktorým vyberie deti pri ktorých sa má zavolať funkcia
+ * @param {String}      listener
+ * @param {Function}   func
  * @returns {G}
  */
 G.prototype.delegate = function(condition, listener, func){//TODO otestovať
+    "use strict";
     if(!G.isString(condition)){
         G.warn("G.prototype.delegate: prvy parameter contidion{String} je ", condition);
         return this;
@@ -2163,11 +2225,12 @@ G.prototype.delegate = function(condition, listener, func){//TODO otestovať
 /**
  * Funkcia odbindne listener z elementu
  *
- * @param {String}		listener - typ listeneru o aký sa jedná
- * @param {Function}	func - funkcia ktorá sa má udiať pri udalosti
+ * @param {String}      listener - typ listeneru o aký sa jedná
+ * @param {Function}   func - funkcia ktorá sa má udiať pri udalosti
  * @returns {G}
  */
 G.prototype.unbind = function(listener, func){//testovane 29.1.2017
+    "use strict";
     if(this.isEmpty()){
         return this;
     }
@@ -2178,11 +2241,12 @@ G.prototype.unbind = function(listener, func){//testovane 29.1.2017
 /**
  * Funkcia binde k elementu listener na zavolanie funkcie
  *
- * @param {String}		listener - typ listeneru o aký sa jedná
- * @param {Function}	func - funkcia ktorá sa má udiať pri udalosti
+ * @param {String}      listener - typ listeneru o aký sa jedná
+ * @param {Function}   func - funkcia ktorá sa má udiať pri udalosti
  * @returns {G}
  */
 G.prototype.bind = function(listener, func){//testovane 29.1.2017
+    "use strict";
     if(this.isEmpty()){
         return this;
     }
@@ -2190,24 +2254,25 @@ G.prototype.bind = function(listener, func){//testovane 29.1.2017
     return this;
 };
 
-G.prototype.blur = function(func){return this.bind("blur", func);};
-G.prototype.keyup = function(func){return this.bind("keyup", func);};
-G.prototype.click = function(func){return this.bind("click", func);};
-G.prototype.focus = function(func){return this.bind("focus", func);};
-G.prototype.submit = function(func){return this.bind("submit", func);};
-G.prototype.scroll = function(func){return this.bind("scroll", func);};
-G.prototype.keydown = function(func){return this.bind("keydown", func);};
-G.prototype.dblclick = function(func){return this.bind("dblclick", func);};
+G.prototype.blur = function(func){"use strict"; return this.bind("blur", func);};
+G.prototype.keyup = function(func){"use strict"; return this.bind("keyup", func);};
+G.prototype.click = function(func){"use strict"; return this.bind("click", func);};
+G.prototype.focus = function(func){"use strict"; return this.bind("focus", func);};
+G.prototype.submit = function(func){"use strict"; return this.bind("submit", func);};
+G.prototype.scroll = function(func){"use strict"; return this.bind("scroll", func);};
+G.prototype.keydown = function(func){"use strict"; return this.bind("keydown", func);};
+G.prototype.dblclick = function(func){"use strict"; return this.bind("dblclick", func);};
 
 /**
  * Funkcia vráti relatívnu pozícii elementu vzhladom k lavému hornému okraju stránky
  *
- * @param {Element}	element
+ * @param {Element}   element
  * @returns {Object}
  */
 G.position = function(element){//testovane 29.1.2017
-    let top  = 0,
-        left = 0;
+    "use strict";
+    let top  = 0;
+    let left = 0;
     if(G.isElement(element)){
         do {
             top  += element.offsetTop  || 0;
@@ -2232,6 +2297,7 @@ G.position = function(element){//testovane 29.1.2017
  * @returns {Number}
  */
 G.left = function(element){//testovane 29.1.2017
+    "use strict";
     return G.position(element).left;
 };
 
@@ -2242,16 +2308,18 @@ G.left = function(element){//testovane 29.1.2017
  * @returns {Number}
  */
 G.top = function(element){//testovane 29.1.2017
+    "use strict";
     return G.position(element).top;
 };
 
 /**
  * Funckia vráti velkosť elementu
  *
- * @param {Element}	element
+ * @param {Element}   element
  * @returns {Object}
  */
 G.size = function(element){//testovane 29.1.2017
+    "use strict";
     if(!G.isElement(element)){
         G.warn("G.size: prvý parameter element{Element} je: ", element);
         return {width: 0, height: 0};
@@ -2269,6 +2337,7 @@ G.size = function(element){//testovane 29.1.2017
  * @returns {Number}
  */
 G.width = function(element){//testovane 26.1.2017
+    "use strict";
     return G.size(element).width;
 };
 
@@ -2279,13 +2348,15 @@ G.width = function(element){//testovane 26.1.2017
  * @returns {Number}
  */
 G.height = function(element){//testovane 26.1.2017
+    "use strict";
     return G.size(element).height;
 };
 
 
 let GO = function(element){
     "use strict";
-    let makeGO = function(target){
+    let makeGO;
+    makeGO = function(target){
         if(!G.isElement(target) || target.setGO === true){
             return target;
         }
@@ -2298,7 +2369,7 @@ let GO = function(element){
         target.text = () => {
             return {
                 get: () => target.textContent,
-                set: content => {
+                set: (content) => {
                     if(!G.isString(content)){
                         G.warn("Argument[content] musí byť typu string a teraz je ", content);
 
@@ -2306,7 +2377,7 @@ let GO = function(element){
                     target.textContent = content;
                     return target;
                 },
-                add: content => {
+                add: (content) => {
                     if(!G.isString(content)){
                         G.warn("Argument[content] musí byť typu string a teraz je ", content);
                         return;
@@ -2320,13 +2391,13 @@ let GO = function(element){
                 }
             };
         };
-        target.attr = name => {
+        target.attr = (name) => {
             if(!G.isString(name)){
                 G.warn("Argument[name] musí byť typu string a teraz je ", name);
                 return target;
             }
             return {
-                set: value => {
+                set: (value) => {
                     target.setAttribute(name, value);
                     return target;
                 },
@@ -2343,7 +2414,7 @@ let GO = function(element){
                 return target;
             }
             return {
-                set: value => {
+                set: (value) => {
                     target.style[name] = value;
                     return target;
                 },
@@ -2387,9 +2458,10 @@ let GO = function(element){
 
 G.create = {
     table: function(args){
-
+        "use strict";
     },
     input: function(argument){
+        "use strict";
         let data = {
             name: "input"
         };
@@ -2422,26 +2494,26 @@ G.object = function(element){
         text: () => {
             return {
                 get: () => element.textContent,
-                set: content => element.textContent = content,
-                add: content => element.textContent += content,
+                set: (content) => element.textContent = content,
+                add: (content) => element.textContent += content,
                 clear: () => element.textContent = ""
             };
         },
-        attr: name => {
+        attr: (name) => {
             return {
-                set: value => element.setAttribute(name, value),
+                set: (value) => element.setAttribute(name, value),
                 get: () => element.getAttribute(name),
                 remove: () => element.removeAttribute(name)
             };
         },
-        css: name => {
+        css: (name) => {
             return {
-                set: value => element.style[name] = value,
+                set: (value) => element.style[name] = value,
                 get: () => element.style[name],
                 remove: () => element.style[name] = null
             };
         },
-        class: name => {
+        class: (name) => {
             return {
                 add: () => element.classList.add(name),
                 has: () => element.classList.has(name),
