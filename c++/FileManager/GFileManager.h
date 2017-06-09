@@ -36,7 +36,7 @@ public:
 		fwrite(content.c_str(), 1, content.size(), fp);
 		fclose(fp);
 	}
-	inline void setFileTextOnLine(const std::string& fileName, const std::string& content, const unsigned int& line){
+	inline void setFileTextOnLine(const std::string& fileName, const std::string& content, const uint line){
 		std::fstream file(fileName) ;
 		if (!file){
 			throw "súbor " + fileName + " sa nepodarilo vytvoriť";
@@ -56,7 +56,7 @@ public:
 		file << content;
 		file.close();
 	}
-	inline std::string getNthLine(const std::string& fileName, const unsigned int& line) const{
+	inline std::string getNthLine(const std::string& fileName, const uint line) const{
 		std::ifstream in(fileName.c_str());
 
 		std::string s;
@@ -65,7 +65,7 @@ public:
 		s.reserve(10000);    
 
 		//skip N lines
-		for(unsigned int i = 1; i < line; ++i){
+		for(uint i = 1; i < line; ++i){
 			std::getline(in, s);
 		}
 
@@ -95,8 +95,8 @@ int main(void){
 	FileManager manager;
 	const std::string inputFileName = "data.txt";
 	const std::string outputFileName = "data2.txt";
-	const unsigned int readNumLine = 500;
-	const unsigned int writeNumLine = 2;
+	const uint readNumLine = 500;
+	const uint writeNumLine = 2;
 	const std::string testLetters = "a\nb\nc\nd\ne\nf\ng\nh\nj\nk\nl\nm\nn\no\np\nq\nr\ns\nt\nu\nv\nw\nx\ny\nz\n";
 	const std::string testNumbers = "1\n2\n3\n4\n5\n6\n7\n8\n9\n";
 	printf("size: %llu\n", manager.getFileSize(inputFileName));
