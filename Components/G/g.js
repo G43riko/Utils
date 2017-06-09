@@ -13,7 +13,6 @@
 let G;
 
 G = function(...args){
-
     //ak sa nevolá ako konštruktor
     if(!((this) instanceof G)){
         const inst = Object.create(G.prototype);
@@ -68,464 +67,6 @@ G = function(...args){
     this.size = this.length();
 };
 
-
-let tests = function(G){
-    "use strict";
-
-    function justCallFunctions(){
-        function callAndPrint(title, ...args){
-            G.log("vola sa:" + title + ":", G[title].apply(window, args));
-        }
-        let tmp = new G();
-        let bodyElement = document.body;
-        callAndPrint("loadScript");
-        callAndPrint("byClass", "*");
-        callAndPrint("byName", "*");
-        callAndPrint("byTag", "*");
-        callAndPrint("byId", "*");
-        callAndPrint("hasClass", bodyElement, "*");
-        callAndPrint("error");
-        callAndPrint("warn");
-        callAndPrint("log");
-        callAndPrint("createElement", "input");
-        callAndPrint("now");
-        callAndPrint("typeOf", bodyElement);
-        callAndPrint("last");
-        callAndPrint("isIn");
-        callAndPrint("extend", {});
-        callAndPrint("matches", bodyElement);
-        callAndPrint("each", {}, (a) => a);
-        callAndPrint("find", "*");
-        callAndPrint("parent", bodyElement);
-        callAndPrint("parents", bodyElement);
-        callAndPrint("text", bodyElement);
-        callAndPrint("html", bodyElement);
-        callAndPrint("next", bodyElement);
-        callAndPrint("prev", bodyElement);
-        callAndPrint("childrens", bodyElement);
-        callAndPrint("class", bodyElement);
-        callAndPrint("css", bodyElement);
-        callAndPrint("attr", bodyElement);
-        callAndPrint("_modifyListener", bodyElement, "click", (a) => a);
-        callAndPrint("position", bodyElement);
-        callAndPrint("width", bodyElement);
-        callAndPrint("height", bodyElement);
-        callAndPrint("size", bodyElement);
-        callAndPrint("top", bodyElement);
-        callAndPrint("left", bodyElement);
-        //callAndPrint("delete", bodyElement.firstElementChild);
-
-    }
-
-    let localTests = {};
-    localTests.find = function(){
-        let a = G.createElement("input", {"class": "a b"});
-        let b = G.createElement("div", {"class": "b c"});
-        let parent = G.createElement("div", {"class": "a b c"});
-        parent.appendChild(a);
-        parent.appendChild(b);
-        let res = new G(G.find(".b", parent));
-        window.console.assert(res.size === 2);
-    };
-    localTests.createElement = function(){
-        let a = G.createElement("input");
-        window.console.assert(G.isEmpty(G.attr(a)), "nevytvoril sa prazdny element ale ", G.attr(a));
-        let b = G.createElement("div", {"class": "aa"});
-        window.console.assert(G.class(b, "aa"), "nevytvoril sa element z triedov");
-        let c = G.createElement("span", {}, "gabriel");
-        window.console.assert(G.text(c) === "gabriel", "nepriradil sa string ako obsah pri vytvarani objektu");
-        let d = G.createElement("a", {}, c);
-        window.console.assert(G.html(d) === c.outerHTML, "vnútorne HTML nieje rovnake");
-        let e = G.createElement("a", {}, "", {border: "1px solid black"});
-        window.console.assert(G.css(e, "border") === "1px solid black", "nenastavil sa správne štýl");
-    };
-    localTests.testAttr = function(){
-        let element = G.createElement("input");
-        window.console.assert(G.isEmpty(G.attr(element)), "prázdny element má nejaký atribúty");
-        G.attr(element, "type", "text");
-        window.console.assert(G.attr(element).type === "text", "po nastavení typu niee známy typ");
-        window.console.assert(G.attr(element, "type") === "text", "po nastavení typu niee známy typ");
-        G.attr(element, "type", "password");
-        window.console.assert(G.attr(element, "type") === "password", "po nastavení typu niee známy typ");
-        G.attr(element, {value: "val", "class": "classa"});
-        window.console.assert(G.attr(element).class === "classa", "nanastavila sa class");
-        window.console.assert(G.attr(element, "value") === "val", "nanastavila sa value");
-        G.attr(element, "-value");
-        window.console.assert(!G.isString(G.attr(element).value), "navymazal sa value1");
-        window.console.assert(!G.isString(G.attr(element, "value")), "navymazal sa value2");
-    };
-    localTests.testClass = function(){
-        let element = G.createElement("div");
-        window.console.assert(!G.class(element, "nieco"), "obsahuje triedu ktorú nemá zadanú");
-        G.class(element, "+nieco");
-        window.console.assert(G.class(element, "nieco"), "neeobsahuje triedu ktorú má zadanú");
-        G.class(element, "-nieco");
-        window.console.assert(!G.class(element, "nieco"), "obsahuje triedu ktorú nemá zadanú2");
-        G.class(element, "/macka");
-        window.console.assert(G.class(element, "macka"), "neeobsahuje triedu ktorú má zadanú2");
-        G.class(element, "/macka");
-        window.console.assert(!G.class(element, "macka"), "obsahuje triedu ktorú nemá zadanú3");
-        G.class(element, "/macka", false);
-        window.console.assert(!G.class(element, "macka"), "obsahuje triedu ktorú nemá zadanú4");
-        G.class(element, "/macka", true);
-        window.console.assert(G.class(element, "macka"), "neeobsahuje triedu ktorú má zadanú3");
-        G.class(element, "/macka", true);
-        window.console.assert(G.class(element, "macka"), "neeobsahuje triedu ktorú má zadanú4");
-        G.class(element, ["+a", "/b", "+c"]);
-        window.console.assert(G.class(element, "a"), "neeobsahuje triedu ktorú má zadanú5");
-        window.console.assert(G.class(element, "b"), "neeobsahuje triedu ktorú má zadanú6");
-        window.console.assert(G.class(element, "c"), "neeobsahuje triedu ktorú má zadanú7");
-        G.class(element, ["/a", "-b", "/c"]);
-        window.console.assert(!G.class(element, "a"), "obsahuje triedu ktorú nemá zadanú5");
-        window.console.assert(!G.class(element, "b"), "obsahuje triedu ktorú nemá zadanú6");
-        window.console.assert(!G.class(element, "c"), "obsahuje triedu ktorú nemá zadanú7");
-    };
-    //localTests.testHTML = function(){};
-    localTests.testText = function(){
-        let a = G.createElement("input");
-        window.console.assert(G.text(a) === "", "text nieje prázdny");
-        let b = G.createElement("div", {}, "gabriel");
-        window.console.assert(G.text(b) === "gabriel", "text nieje správny");
-        let c = G.createElement("span", {}, b);
-        window.console.assert(G.text(c) === "gabriel", "text z vnoreneho elementu nieje správny");
-        G.text(b, "kvetina");
-        window.console.assert(G.text(c) === "kvetina", "text z vnoreneho elementu po zmene nieje správny");
-        G.text(c, "jahoda");
-        window.console.assert(G.text(c) === "jahoda", "text z po zmenenieje správny");
-    };
-    localTests.testExtends = function(){
-        let a = {
-            a: "a",
-            aa: {
-                a: "a",
-                b: "bb"
-            }
-        };
-        let b = {
-            b: "b",
-            c: "c",
-            aa: {
-                a: "aa",
-                c: "c",
-                d: "dd"
-            }
-        };
-        let c = {
-            d: "d",
-            c: "cc"
-        };
-
-        let result = G.extend(a, b, c);
-        window.console.assert(result.aa.b === "bb", "nefunguje extends");
-    };
-    //localTests.testAjax = function(){};
-    //localTests.testParents = function(){};
-    //localTests.testEach = function(){};
-    //localTests.testContainsIsHas = function(){};
-
-
-    //zavoláme všetky lokálne testy
-    G.each(localTests, (e) => e());
-
-    //zavoláme všetky funkcie z defaultným argumentom aby prešli
-    justCallFunctions();
-
-    G.log("...................................");
-    let body = new G(document.body);
-
-    body.append(G.createElement("div", {id: "idecko"}, "id"));
-    body.append(G.createElement("div", {class: "classa"}, "id"));
-    body.append(G.createElement("div", {id: "rodic"}, [
-        G.createElement("div", {class: "aaa"}),
-        G.createElement("div", {class: "aaa"},
-            G.createElement("ul", {}, [
-                G.createElement("li"),
-                G.createElement("li", {class: "temno"}, "temno vnutorne"),
-                G.createElement("li"),
-                G.createElement("li")
-            ])
-        ),
-        G.createElement("div", {class: "aaa"})
-    ]));
-    body.append(G.createElement("div", {class: "temno"}, "temno vonkajsie"));
-
-    /*
-     * empty();
-     * append();
-     * length();
-     * createElement();
-     */
-    body.empty();
-    if(body.children().length() !== 0){
-        G.warn("dlžka prazdneho objektu je: " + body.length());
-    }
-
-    body.append("<div id='idecko'>jupilajda</div>");
-    body.append(new G("div", {
-        attr : {
-            class: "clasa"
-        },
-        cont: "toto je classsa"
-    }));
-    let elementP = document.createElement("p");
-    elementP.appendChild(document.createTextNode("juhuuu toto je paragraf"));
-    body.append(elementP);
-    if(body.children().length() !== 3){
-        G.warn("dlžka objektu s 2 detmi je: " + body.children().length());
-    }
-
-    let idecko = new G("#idecko");
-    let clasa = new G(".clasa");
-    let par = new G("p");
-
-    /*
-     * constructor()
-     * find()
-     * first();
-     */
-
-    if(G.isDefined(new G().first())){
-        G.warn("pri prazdnom G to nevratilo ako prvý element null");
-    }
-
-    if(idecko.first() !== document.getElementById("idecko")){
-        G.warn("nenašiel sa správny element podla id");
-    }
-
-    if(clasa.first() !== document.getElementsByClassName("clasa")[0]){
-        G.warn("nenašiel sa správny element podla class");
-    }
-
-    if(par.first() !== document.getElementsByTagName("p")[0]){
-        G.warn("nenašiel sa správny element podla tagu");
-    }
-
-    /*
-     * css
-     */
-
-    if(!G.isObject(idecko.css())){
-        G.warn("css() nevratilo objekt");
-    }
-
-    idecko.css("color", "");
-    if(idecko.css("color") !== ""){
-        G.warn("nenastavený css nieje prazdny");
-    }
-
-    idecko.css("color", "red");
-    if(idecko.css("color") !== "red"){
-        G.warn("nesprávne to nastavilo css štýl");
-    }
-
-    idecko.css({color: "blue", width: "200px"});
-
-    if(idecko.css("color") !== "blue" || idecko.css("width") !== "200px"){
-        G.warn("nesprávne to nastavilo css štýl s objektu");
-    }
-
-    if(idecko.parent().first() !== body.first()){
-        G.warn("parent nefunguje správne");
-    }
-
-    /*
-     * extends
-     */
-
-    let a = {a: "aa"};
-    let b = {b: "bb", c: "cc"};
-    let c = {a: "aaa", c: "cccc"};
-
-    let res = G.extend({}, a, b, c);
-
-    if(res.a !== "aaa" || res.b !== "bb" || res.c !== "cccc"){
-        G.warn("nefunguje extendse pretože po zlučenie", a, b, c, " vzniklo: ", res, "a malo vzniknut: ", {a: "aaa", b: "bb", c: "cccc"});
-    }
-
-
-    /*
-     * find, parents, parent, is, prev, childrens, next, attr
-     */
-
-    new G("div", {
-        attr: {id: "container"},
-        cont: [
-            G.createElement("nav", {id: "topMenu"}, [
-                    G.createElement("ul", {}, [
-                        G.createElement("li", {},
-                            G.createElement("a", {class: "firstLink", href: "stranka"})
-                        ),
-                        G.createElement("li", {},
-                            G.createElement("a", {class: "secondLink"})
-                        )
-                    ]),
-                    G.createElement("div", {id: "wrapper", class: "wrappedDiv"},
-                        G.createElement("nav", {id: "rightMenu"},
-                            G.createElement("ul", {class: "secondUl"}, [
-                                G.createElement("li", {class: "firstLi"},
-                                    G.createElement("a", {class: "firstLink"})
-                                ),
-                                G.createElement("li", {class: "middleLi disabled"},
-                                    G.createElement("a", {class: "secondLink"})
-                                ),
-                                G.createElement("li", {class: "lastLi disabled"},
-                                    G.createElement("a", {class: "thirdLink"})
-                                )
-                            ])
-                        )
-                    )
-                ]
-            )]
-    }).appendTo(body);
-
-    if(new G("#topMenu").find(".firstLink").attr("href") !== "stranka"){
-        window.console.log("zlihalo 1");
-    }
-    if(new G(".thirdLink").parents("#wrapper").is(".wrappedDiv") !== true){
-        window.console.log("zlihalo 2");
-    }
-    if(new G("#rightMenu").find("ul").childrens(":not(.disabled)").is(".firstLi") === false){
-        window.console.log("zlihalo 3");
-    }
-    if(new G(".middleLi").prev().is(".firstLi") !== true){
-        window.console.log("zlihalo 4");
-    }
-    if(new G(".middleLi").next().is(".lastLi") !== true){
-        window.console.log("zlihalo 5");
-    }
-    if(new G(".secondUl").parent().is("#rightMenu") !== true){
-        window.console.log("zlihalo 6");
-    }
-
-    /*
-     * //click
-     */
-
-    body.append(G.createElement("span", {id: "resultSpan"}));
-
-    if(new G("#resultSpan").text() !== ""){
-        window.console.log("zlahalo 1");
-    }
-    body.append(G.createElement("input", {type: "button", id: "resultButton", value: "klikni"}));
-
-
-    let clickFunction = function(){
-        new G("#resultSpan").text("kuriatko");
-    };
-
-    new G("#resultButton").click(clickFunction);
-
-    new G("#resultButton").first().click();
-
-    if(new G("#resultSpan").text() !== "kuriatko"){
-        window.console.log("zlahalo 2");
-    }
-
-    new G("#resultButton").unbind("click", clickFunction);
-    new G("#resultSpan").text("maciatko");
-    new G("#resultButton").first().click();
-
-    if(new G("#resultSpan").text() !== "maciatko"){
-        window.console.log("zlahalo 3");
-    }
-
-    /*
-     * APPEND
-     */
-    let parent = new G("div", {attr: {id :"parentElement"}});
-    parent.append("<li>a</li>");
-    parent.append(new G("li", {cont: "b"}));
-    parent.append(G.createElement("li", {}, "c"));
-    if(parent.text() !== "abc"){
-        window.console.log("append nefunguje");
-    }
-
-    /*
-     * HTML
-     */
-    parent = new G("div", {attr: {id :"parentElement"}});
-    parent.html("<li>abc</li>");
-    if(parent.text() !== "abc" && parent.html() !== "<li>abc</li>"){
-        window.console.log("html nefunguje 1");
-    }
-    parent.html("abc");
-    if(parent.text() !== "abc" && parent.html() !== "abc"){
-        window.console.log("html nefunguje 2");
-    }
-    parent.html(G.createElement("li", {}, "abc"));
-    if(parent.text() !== "abc" && parent.html() !== "<li>abc</li>"){
-        window.console.log("html nefunguje 3");
-    }
-    parent.html("+abc");
-    if(parent.text() !== "abcabc" && parent.html() !== "<li>abc</li>abc"){
-        window.console.log("html nefunguje 4");
-    }
-    parent.html("+<li>abc</li>");
-    if(parent.text() !== "abcabcabc" && parent.html() !== "<li>abc</li>abc<li>abc</li>"){
-        window.console.log("html nefunguje 5");
-    }
-    if(parent.children().length() !== 2){
-        window.console.log("html nefunguje 6");
-    }
-
-
-    //add, contains, equalAll
-
-    let data = new G();
-    let el = G.createElement("span", {class: "pes macka"}, "volačo");
-    data.add(el);
-    data.add(G.createElement("div", {class: "pes kura"}, "niečo iné"));
-    data.add(G.createElement("p", {class: "macka kura"}, "niečo zasa iné"));
-    if(data.has(".pes").length() !== 2){
-        window.console.log("add nefunguje 1");
-    }
-    if(data.has(".pterodaktil").length() !== 0){
-        window.console.log("add nefunguje 2");
-    }
-    if(data.not(".kura").length() !== 1){
-        window.console.log("not nefunguje 2");
-    }
-
-    if(!data.contains(el)){
-        window.console.log("nefunguje contains");
-    }
-
-    data.remove(el);
-
-    if(data.length() !== 2){
-        window.console.log("nefunguje remove");
-    }
-
-    if(data.contains(el)){
-        window.console.log("nefunguje remove alebo contains");
-    }
-
-    let dataNew = new G(data);
-
-    if(!data.equalAll(dataNew)){
-        window.console.log("nefunguje equalAll alebo konštruktor kde argument je G objekt");
-    }
-    dataNew.clear();
-    if(!dataNew.isEmpty()){
-        window.console.log("nefunguje clear");
-    }
-    if(data.equalAll(dataNew)){
-        window.console.log("nefunguje equalAll alebo clear");
-    }
-
-    //delete, deleteAll
-    let items = new G(".disabled");
-    items.delete();
-    if(items.length() !== 1){
-        window.console.log("nefunguje delete");
-    }
-
-    let items2 = new G("ul");
-    items2.deleteAll();
-    if(!items2.isEmpty()){
-        window.console.log("nefunguje deleteAll");
-    }
-};
 
 /**
  * Funkcia spustí AJAXové volanie na danu url a po uspešnej odpovedi zavolá callback funkciu
@@ -750,10 +291,10 @@ G.log = function(...args){
  * G.createElement({name: "div"}) => <div></div>;
  * G.createElement({name: "div", attr: {id: "ide"}}) => <div id="ide"></div>;
  *
- * @param {String|Object}        name  - názov elementu alebo object {name: "", attr: {}, style: {}, cont: ""}
- * @param {Object}              attr  - objekt kde kluče su nazvy atribútov a hodnoty su hodnoty atribútov
- * @param {String|Element|G}    cont  - string s textom alebo element alebo pole elementov
- * @param {Object}              style - objekt kde kluče su nazvy štýlov a hodnoty su hodnoty štýlov
+ * @param {String|Object}       name  - názov elementu alebo object {name: "", attr: {}, style: {}, cont: ""}
+ * @param {Object=}             attr  - objekt kde kluče su nazvy atribútov a hodnoty su hodnoty atribútov
+ * @param {(String|Element|G)=} cont  - string s textom alebo element alebo pole elementov
+ * @param {Object=}             style - objekt kde kluče su nazvy štýlov a hodnoty su hodnoty štýlov
  * @returns {Element} - novo vytvorený element
  */
 G.createElement = function(name, attr, cont, style){
@@ -1007,6 +548,38 @@ G.each = function(obj, func, thisArg){
             }
         }
     }
+};
+
+/**
+ * @param {Element} form
+ * @returns {{}}
+ */
+G.serialize = function(form){
+    let result = {};
+    //ak formular nieje element
+    if(!G.isElement(form)){
+        G.warn("G.serialize: prvý parameter form{Element} je ", form);
+        return result;
+    }
+
+    //ak formular nieje typu form
+    if(form.tagName.toLowerCase() !== "form"){
+        G.warn("G.serialize: prvý parameter musí byť element typu form", form);
+        return result;
+    }
+
+    //získame všetky input elementy
+    let elements = G.byTag("input");
+
+    //priradíme hodnoty do výsledného objektu
+    G.each(elements, (e) => {
+        let name = G.attr(e, "name");
+        if(name){
+            result[name] = G.attr(e, "value");
+        }
+    });
+
+    return result;
 };
 
 /**
@@ -2107,7 +1680,7 @@ G.attr = function(element, ...arg){
         }
         //ináč vrá atribút
         else{
-            return element.getAttribute(arg[0]);
+            return arg[0] === "value" ? element.value : element.getAttribute(arg[0]);
         }
     }
     //ak je prvý parameter objekt nastav všetky štýli podla objektu
@@ -2144,6 +1717,10 @@ G.prototype.attr = function(key, value){//testovane 29.1.2017
  * LISTENERS
  */
 
+(function(){
+   G._events = {};
+})();
+
 /**
  * Funkcia upravý listener na elemente
  *
@@ -2176,11 +1753,14 @@ G._modifyListener = function(element, listener, func, type){//testovane 29.1.201
         return element;
     }
 
+    let funct = function(e){e.preventDefault(); func.call(element, e);};
+    G._events[func] = funct;
+
     if(type === "unbind"){
-        element.removeEventListener(listener, func);
+        element.removeEventListener(listener, funct);
     }
     else if(type === "bind"){
-        element.addEventListener(listener, func);
+        element.addEventListener(listener, funct);
     }
 
     return element;
@@ -2523,6 +2103,531 @@ G.object = function(element){
         }
     };
 };
+
+
+let tests = function(G){
+    "use strict";
+
+    function justCallFunctions(){
+        function callAndPrint(title, ...args){
+            G.log("vola sa:" + title + ":", G[title].apply(window, args));
+        }
+        let tmp = new G();
+        let bodyElement = document.body;
+        callAndPrint("loadScript");
+        callAndPrint("byClass", "*");
+        callAndPrint("byName", "*");
+        callAndPrint("byTag", "*");
+        callAndPrint("byId", "*");
+        callAndPrint("hasClass", bodyElement, "*");
+        callAndPrint("error");
+        callAndPrint("warn");
+        callAndPrint("log");
+        callAndPrint("createElement", "input");
+        callAndPrint("now");
+        callAndPrint("typeOf", bodyElement);
+        callAndPrint("last");
+        callAndPrint("isIn");
+        callAndPrint("extend", {});
+        callAndPrint("matches", bodyElement);
+        callAndPrint("each", {}, (a) => a);
+        callAndPrint("find", "*");
+        callAndPrint("parent", bodyElement);
+        callAndPrint("parents", bodyElement);
+        callAndPrint("text", bodyElement);
+        callAndPrint("html", bodyElement);
+        callAndPrint("next", bodyElement);
+        callAndPrint("prev", bodyElement);
+        callAndPrint("childrens", bodyElement);
+        callAndPrint("class", bodyElement);
+        callAndPrint("css", bodyElement);
+        callAndPrint("attr", bodyElement);
+        callAndPrint("_modifyListener", bodyElement, "click", (a) => a);
+        callAndPrint("position", bodyElement);
+        callAndPrint("width", bodyElement);
+        callAndPrint("height", bodyElement);
+        callAndPrint("size", bodyElement);
+        callAndPrint("top", bodyElement);
+        callAndPrint("left", bodyElement);
+        //callAndPrint("delete", bodyElement.firstElementChild);
+
+    }
+
+    let localTests = {};
+    localTests.find = function(){
+        let a = G.createElement("input", {"class": "a b"});
+        let b = G.createElement("div", {"class": "b c"});
+        let parent = G.createElement("div", {"class": "a b c"});
+        parent.appendChild(a);
+        parent.appendChild(b);
+        let res = new G(G.find(".b", parent));
+        window.console.assert(res.size === 2);
+    };
+    localTests.createElement = function(){
+        let a = G.createElement("input");
+        window.console.assert(G.isEmpty(G.attr(a)), "nevytvoril sa prazdny element ale ", G.attr(a));
+        let b = G.createElement("div", {"class": "aa"});
+        window.console.assert(G.class(b, "aa"), "nevytvoril sa element z triedov");
+        let c = G.createElement("span", {}, "gabriel");
+        window.console.assert(G.text(c) === "gabriel", "nepriradil sa string ako obsah pri vytvarani objektu");
+        let d = G.createElement("a", {}, c);
+        window.console.assert(G.html(d) === c.outerHTML, "vnútorne HTML nieje rovnake");
+        let e = G.createElement("a", {}, "", {border: "1px solid black"});
+        window.console.assert(G.css(e, "border") === "1px solid black", "nenastavil sa správne štýl");
+    };
+    localTests.testAttr = function(){
+        let element = G.createElement("input");
+        window.console.assert(G.isEmpty(G.attr(element)), "prázdny element má nejaký atribúty");
+        G.attr(element, "type", "text");
+        window.console.assert(G.attr(element).type === "text", "po nastavení typu niee známy typ");
+        window.console.assert(G.attr(element, "type") === "text", "po nastavení typu niee známy typ");
+        G.attr(element, "type", "password");
+        window.console.assert(G.attr(element, "type") === "password", "po nastavení typu niee známy typ");
+        G.attr(element, {value: "val", "class": "classa"});
+        window.console.assert(G.attr(element).class === "classa", "nanastavila sa class");
+        window.console.assert(G.attr(element, "value") === "val", "nanastavila sa value");
+        G.attr(element, "-value");
+        window.console.assert(!G.isString(G.attr(element).value), "navymazal sa value1");
+        window.console.assert(!G.isString(G.attr(element, "value")), "navymazal sa value2");
+    };
+    localTests.testClass = function(){
+        let element = G.createElement("div");
+        window.console.assert(!G.class(element, "nieco"), "obsahuje triedu ktorú nemá zadanú");
+        G.class(element, "+nieco");
+        window.console.assert(G.class(element, "nieco"), "neeobsahuje triedu ktorú má zadanú");
+        G.class(element, "-nieco");
+        window.console.assert(!G.class(element, "nieco"), "obsahuje triedu ktorú nemá zadanú2");
+        G.class(element, "/macka");
+        window.console.assert(G.class(element, "macka"), "neeobsahuje triedu ktorú má zadanú2");
+        G.class(element, "/macka");
+        window.console.assert(!G.class(element, "macka"), "obsahuje triedu ktorú nemá zadanú3");
+        G.class(element, "/macka", false);
+        window.console.assert(!G.class(element, "macka"), "obsahuje triedu ktorú nemá zadanú4");
+        G.class(element, "/macka", true);
+        window.console.assert(G.class(element, "macka"), "neeobsahuje triedu ktorú má zadanú3");
+        G.class(element, "/macka", true);
+        window.console.assert(G.class(element, "macka"), "neeobsahuje triedu ktorú má zadanú4");
+        G.class(element, ["+a", "/b", "+c"]);
+        window.console.assert(G.class(element, "a"), "neeobsahuje triedu ktorú má zadanú5");
+        window.console.assert(G.class(element, "b"), "neeobsahuje triedu ktorú má zadanú6");
+        window.console.assert(G.class(element, "c"), "neeobsahuje triedu ktorú má zadanú7");
+        G.class(element, ["/a", "-b", "/c"]);
+        window.console.assert(!G.class(element, "a"), "obsahuje triedu ktorú nemá zadanú5");
+        window.console.assert(!G.class(element, "b"), "obsahuje triedu ktorú nemá zadanú6");
+        window.console.assert(!G.class(element, "c"), "obsahuje triedu ktorú nemá zadanú7");
+    };
+    localTests.testBindAndUnbind = function(){
+        let counter = 0;
+        let callback = () => counter++;
+        let input = new G("input", {attr: {
+            type: "button",
+            value: "klikni",
+            id: "idButton"
+        }}).appendTo(window.document.body);
+
+        input.first().click();
+        window.console.assert(counter === 0, "je event listener aj ked nebol pridany");
+
+        input.bind("click", callback);
+        input.first().click();
+        window.console.assert(counter === 1, "nezvačšil sa counter lebo mal byť 1 a je" + counter);
+
+        input.unbind("click", callback);
+        input.first().click();
+        window.console.assert(counter === 1, "zmenil sa counter lebo mal byť 1 a je" + counter);
+
+        input.delete();
+    };
+    localTests.testSerialize = function(){
+        let name = G.createElement("input", {
+            type: "text",
+            placeholder: "zadaj meno",
+            value: "meno",
+            name: "login"
+        });
+
+        let email = G.createElement("input", {
+            type: "text",
+            placeholder: "zadaj email",
+            value: "email",
+            name: "email"
+        });
+
+        let pass = G.createElement("input", {
+            type: "password",
+            value: "password",
+            name: "pass"
+        });
+
+        let submit = G.createElement("input", {
+            type: "submit",
+            value: "Odoslať"
+        });
+
+        let form = new G("form", {
+            attr: {
+                method: "get",
+                action: "#"
+            },
+            cont: [name, email, pass, submit]
+        }).submit(function(){
+            let formObject = G.serialize(this);
+            window.console.assert(formObject.login === "meno", "nieje správny login");
+            window.console.assert(formObject.email === "email", "nieje správny email");
+            window.console.assert(formObject.pass === "password", "nieje správny heslo");
+            form.delete();
+            return false;
+        }).appendTo(document.body);
+
+        submit.click();
+    };
+    localTests.testText = function(){
+        let a = G.createElement("input");
+        window.console.assert(G.text(a) === "", "text nieje prázdny");
+        let b = G.createElement("div", {}, "gabriel");
+        window.console.assert(G.text(b) === "gabriel", "text nieje správny");
+        let c = G.createElement("span", {}, b);
+        window.console.assert(G.text(c) === "gabriel", "text z vnoreneho elementu nieje správny");
+        G.text(b, "kvetina");
+        window.console.assert(G.text(c) === "kvetina", "text z vnoreneho elementu po zmene nieje správny");
+        G.text(c, "jahoda");
+        window.console.assert(G.text(c) === "jahoda", "text z po zmenenieje správny");
+    };
+    localTests.testExtends = function(){
+        let a = {
+            a: "a",
+            aa: {
+                a: "a",
+                b: "bb"
+            }
+        };
+        let b = {
+            b: "b",
+            c: "c",
+            aa: {
+                a: "aa",
+                c: "c",
+                d: "dd"
+            }
+        };
+        let c = {
+            d: "d",
+            c: "cc"
+        };
+
+        let result = G.extend(a, b, c);
+        window.console.assert(result.aa.b === "bb", "nefunguje extends");
+    };
+    //localTests.testAjax = function(){};
+    //localTests.testHTML = function(){};
+    //localTests.testParents = function(){};
+    //localTests.testEach = function(){};
+    //localTests.testContainsIsHas = function(){};
+
+
+    //zavoláme všetky lokálne testy
+    G.each(localTests, (e) => e());
+
+    //zavoláme všetky funkcie z defaultným argumentom aby prešli
+    justCallFunctions();
+
+    G.log("...................................");
+    let body = new G(document.body);
+
+    body.append(G.createElement("div", {id: "idecko"}, "id"));
+    body.append(G.createElement("div", {class: "classa"}, "id"));
+    body.append(G.createElement("div", {id: "rodic"}, [
+        G.createElement("div", {class: "aaa"}),
+        G.createElement("div", {class: "aaa"},
+            G.createElement("ul", {}, [
+                G.createElement("li"),
+                G.createElement("li", {class: "temno"}, "temno vnutorne"),
+                G.createElement("li"),
+                G.createElement("li")
+            ])
+        ),
+        G.createElement("div", {class: "aaa"})
+    ]));
+    body.append(G.createElement("div", {class: "temno"}, "temno vonkajsie"));
+
+    /*
+     * empty();
+     * append();
+     * length();
+     * createElement();
+     */
+    body.empty();
+    if(body.children().length() !== 0){
+        G.warn("dlžka prazdneho objektu je: " + body.length());
+    }
+
+    body.append("<div id='idecko'>jupilajda</div>");
+    body.append(new G("div", {
+        attr : {
+            class: "clasa"
+        },
+        cont: "toto je classsa"
+    }));
+    let elementP = document.createElement("p");
+    elementP.appendChild(document.createTextNode("juhuuu toto je paragraf"));
+    body.append(elementP);
+    if(body.children().length() !== 3){
+        G.warn("dlžka objektu s 2 detmi je: " + body.children().length());
+    }
+
+    let idecko = new G("#idecko");
+    let clasa = new G(".clasa");
+    let par = new G("p");
+
+    /*
+     * constructor()
+     * find()
+     * first();
+     */
+
+    if(G.isDefined(new G().first())){
+        G.warn("pri prazdnom G to nevratilo ako prvý element null");
+    }
+
+    if(idecko.first() !== document.getElementById("idecko")){
+        G.warn("nenašiel sa správny element podla id");
+    }
+
+    if(clasa.first() !== document.getElementsByClassName("clasa")[0]){
+        G.warn("nenašiel sa správny element podla class");
+    }
+
+    if(par.first() !== document.getElementsByTagName("p")[0]){
+        G.warn("nenašiel sa správny element podla tagu");
+    }
+
+    /*
+     * css
+     */
+
+    if(!G.isObject(idecko.css())){
+        G.warn("css() nevratilo objekt");
+    }
+
+    idecko.css("color", "");
+    if(idecko.css("color") !== ""){
+        G.warn("nenastavený css nieje prazdny");
+    }
+
+    idecko.css("color", "red");
+    if(idecko.css("color") !== "red"){
+        G.warn("nesprávne to nastavilo css štýl");
+    }
+
+    idecko.css({color: "blue", width: "200px"});
+
+    if(idecko.css("color") !== "blue" || idecko.css("width") !== "200px"){
+        G.warn("nesprávne to nastavilo css štýl s objektu");
+    }
+
+    if(idecko.parent().first() !== body.first()){
+        G.warn("parent nefunguje správne");
+    }
+
+    /*
+     * extends
+     */
+
+    let a = {a: "aa"};
+    let b = {b: "bb", c: "cc"};
+    let c = {a: "aaa", c: "cccc"};
+
+    let res = G.extend({}, a, b, c);
+
+    if(res.a !== "aaa" || res.b !== "bb" || res.c !== "cccc"){
+        G.warn("nefunguje extendse pretože po zlučenie", a, b, c, " vzniklo: ", res, "a malo vzniknut: ", {a: "aaa", b: "bb", c: "cccc"});
+    }
+
+
+    /*
+     * find, parents, parent, is, prev, childrens, next, attr
+     */
+
+    new G("div", {
+        attr: {id: "container"},
+        cont: [
+            G.createElement("nav", {id: "topMenu"}, [
+                    G.createElement("ul", {}, [
+                        G.createElement("li", {},
+                            G.createElement("a", {class: "firstLink", href: "stranka"})
+                        ),
+                        G.createElement("li", {},
+                            G.createElement("a", {class: "secondLink"})
+                        )
+                    ]),
+                    G.createElement("div", {id: "wrapper", class: "wrappedDiv"},
+                        G.createElement("nav", {id: "rightMenu"},
+                            G.createElement("ul", {class: "secondUl"}, [
+                                G.createElement("li", {class: "firstLi"},
+                                    G.createElement("a", {class: "firstLink"})
+                                ),
+                                G.createElement("li", {class: "middleLi disabled"},
+                                    G.createElement("a", {class: "secondLink"})
+                                ),
+                                G.createElement("li", {class: "lastLi disabled"},
+                                    G.createElement("a", {class: "thirdLink"})
+                                )
+                            ])
+                        )
+                    )
+                ]
+            )]
+    }).appendTo(body);
+
+    if(new G("#topMenu").find(".firstLink").attr("href") !== "stranka"){
+        window.console.log("zlihalo 1");
+    }
+    if(new G(".thirdLink").parents("#wrapper").is(".wrappedDiv") !== true){
+        window.console.log("zlihalo 2");
+    }
+    if(new G("#rightMenu").find("ul").childrens(":not(.disabled)").is(".firstLi") === false){
+        window.console.log("zlihalo 3");
+    }
+    if(new G(".middleLi").prev().is(".firstLi") !== true){
+        window.console.log("zlihalo 4");
+    }
+    if(new G(".middleLi").next().is(".lastLi") !== true){
+        window.console.log("zlihalo 5");
+    }
+    if(new G(".secondUl").parent().is("#rightMenu") !== true){
+        window.console.log("zlihalo 6");
+    }
+
+    /*
+     * //click
+     */
+
+    body.append(G.createElement("span", {id: "resultSpan"}));
+
+    if(new G("#resultSpan").text() !== ""){
+        window.console.log("zlahalo 1");
+    }
+    body.append(G.createElement("input", {type: "button", id: "resultButton", value: "klikni"}));
+
+
+    let clickFunction = function(){
+        new G("#resultSpan").text("kuriatko");
+    };
+
+    new G("#resultButton").click(clickFunction);
+
+    new G("#resultButton").first().click();
+
+    if(new G("#resultSpan").text() !== "kuriatko"){
+        window.console.log("zlahalo 2");
+    }
+
+    new G("#resultButton").unbind("click", clickFunction);
+    new G("#resultSpan").text("maciatko");
+    new G("#resultButton").first().click();
+
+    if(new G("#resultSpan").text() !== "maciatko"){
+        window.console.log("zlahalo 3");
+    }
+
+    /*
+     * APPEND
+     */
+    let parent = new G("div", {attr: {id :"parentElement"}});
+    parent.append("<li>a</li>");
+    parent.append(new G("li", {cont: "b"}));
+    parent.append(G.createElement("li", {}, "c"));
+    if(parent.text() !== "abc"){
+        window.console.log("append nefunguje");
+    }
+
+    /*
+     * HTML
+     */
+    parent = new G("div", {attr: {id :"parentElement"}});
+    parent.html("<li>abc</li>");
+    if(parent.text() !== "abc" && parent.html() !== "<li>abc</li>"){
+        window.console.log("html nefunguje 1");
+    }
+    parent.html("abc");
+    if(parent.text() !== "abc" && parent.html() !== "abc"){
+        window.console.log("html nefunguje 2");
+    }
+    parent.html(G.createElement("li", {}, "abc"));
+    if(parent.text() !== "abc" && parent.html() !== "<li>abc</li>"){
+        window.console.log("html nefunguje 3");
+    }
+    parent.html("+abc");
+    if(parent.text() !== "abcabc" && parent.html() !== "<li>abc</li>abc"){
+        window.console.log("html nefunguje 4");
+    }
+    parent.html("+<li>abc</li>");
+    if(parent.text() !== "abcabcabc" && parent.html() !== "<li>abc</li>abc<li>abc</li>"){
+        window.console.log("html nefunguje 5");
+    }
+    if(parent.children().length() !== 2){
+        window.console.log("html nefunguje 6");
+    }
+
+
+    //add, contains, equalAll
+
+    let data = new G();
+    let el = G.createElement("span", {class: "pes macka"}, "volačo");
+    data.add(el);
+    data.add(G.createElement("div", {class: "pes kura"}, "niečo iné"));
+    data.add(G.createElement("p", {class: "macka kura"}, "niečo zasa iné"));
+    if(data.has(".pes").length() !== 2){
+        window.console.log("add nefunguje 1");
+    }
+    if(data.has(".pterodaktil").length() !== 0){
+        window.console.log("add nefunguje 2");
+    }
+    if(data.not(".kura").length() !== 1){
+        window.console.log("not nefunguje 2");
+    }
+
+    if(!data.contains(el)){
+        window.console.log("nefunguje contains");
+    }
+
+    data.remove(el);
+
+    if(data.length() !== 2){
+        window.console.log("nefunguje remove");
+    }
+
+    if(data.contains(el)){
+        window.console.log("nefunguje remove alebo contains");
+    }
+
+    let dataNew = new G(data);
+
+    if(!data.equalAll(dataNew)){
+        window.console.log("nefunguje equalAll alebo konštruktor kde argument je G objekt");
+    }
+    dataNew.clear();
+    if(!dataNew.isEmpty()){
+        window.console.log("nefunguje clear");
+    }
+    if(data.equalAll(dataNew)){
+        window.console.log("nefunguje equalAll alebo clear");
+    }
+
+    //delete, deleteAll
+    let items = new G(".disabled");
+    items.delete();
+    if(items.length() !== 1){
+        window.console.log("nefunguje delete");
+    }
+
+    let items2 = new G("ul");
+    items2.deleteAll();
+    if(!items2.isEmpty()){
+        window.console.log("nefunguje deleteAll");
+    }
+};
+
 /*
  G.ajax();
  G.warn();
