@@ -4,7 +4,7 @@ l_folder="$HOME/.myconf"
 l_bashrc="$HOME/.bashrc";
 l_tmp_folder="/tmp/linuxInstall"
 l_on_terminal_run_file="onTerminalRun"
-l_line=". ~/.myconf/$l_on_terminal_run_file";
+l_line=". $l_folder/$l_on_terminal_run_file";	# riadok ktorým sa spustí náš súbor
 l_git_repo="https://github.com/G43riko/Linux";
 l_repo_aliases_file="aliases.sh"
 l_instal_packages=0
@@ -46,7 +46,7 @@ git clone "$l_git_repo" "$l_tmp_folder";
 mv "$l_tmp_folder/$l_repo_aliases_file" "$l_folder/$l_on_terminal_run_file"
 
 # do ~/.bashrc prida spustenie .onTerminalRun súboru
-if [ ! -f "$l_bashrc" ]; then # ak taký súbor existuje
+if [ -f "$l_bashrc" ]; then # ak taký súbor existuje
 	if [ `grep "$l_line" "$l_bashrc" | wc -l` -eq 0 ]; then # ak sa v ňom taký riadok nenachádza
 		echo >> "$l_bashrc";
 		echo "$l_line" >> "$l_bashrc";
@@ -58,6 +58,4 @@ fi;
 
 
 #zmaže tmp priečinok
-if [ -d "$l_tmp_folder" ]; then
-	rm -rf "$l_tmp_folder";
-fi;	
+rm -rf "$l_tmp_folder";
