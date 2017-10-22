@@ -1,50 +1,56 @@
-function getOsData() {
-	const os = require("os");
-	return {
-		eol: os.EOL,
-		arch: os.arch(),
-		constants: os.constants,
-		cpus: os.cpus(),
-		endian: os.endianness(), // big endian/little endian.
-		freeMem: os.freemem(), // free memory in bytes
-		homedir: os.homedir(),
-		hostName: os.hostname(),
-		networkInterfaces: os.networkInterfaces(),
-		platform: os.platform(),
-		release: os.release(),
-		tmpDir: os.tmpdir(),
-		totalMem: os.totalmem(),
-		type: os.type(),
-		uptime: os.uptime(),
-		userInfo: os.userInfo(),
-	};
-}
+function getData() {
+	function getOsData() {
+		const os = require("os");
+		return {
+			eol: os.EOL,
+			arch: os.arch(),
+			constants: os.constants,
+			cpus: os.cpus(),
+			endian: os.endianness(), // big endian/little endian.
+			freeMem: os.freemem(), // free memory in bytes
+			homedir: os.homedir(),
+			hostName: os.hostname(),
+			networkInterfaces: os.networkInterfaces(),
+			platform: os.platform(),
+			release: os.release(),
+			tmpDir: os.tmpdir(),
+			totalMem: os.totalmem(),
+			type: os.type(),
+			uptime: os.uptime(),
+			userInfo: os.userInfo(),
+		};
+	}
 
-function getProcessData() {
-	const process = require("process");
-	return {
-		arch: process.arch,
-		argv: process.argv,
-		cpuUsage: process.cpuUsage(),
-		cwd: process.cwd(),
-		env: process.env,
-		execArgv: process.execArgv,
-		execPath: process.execPath,
-		groupId: process.getegid(),
-		userId: process.geteuid(),
-		processGroupId: process.getgid(),
-		groups: process.getgroups(),
-		processId: process.getuid(),
-		hrTime: process.hrtime(), // [seconds, nanoseconds]
-		memoryUsage: process.memoryUsage(),
-		pid: process.pid,
-		platform: process.platform,
-		release: process.release,
-		title: process.title,
-		uptime: process.uptime(),
-		version: process.version,
-		versions: process.versions,
+	function getProcessData() {
+		const process = require("process");
+		return {
+			arch: process.arch,
+			argv: process.argv,
+			cpuUsage: process.cpuUsage(),
+			cwd: process.cwd(),
+			env: process.env,
+			execArgv: process.execArgv,
+			execPath: process.execPath,
+			groupId: process.getegid(),
+			userId: process.geteuid(),
+			processGroupId: process.getgid(),
+			groups: process.getgroups(),
+			processId: process.getuid(),
+			hrTime: process.hrtime(), // [seconds, nanoseconds]
+			memoryUsage: process.memoryUsage(),
+			pid: process.pid,
+			platform: process.platform,
+			release: process.release,
+			title: process.title,
+			uptime: process.uptime(),
+			version: process.version,
+			versions: process.versions,
 
+		}
+	}
+	return {
+		os: getOsData(),
+		process: getProcessData()
 	}
 }
 
@@ -71,32 +77,140 @@ function testChildProcess() {
 	});
 }
 
-function testSocketServer() {
+function testReadFromLine() {
+	var readline = require('readline');
+	var rl = readline.createInterface({
+	  input: process.stdin,
+	  output: process.stdout,
+	  terminal: false
+	});
+
+	rl.on('line', function(line){
+	    console.log("precitane: ", line);
+	    if(line === "reset") {
+			process.stdout.write('\033c');
+	    }
+	    if(line === "clean") {
+	    	process.stdout.clearLine();
+	    }
+	})
+}
+
+function testSocketServer(options = {}) {
 	const net = require("net");
-	const port = "27490"
 	const EXIT_KEYWORD = "exit";
-	const CTRL_C_BUFFED = new Buffer("fff4fffd06", "hex");
+	const CTRL_C_BUFFER_LINNUX = new Buffer("fff4fffd06", "hex");
+	const CTRL_C_BUFFED_WINDOWS = new Buffer("03", "hex");
+	const END_LINE_WINDOW = new Buffer("0d0a", "hex");
+
+	options.port = options.port || 8123;
+	options.exclusive = typeof options.exclusive === "undefined" ? options.exclusive : true;
 
 	const server = net.createServer((socket) => {
 		socket.write("si pripojený\n");
 
 		socket.on("data", (data) => {
-			if (data.equals(CTRL_C_BUFFED)) {
+			if (data.equals(CTRL_C_BUFFER_LINNUX) || data.equals(CTRL_C_BUFFED_WINDOWS)) {
 				socket.end("oukey tak sa maj\n");		
 				console.log("Client sa odpojil");
 			} else {
-				console.log(data.toString());
+				console.log(data.toString(), " == ", data);
+			}
+			if(data.equals(END_LINE_WINDOW)) {
+				console.log("end of line");
 			}
 		});
 	}).on('error', (err) => {
 		throw err;
 	});
 	server.listen({
-	  port: port,
-	  exclusive: true
+	  port: options.port,
+	  exclusive: options.exclusive
 	},() => {
 		console.log('opened server on', server.address());
 	});
 }
 
-testSocketServer();
+function handleEvents() {
+	process.exitCode = 1;
+
+	process.on('SIGINT', () => {
+		console.log("Oukey tak teda končíme: ", process.exitCode);
+		process.exit();
+	});
+
+
+	setTimeout(() => console.log("končíme"), 10000);
+}
+
+function testKeyLogger() {
+	const { spawn } = require("child_process");
+	const ls = spawn("xinput", ["list"]);
+
+	ls.stdout.on("data", (data) => {
+	  // console.log("data: ", data.toString());
+	  // split by "\n"
+	  // najsť riadok obsahujuci master keyboard a najsť tam id=X
+	  // zistiť či v /dev/inputs existuje súbor eventX
+	  // počúvať súbor /dev/inputs/eventX
+	  // pri každej zmene zistiť tlačítko
+	});
+}
+
+function testLoader() {
+	/*
+	var twirlTimer = (function() {
+	  var P = ["\\", "|", "/", "-"];
+	  var x = 0;
+	  return setInterval(function() {
+	    process.stdout.write("\r" + P[x++]);
+	    x &= 3;
+	  }, 250);
+	})();
+	*/
+	let counter = 0
+	setInterval(() => {
+		process.stdout.write("#");
+		if(counter++ % (process.stdout.columns )  === 0) {
+			process.stdout.clearLine();
+			process.stdout.cursorTo(0);
+		}
+	}, 25);
+}
+
+
+function killByName(name) {
+	const { spawn } = require("child_process");
+	const ls = spawn("ps", ["x"]);
+
+	ls.stdout.on("data", (data) => {
+		const lines = data.toString().split("\n").filter(line => line.indexOf(name) >= 0);
+		if(lines.length === 1) {
+			const splitLine = lines[0].replace(/ +/g, " ").split(" ");	
+			const pid = splitLine[0];
+			const name = splitLine[4];
+			console.log("remove", name + " (" + pid +")???");
+
+			process.stdin.on('readable', () => {
+			  const chunk = process.stdin.read();
+			  if (chunk !== null) {
+			    if(chunk.toString() === "ano\n") {
+			    	console.log("maze sa");
+					process.kill(pid);
+			    } else {
+			    	console.log("nemaze sa");
+			    }
+				process.stdin.removeAllListeners("readable");
+			  }
+
+			});
+		}
+	});
+}
+
+// testSocketServer();
+// testKeyLogger();
+// handleEvents();
+// testReadFromLine();
+
+killByName("soffice");
