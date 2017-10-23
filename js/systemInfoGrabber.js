@@ -1,3 +1,14 @@
+/*
+TODO 
+sudo lshw / lshw -short / lshw -html
+lscpu
+lsblk / lsblk -a
+lsusb / lsusb -v
+lspci / lspci -v
+sudo fdisk -l
+sudo dmidecode -t bios / sudo dmidecode -t memory / sudo dmidecode -t system
+ */
+
 function getData() {
 	function getOsData() {
 		const os = require("os");
@@ -48,9 +59,56 @@ function getData() {
 
 		}
 	}
+	function getUsers() {
+		const fs = require('fs');
+		const content = fs.readFileSync('/etc/passwd').toString();
+		if (!content) {
+			console.error("error: súbor \"/etc/passwd\" neexistuje");
+			return null;
+		}
+		const contents = content.split("\n");
+		const result = [];
+		for(let i=0 ; i<contents.length ; i++) {
+			const splitLine = contents[i].split(":");
+			result[result.length] = {
+				userName: splitLine[0],
+				password: splitLine[1],
+				userId: splitLine[2],
+				groupId: splitLine[3],
+				groupIdInfo: splitLine[4],
+				homeDirectory: splitLine[5],
+				shell: splitLine[6],
+			}
+		}
+		return result;
+	}
+
+	function getGroups() {
+		const fs = require('fs');
+		const content = fs.readFileSync('/etc/group').toString();
+		if (!content) {
+			console.error("error: súbor \"/etc/group\" neexistuje");
+			return null;
+		}
+		const contents = content.split("\n");
+		const result = [];
+		for(let i=0 ; i<contents.length ; i++) {
+			const splitLine = contents[i].split(":");
+			result[result.length] = {
+				groupName: splitLine[0],
+				password: splitLine[1],
+				groupId: splitLine[2],
+				groupList: splitLine[3] // users list
+			}
+		}
+		return result;
+	}
+
 	return {
 		os: getOsData(),
-		process: getProcessData()
+		process: getProcessData(),
+		users: getUsers(),
+		groups: getGroups()
 	}
 }
 
@@ -213,4 +271,36 @@ function killByName(name) {
 // handleEvents();
 // testReadFromLine();
 
-killByName("soffice");
+// killByName("soffice");
+
+
+function getLoginUsers() {
+	const result = {
+		time: new Date().getTime(),
+		data: []
+	}
+	const { spawn } = require("child_process");
+	const ls = spawn("w");
+	return new Promise((success, reject) => {
+		ls.stdout.on("data", (data) => {
+			const splitData = data.toString().split("\n");
+			for(let i=2 ; i<splitData.length ; i++) {
+				const line = splitData[i].replace(/ +/g, " ").split(" ");
+				if(line.length < 8) {
+					continue;
+				}
+				result.data[result.data.length] = {
+					user: line[0],
+					tty: line[1],
+					from: line[2],
+					login: line[3],
+					idle: line[4],
+					jcpu: line[5], // time used by all processes attached to the tty.
+					pcpu: line[6], // time used by the current process, named in the "what" field.
+					what: line[7],
+				}
+			}
+			success(result);
+		});
+	})
+}
