@@ -42,13 +42,13 @@ function getData() {
 			env: process.env,
 			execArgv: process.execArgv,
 			execPath: process.execPath,
-			groupId: process.getegid(),
-			userId: process.geteuid(),
-			processGroupId: process.getgid(),
-			groups: process.getgroups(),
-			processId: process.getuid(),
-			hrTime: process.hrtime(), // [seconds, nanoseconds]
-			memoryUsage: process.memoryUsage(),
+			groupId: process.getegid && process.getegid(),
+			userId: process.geteuid && process.geteuid(),
+			processGroupId: process.getgid && process.getgid(),
+			groups: process.getgroups && process.getgroups(),
+			processId: process.getuid && process.getuid(),
+			hrTime: process.hrtime && process.hrtime(), // [seconds, nanoseconds]
+			memoryUsage: process.memoryUsage && process.memoryUsage(),
 			pid: process.pid,
 			platform: process.platform,
 			release: process.release,
@@ -58,14 +58,15 @@ function getData() {
 			versions: process.versions,
 
 		}
-	}
+    }
+    
 	function getUsers() {
-		const fs = require('fs');
-		const content = fs.readFileSync('/etc/passwd').toString();
-		if (!content) {
-			console.error("error: súbor \"/etc/passwd\" neexistuje");
-			return null;
-		}
+        const fs = require('fs');
+        const PASSWD_FILE = "/etc/passwd";
+        if (!fs.existsSync(PASSWD_FILE)) {
+            console.error("error: súbor " + PASSWD_FILE + " neexistuje");
+			return {};
+        }
 		const contents = content.split("\n");
 		const result = [];
 		for(let i=0 ; i<contents.length ; i++) {
@@ -84,12 +85,13 @@ function getData() {
 	}
 
 	function getGroups() {
-		const fs = require('fs');
-		const content = fs.readFileSync('/etc/group').toString();
-		if (!content) {
-			console.error("error: súbor \"/etc/group\" neexistuje");
-			return null;
-		}
+        const fs = require('fs');
+        const GROUP_FILE = "/etc/group";
+        if (!fs.existsSync(GROUP_FILE)) {
+            console.error("error: súbor " + GROUP_FILE + " neexistuje");
+			return {};
+        }
+		const content = fs.readFileSync(GROUP_FILE).toString();
 		const contents = content.split("\n");
 		const result = [];
 		for(let i=0 ; i<contents.length ; i++) {
@@ -120,7 +122,7 @@ function getUrlInfo(url) {
 
 function testChildProcess() {
 	const { spawn } = require("child_process");
-	const ls = spawn("ls", ["-al", "."]);
+	const ls = spawn("ls", ["."]);
 
 	ls.stdout.on("data", (data) => {
 	  console.log(`stdout: ${data}`);
@@ -168,7 +170,7 @@ function testSocketServer(options = {}) {
 		socket.write("si pripojený\n");
 
 		socket.on("data", (data) => {
-			if (data.equals(CTRL_C_BUFFER_LINNUX) || data.equals(CTRL_C_BUFFED_WINDOWS)) {
+			if (data.equals(CTRL_C_BUFFER_LINNUX) || data.equals(CTRL_C_BUFFED_WINDOWS)) {
 				socket.end("oukey tak sa maj\n");		
 				console.log("Client sa odpojil");
 			} else {
